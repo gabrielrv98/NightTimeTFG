@@ -7,15 +7,18 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.twotone.LocalBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawShadow
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.unit.dp
@@ -45,21 +48,21 @@ fun ScreenScaffolded(){
 
 
         bottomBar = {
-            BottomAppBar(
-
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colors.background
             ) {
                 bottomBar()
             }
         },
-        contentColor = MaterialTheme.colors.onSurface
+
 
     ){
         // A surface container using the 'background' color from the theme
         Surface(
             color = MaterialTheme.colors.background
         ) {
-            Column(
-                Modifier.fillMaxWidth().fillMaxHeight(),
+            Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                 verticalArrangement = Arrangement.Center ,
                 horizontalAlignment  = Alignment.CenterHorizontally){
                 Row(){
@@ -76,67 +79,123 @@ fun ScreenScaffolded(){
     }
 }
 
+
 @Composable
 fun bottomBar(){
-    Row(
-        modifier = Modifier
-            .padding(top = 5.dp, bottom = 5.dp)
-            .fillMaxWidth(1f)
-    ){
 
-        val modifier = Modifier.padding(horizontal = 6.dp)
-        Column{
-            Button(modifier = modifier ,
-                onClick = {}
-            ){
-                Icon(asset = )
+    Column{
+
+        //Row with a divider line
+        Row{
+            Divider(color = Color.Black, thickness = 1.dp)
+        }
+
+        //Navigation Buttons
+        Row( modifier = Modifier.padding(top = 6.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+
+        ){
+            //NavButtons(modifier = Modifier)
+            val buttonModifier = Modifier.padding(horizontal = 6.dp)
+
+            Column{
+                Button(  modifier = buttonModifier,
+                    onClick = {}
+                ){
+                    Icon(asset = Icons.Default.LocalBar)
+                }
             }
-        }
-        Column{
-            Button(modifier = modifier,
-                onClick = {}
-            ){
-                Text(text = "Bares2")
+            Column{
+                Button( modifier = buttonModifier,
+                    onClick = {}
+                ){
+                    Icon(asset = Icons.Default.Today)
+                }
             }
-        }
-        Column{
-            Button(modifier = modifier,
-                onClick = {}
-            ){
-                Text(text = "Bares3")
+            Column{
+                Button( modifier = buttonModifier,
+                    onClick = {}
+                ){
+                    Icon(asset = Icons.Default.People)
+                }
             }
-        }
-        Column{
-            Button(modifier = modifier,
-                onClick = {}
-            ){
-                Text(text = "Bares4")
+            Column{
+                Button( modifier = buttonModifier,
+                    onClick = {}
+                ){
+                    Icon(asset = Icons.TwoTone.LocalBar)
+                }
             }
-        }
-/*
-        Surface(
-            modifier = Modifier.padding(top = 0.dp)
-                .drawShadow(elevation = 2.dp, shape = CircleShape)
-
-                .clickable(onClick = {}),
-            color = MaterialTheme.colors.primary,
-            elevation = 5.dp,
-            shape = RectangleShape,
-
-            ){
-            Text(
-                modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp),
-                text = "Bares2"
-            )
-
 
         }
-*/
     }
+}
+
+@Composable
+fun NavButtons(modifier : Modifier = Modifier){
+    val buttonModifier = modifier.padding(horizontal = 6.dp)
+
+    Column{
+        Button(  modifier = buttonModifier,
+            onClick = {}
+        ){
+            Icon(asset = Icons.Default.LocalBar)
+        }
+    }
+    Column{
+        Button( modifier = buttonModifier,
+            onClick = {}
+        ){
+            Icon(asset = Icons.Default.Today)
+        }
+    }
+    Column{
+        Button( modifier = buttonModifier,
+            onClick = {}
+        ){
+            Icon(asset = Icons.Default.People)
+        }
+    }
+    Column{
+        Button( modifier = buttonModifier,
+            onClick = {}
+        ){
+            Icon(asset = Icons.TwoTone.LocalBar)
+        }
+    }
+
+
+
+/*
+            Surface(
+                modifier = Modifier.padding(top = 0.dp)
+                    .drawShadow(elevation = 2.dp, shape = CircleShape)
+
+                    .clickable(onClick = {}),
+                color = MaterialTheme.colors.primary,
+                elevation = 5.dp,
+                shape = RectangleShape,
+
+                ){
+                Text(
+                    modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp),
+                    text = "Bares2"
+                )
+
+
+            }
+*/
 }
 
 @Preview
 @Composable
-fun PreviewFirstTry(){
+fun PreviewScreen() {
     ScreenScaffolded()
+}
+
+@Preview
+@Composable
+fun PreviewBottomBar(){
+    bottomBar()
 }
