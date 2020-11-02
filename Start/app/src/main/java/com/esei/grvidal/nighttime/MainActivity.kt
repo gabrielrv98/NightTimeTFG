@@ -5,6 +5,7 @@ package com.esei.grvidal.nighttime
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -79,17 +80,40 @@ fun ScreenScaffolded(){
 fun bottomBar(){
     Row(
         modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .padding(bottom = 5.dp)
+            .padding(top = 5.dp, bottom = 5.dp)
             .fillMaxWidth(1f)
     ){
 
-        Button(modifier = Modifier.padding(horizontal = 20.dp),
-            onClick = {}
-        ){
-            Text(text = "Bares1")
+        val modifier = Modifier.padding(horizontal = 6.dp)
+        Column{
+            Button(modifier = modifier ,
+                onClick = {}
+            ){
+                Icon(asset = )
+            }
         }
-
+        Column{
+            Button(modifier = modifier,
+                onClick = {}
+            ){
+                Text(text = "Bares2")
+            }
+        }
+        Column{
+            Button(modifier = modifier,
+                onClick = {}
+            ){
+                Text(text = "Bares3")
+            }
+        }
+        Column{
+            Button(modifier = modifier,
+                onClick = {}
+            ){
+                Text(text = "Bares4")
+            }
+        }
+/*
         Surface(
             modifier = Modifier.padding(top = 0.dp)
                 .drawShadow(elevation = 2.dp, shape = CircleShape)
@@ -104,7 +128,10 @@ fun bottomBar(){
                 modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp),
                 text = "Bares2"
             )
+
+
         }
+*/
     }
 }
 
