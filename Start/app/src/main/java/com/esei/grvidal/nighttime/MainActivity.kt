@@ -5,25 +5,31 @@ package com.esei.grvidal.nighttime
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.LocalBar
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Today
-import androidx.compose.material.icons.twotone.LocalBar
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.platform.ContextAmbient
-import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
+
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
+import androidx.compose.ui.platform.setContent
+import androidx.compose.foundation.Icon as ComposeFoundationIcon
+import androidx.compose.material.Button as Button
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +45,9 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun ScreenScaffolded(){
+
+    val (icon, setIcon) = remember { mutableStateOf(Icons.Default.LocalBar) }
+
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -52,7 +61,7 @@ fun ScreenScaffolded(){
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colors.background
             ) {
-                bottomBar()
+                bottomBar(icon, setIcon)
             }
         },
 
@@ -65,11 +74,18 @@ fun ScreenScaffolded(){
             Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                 verticalArrangement = Arrangement.Center ,
                 horizontalAlignment  = Alignment.CenterHorizontally){
-                Row(){
+                Row{
                     Text(text = "Night Time main page")
                 }
                 Row{
-                    Text(text = ContextAmbient.current.getString(R.string.Bar_st))
+                    if (icon == Icons.Default.LocalBar)
+                        Text(text = ContextAmbient.current.getString(R.string.Bar_st))
+                    else if(icon == Icons.Default.Today)
+                        Text(text = ContextAmbient.current.getString(R.string.Calendario))
+                    else if(icon == Icons.Default.People)
+                        Text(text = ContextAmbient.current.getString(R.string.amigos))
+                    else if(icon == Icons.Default.AddComment)
+                        Text(text = ContextAmbient.current.getString(R.string.chat))
                 }
             }
 
@@ -81,7 +97,7 @@ fun ScreenScaffolded(){
 
 
 @Composable
-fun bottomBar(){
+fun bottomBar(icon: VectorAsset, setIcon: (VectorAsset) -> Unit){
 
     Column{
 
@@ -96,97 +112,88 @@ fun bottomBar(){
             verticalAlignment = Alignment.CenterVertically
 
         ){
-            //NavButtons(modifier = Modifier)
-            val buttonModifier = Modifier.padding(horizontal = 6.dp)
+            NavButtons(icon,setIcon )
 
-            Column{
-                Button(  modifier = buttonModifier,
-                    onClick = {}
-                ){
-                    Icon(asset = Icons.Default.LocalBar)
-                }
-            }
-            Column{
-                Button( modifier = buttonModifier,
-                    onClick = {}
-                ){
-                    Icon(asset = Icons.Default.Today)
-                }
-            }
-            Column{
-                Button( modifier = buttonModifier,
-                    onClick = {}
-                ){
-                    Icon(asset = Icons.Default.People)
-                }
-            }
-            Column{
-                Button( modifier = buttonModifier,
-                    onClick = {}
-                ){
-                    Icon(asset = Icons.TwoTone.LocalBar)
-                }
-            }
 
         }
     }
+}
+
+
+//Stateful composable with the logic
+@Composable
+fun NavButtons(icon: VectorAsset, setIcon: (VectorAsset) -> Unit){
+
+
+
+    //da forma
+    NavButtons(icon,setIcon, asset = Icons.Default.LocalBar)
+
+    NavButtons(icon,setIcon, asset = Icons.Default.Today)
+
+    NavButtons(icon,setIcon, asset = Icons.Default.People )
+
+    NavButtons(icon,setIcon, asset = Icons.Default.AddComment)
+
 }
 
 @Composable
-fun NavButtons(modifier : Modifier = Modifier){
-    val buttonModifier = modifier.padding(horizontal = 6.dp)
-
-    Column{
-        Button(  modifier = buttonModifier,
-            onClick = {}
-        ){
-            Icon(asset = Icons.Default.LocalBar)
-        }
-    }
-    Column{
-        Button( modifier = buttonModifier,
-            onClick = {}
-        ){
-            Icon(asset = Icons.Default.Today)
-        }
-    }
-    Column{
-        Button( modifier = buttonModifier,
-            onClick = {}
-        ){
-            Icon(asset = Icons.Default.People)
-        }
-    }
-    Column{
-        Button( modifier = buttonModifier,
-            onClick = {}
-        ){
-            Icon(asset = Icons.TwoTone.LocalBar)
-        }
-    }
-
-
-
-/*
-            Surface(
-                modifier = Modifier.padding(top = 0.dp)
-                    .drawShadow(elevation = 2.dp, shape = CircleShape)
-
-                    .clickable(onClick = {}),
-                color = MaterialTheme.colors.primary,
-                elevation = 5.dp,
-                shape = RectangleShape,
-
-                ){
-                Text(
-                    modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp),
-                    text = "Bares2"
-                )
-
-
-            }
-*/
+fun NavButtons(
+    icon: VectorAsset,
+    onIconChange: (VectorAsset) -> Unit,
+    asset: VectorAsset,
+    modifier: Modifier = Modifier
+) {
+    SelectableIconButton(
+                icon = asset,
+                onIconSelected = { //TODO Navegar a la sigueinte pestaña
+                    onIconChange(asset) },
+                isSelected = icon == asset
+            )
 }
+
+
+@Composable
+fun SelectableIconButton(
+    icon: VectorAsset,
+    onIconSelected: () -> Unit,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val tint = if (isSelected) {
+        MaterialTheme.colors.primary
+    } else {
+        MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+    }
+    Button(
+        onClick = { onIconSelected() },
+        shape = CircleShape,
+        backgroundColor = Color.Transparent,
+        border = null,
+        elevation = 0.dp,
+        modifier = modifier
+    ){
+        Column {
+            androidx.compose.foundation.Icon(icon, tint = tint)
+
+            if (isSelected) {
+                Box(
+                    Modifier
+                        .padding(top = 3.dp)
+                        .preferredWidth(icon.defaultWidth)
+                        .preferredHeight(1.dp)
+                        .background(tint)
+                )
+            } else {
+                Spacer(modifier = Modifier.preferredHeight(4.dp))
+            }
+        }
+    }
+}
+
+
+
+
 
 @Preview
 @Composable
@@ -197,5 +204,6 @@ fun PreviewScreen() {
 @Preview
 @Composable
 fun PreviewBottomBar(){
-    bottomBar()
+    val (icon, setIcon) = remember { mutableStateOf(Icons.Default.LocalBar) }
+    bottomBar(icon, setIcon)
 }

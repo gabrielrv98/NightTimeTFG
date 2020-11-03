@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">NightTime</string>
     <string name="Bar_st">Bar</string>
+    <string name="Calendario">Calendario</string>
+    <string name="amigos">amigos</string>
+    <string name="chat">chat</string>
 </resources>
