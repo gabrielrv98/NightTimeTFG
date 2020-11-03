@@ -105,15 +105,8 @@ fun CalendarPageView() {
 
         }
 
-
-//Stateful composable with the logic
-@Composable
-fun NavButtons(icon: VectorAsset, setIcon: (VectorAsset) -> Unit){
-
-
-
-    //da forma
-    NavButtons(icon,setIcon, asset = Icons.Default.LocalBar)
+        //todo Eliminar este Divider es solo una referencia
+        Divider(thickness = 2.dp, modifier = Modifier.fillMaxWidth())
 
         Row( modifier = modifier.weight(1f)){
             Surface(modifier = Modifier.padding(6.dp),
@@ -128,8 +121,15 @@ fun NavButtons(icon: VectorAsset, setIcon: (VectorAsset) -> Unit){
 }
 
 @Composable
-}
+fun CalendarVidow(dias : Calendar){
+    Surface(modifier = Modifier.padding(6.dp),
+        border= BorderStroke(2.dp, MaterialTheme.colors.primary),
+        shape = RoundedCornerShape(20)
+    ){
 
+        Text(text = "abc", modifier = Modifier.padding(12.dp))
+    }
+}
 
 @Composable
 fun ScreenScaffolded(
