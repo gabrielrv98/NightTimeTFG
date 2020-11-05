@@ -22,10 +22,10 @@ class ChipDayFactory {
         /**
          * @param selectedDate Selected date.
          *
-         * @return An array with days with the selected day surrounded by the previous days
+         * @return An array of arrays composed with 7 days in the selected month surrounded by the previous days
          * or the next days if needed
          */
-        fun datesCreator(selectedDate: MyDay = today): MutableList<MyDay> {
+        fun datesCreator(selectedDate: MyDay = today): List<List<MyDay>> {
 
             //Array with the dates to return
             val monthArray = mutableListOf<MyDay>()
@@ -108,7 +108,7 @@ class ChipDayFactory {
 
 
 
-            return monthArray
+            return monthArray.chunked(7)
             //return  selectedDate.get(Calendar.DAY_OF_WEEK).toString() + "  -> " +  selectedDate.toString()
         }
 

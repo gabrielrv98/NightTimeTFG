@@ -30,12 +30,12 @@ fun CalendarPageView() {
 
     val modifier = Modifier.fillMaxWidth()
     val (date, setDate) = remember { mutableStateOf(MyDay(5, 11, 2020)) }
-    val myCalendar : List<List<MyDay>> = ChipDayFactory.datesCreator().chunked(7)
+    val myCalendar : List<List<MyDay>> = ChipDayFactory.datesCreator()
     val (calendar,setCalendar) = remember{ mutableStateOf(myCalendar)}
 
     val mySetDay = { myDay: MyDay  ->
         if (date.month != myDay.month)
-            setCalendar(ChipDayFactory.datesCreator(myDay).chunked(7))
+            setCalendar(ChipDayFactory.datesCreator(myDay))
         setDate(myDay)
     }
     Column(
@@ -201,7 +201,7 @@ private fun DayChip(
 @Composable
 fun CalendarWindowPreview() {
     val (date, setDate) = remember { mutableStateOf(MyDay(5, 11, 2020)) }
-    CalendarWindow(date, setDate,calendar = ChipDayFactory.datesCreator().chunked(7))
+    CalendarWindow(date, setDate,calendar = ChipDayFactory.datesCreator())
 }
 
 @Preview("Calendar")
