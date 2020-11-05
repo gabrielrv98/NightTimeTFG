@@ -76,7 +76,7 @@ fun CalendarWindow(date: MyDay, setDate: (MyDay) -> Unit ,
         elevation = 1.dp
     ) {
         Column(
-            //modifier = Modifier.padding(6.dp)
+            modifier = Modifier.padding(6.dp)
         ) {
             Surface( color = ContentColorAmbient.current.copy(alpha = 0.15f),
                 modifier = Modifier.padding(6.dp)
@@ -123,7 +123,7 @@ fun CalendarWindow(date: MyDay, setDate: (MyDay) -> Unit ,
             }
 
             Divider(thickness = 1.dp)
-            LazyColumnFor(items = calendar) {
+            LazyColumnFor(items = calendar,modifier = Modifier.padding(6.dp)) {
 
 
             //Column(modifier = Modifier.padding(top = 15.dp)) {
