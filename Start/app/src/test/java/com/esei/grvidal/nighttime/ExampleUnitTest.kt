@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import com.esei.grvidal.nighttime.ui.ChipDayFactory
+import com.esei.grvidal.nighttime.ui.MyDay
 import org.junit.Test
 
 /**
