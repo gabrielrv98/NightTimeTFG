@@ -4,20 +4,26 @@ import androidx.compose.foundation.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
+import androidx.ui.tooling.preview.Preview
 import java.util.*
 
 //todo eliminar
@@ -26,7 +32,7 @@ data class NavButton(
     val id: UUID = UUID.randomUUID()
 )
 
-enum class NavButtonsIcon(val vectorAsset: VectorAsset) {
+enum class NavButtonsIcon (val vectorAsset: VectorAsset) {
     Bar(Icons.Default.LocalBar),
     Calendar(Icons.Default.Today),
     Friends(Icons.Default.People),
@@ -40,8 +46,19 @@ fun bottomBar(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
     Column {
 
         //Row with a divider line
-        Row {
-            Divider(color = Color.Black, thickness = 1.dp)
+        Row( horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(3.dp)
+        ) {
+
+            Surface(
+                modifier = Modifier.fillMaxWidth()
+                    .preferredHeight(1.dp),
+                color = MaterialTheme.colors.onSurface,
+                shape = RoundedCornerShape(5.dp)
+            ){
+
+            }
+            //Divider(color = MaterialTheme.colors.onSurface, thickness = 1.dp)
         }
 
         //Navigation Buttons
@@ -65,13 +82,13 @@ fun NavButtons(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
 
 
     //da forma
-    NavButtons(icon, setIcon, asset = Icons.Default.LocalBar)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Bar.vectorAsset)
 
-    NavButtons(icon, setIcon, asset = Icons.Default.Today)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Calendar.vectorAsset)
 
-    NavButtons(icon, setIcon, asset = Icons.Default.People)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Friends.vectorAsset)
 
-    NavButtons(icon, setIcon, asset = Icons.Default.AddComment)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Chat.vectorAsset)
 
 }
 
@@ -127,4 +144,13 @@ fun SelectableIconButton(
             }
         }
     }
+}
+
+@Preview( "bottomBar")
+@Composable
+fun bottomBarPreview(){
+    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar.vectorAsset) }
+
+    bottomBar(icon, setIcon)
+
 }

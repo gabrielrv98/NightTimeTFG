@@ -27,6 +27,7 @@ import androidx.ui.tooling.preview.Preview
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.util.*
 import androidx.compose.material.Button as Button
@@ -48,13 +49,15 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun MainScreen() {
-    val (icon, setIcon) = remember { mutableStateOf(Icons.Default.LocalBar) }
+    //saving the sate of the NavButton selected selected
+
+    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar.vectorAsset) }
     val text: String = when (icon) {
-        Icons.Default.LocalBar -> ContextAmbient.current.getString(R.string.Bar_st)
-        Icons.Default.Today -> ContextAmbient.current.getString(R.string.Calendario)
-        Icons.Default.People -> ContextAmbient.current.getString(R.string.amigos)
-        Icons.Default.AddComment -> ContextAmbient.current.getString(R.string.chat)
-        else -> "error"
+        NavButtonsIcon.Bar.vectorAsset -> stringResource(id = R.string.Bar_st)
+        NavButtonsIcon.Calendar.vectorAsset -> stringResource(id = R.string.Calendario)
+        NavButtonsIcon.Friends.vectorAsset -> stringResource(id = R.string.amigos)
+        NavButtonsIcon.Chat.vectorAsset -> stringResource(id = R.string.chat)
+        else -> stringResource(id = R.string.error)
     }
     ScreenScaffolded(icon, setIcon) {
         MainView(text = text)
@@ -66,7 +69,8 @@ fun MainScreen() {
 fun MainView(text: String = "empty") {
     // A surface container using the 'background' color from the theme
     Surface(
-        color = MaterialTheme.colors.background
+        color = MaterialTheme.colors.background,
+        elevation = 1.dp
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().fillMaxHeight()
@@ -123,23 +127,18 @@ fun ScreenScaffolded(
 
 
 
-@Preview
+@Preview ("Main Page")
 @Composable
 fun PreviewScreen() {
     NightTimeTheme {
-        MainView("Calendario")
+        MainScreen()
 
     }
 }
 
-@Preview
-@Composable
-fun PreviewBottomBar() {
-    val (icon, setIcon) = remember { mutableStateOf(Icons.Default.LocalBar) }
-    NavButtons(icon, setIcon, asset = Icons.Default.LocalBar)
-}
 
-//Wights
+
+//Weights
 /*
 Row() {
     Box(
