@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -23,7 +22,6 @@ import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.ui.ChipDayFactory
 import com.esei.grvidal.nighttime.ui.MyDay
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
-import com.esei.grvidal.nighttime.ui.grayBlue
 
 @Composable
 fun CalendarPageView() {
@@ -50,7 +48,24 @@ fun CalendarPageView() {
         }
 
         //todo Eliminar este Divider es solo una referencia
-        Divider(thickness = 2.dp,  color = MaterialTheme.colors.primary)
+        Row{
+            Surface(
+                modifier = Modifier//.fillMaxWidth()
+                    .preferredHeight(1.dp).weight(1f),
+                color = MaterialTheme.colors.primary,
+                elevation = 1.dp,
+                content = {}
+            )
+
+            Surface(
+                modifier = Modifier
+                    .preferredHeight(1.dp).weight(1f),
+                color = MaterialTheme.colors.onSurface,
+                elevation = 1.dp,
+                content = {}
+            )
+        }
+
 
         Row(modifier = modifier.weight(1f)) {
             Surface(
@@ -76,10 +91,10 @@ fun CalendarWindow(date: MyDay, setDate: (MyDay) -> Unit ,
         elevation = 1.dp
     ) {
         Column(
-            modifier = Modifier.padding(6.dp)
+            modifier = Modifier.padding(horizontal = 6.dp)
         ) {
             Surface( color = ContentColorAmbient.current.copy(alpha = 0.15f),
-                modifier = Modifier.padding(6.dp)
+                modifier = Modifier.padding( 6.dp)
             ) {
                 val myModifier = Modifier.padding(horizontal = 15.dp)
                     .weight(1f)
@@ -87,7 +102,7 @@ fun CalendarWindow(date: MyDay, setDate: (MyDay) -> Unit ,
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 9.dp),
+                        .padding(vertical = 9.dp).padding(top = 6.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
@@ -123,12 +138,9 @@ fun CalendarWindow(date: MyDay, setDate: (MyDay) -> Unit ,
             }
 
             Divider(thickness = 1.dp)
-            LazyColumnFor(items = calendar,modifier = Modifier.padding(6.dp)) {
 
+            LazyColumnFor(items = calendar,modifier = Modifier.padding( top =0.dp, start = 6.dp, end = 6.dp).padding(bottom= 0.dp)) {
 
-            //Column(modifier = Modifier.padding(top = 15.dp)) {
-
-                //for(week in chunkedCalendar){
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.padding(vertical = 9.dp)
@@ -155,7 +167,7 @@ private fun DayChip(
     chipDay: MyDay,
     text:String = chipDay.day.toString(),
     modifier:Modifier = Modifier
-        .padding(10.dp),
+        .padding(horizontal = 10.dp, vertical = 7.dp),
     textAlign: TextAlign = TextAlign.Center,
     style: TextStyle = MaterialTheme.typography.h5,
     fontSize: TextUnit = TextUnit.Sp(18),

@@ -26,11 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
 import java.util.*
 
-//todo eliminar
-data class NavButton(
-    val icon: NavButtonsIcon,
-    val id: UUID = UUID.randomUUID()
-)
 
 enum class NavButtonsIcon (val vectorAsset: VectorAsset) {
     Bar(Icons.Default.LocalBar),
@@ -55,10 +50,9 @@ fun bottomBar(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
                     .preferredHeight(1.dp),
                 color = MaterialTheme.colors.onSurface,
                 shape = RoundedCornerShape(25),
-                elevation = 1.dp
-            ){
-
-            }
+                elevation = 1.dp,
+                content = {}
+            )
             //Divider(color = MaterialTheme.colors.onSurface, thickness = 1.dp)
         }
 
