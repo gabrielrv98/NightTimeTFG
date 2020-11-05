@@ -54,7 +54,8 @@ fun bottomBar(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
                 modifier = Modifier.fillMaxWidth()
                     .preferredHeight(1.dp),
                 color = MaterialTheme.colors.onSurface,
-                shape = RoundedCornerShape(5.dp)
+                shape = RoundedCornerShape(25),
+                elevation = 1.dp
             ){
 
             }
