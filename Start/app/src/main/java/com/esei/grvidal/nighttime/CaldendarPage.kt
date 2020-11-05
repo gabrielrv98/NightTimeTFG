@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ContentColorAmbient
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +43,7 @@ fun CalendarPageView() {
     ) {
 
         Row(
-            modifier = modifier.weight(1.4f),
+            modifier = modifier.weight(1.2f),
             horizontalArrangement = Arrangement.Center
         ) {
             CalendarWindow(date = date, setDate = mySetDay, calendar = calendar)
@@ -68,54 +69,57 @@ fun CalendarPageView() {
 fun CalendarWindow(date: MyDay, setDate: (MyDay) -> Unit ,
                    colorBackground : Color = MaterialTheme.colors.secondary,
                    calendar : List<List<MyDay>> ) {
-    
+
     Surface(
-        modifier = Modifier.fillMaxHeight(),
+        modifier = Modifier.fillMaxHeight().fillMaxHeight(),
         color = colorBackground,
         elevation = 1.dp
     ) {
         Column(
-            modifier = Modifier.padding(6.dp)
+            //modifier = Modifier.padding(6.dp)
         ) {
-
-            val myModifier = Modifier.padding(horizontal = 15.dp)
-                .weight(1f)
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 9.dp),
-                horizontalArrangement = Arrangement.Center
+            Surface( color = ContentColorAmbient.current.copy(alpha = 0.15f),
+                modifier = Modifier.padding(6.dp)
             ) {
-                Text(
-                    "L",
-                    modifier = myModifier
-                )
-                Text(
-                    "M",
-                    modifier = myModifier
-                )
-                Text(
-                    "Mi",
-                    modifier = myModifier,
-                    maxLines = 1
-                )
-                Text(
-                    "J",
-                    modifier = myModifier
-                )
-                Text(
-                    "V",
-                    modifier = myModifier
-                )
-                Text(
-                    "S",
-                    modifier = myModifier
-                )
-                Text(
-                    "D",
-                    modifier = myModifier
-                )
+                val myModifier = Modifier.padding(horizontal = 15.dp)
+                    .weight(1f)
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 9.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        "L",
+                        modifier = myModifier
+                    )
+                    Text(
+                        "M",
+                        modifier = myModifier
+                    )
+                    Text(
+                        "Mi",
+                        modifier = myModifier,
+                        maxLines = 1
+                    )
+                    Text(
+                        "J",
+                        modifier = myModifier
+                    )
+                    Text(
+                        "V",
+                        modifier = myModifier
+                    )
+                    Text(
+                        "S",
+                        modifier = myModifier
+                    )
+                    Text(
+                        "D",
+                        modifier = myModifier
+                    )
+                }
             }
 
             Divider(thickness = 1.dp)
