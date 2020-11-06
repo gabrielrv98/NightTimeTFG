@@ -1,7 +1,7 @@
 package com.esei.grvidal.nighttime
 
-import com.esei.grvidal.nighttime.ui.ChipDayFactory
-import com.esei.grvidal.nighttime.ui.MyDay
+import com.esei.grvidal.nighttime.data.ChipDayFactory
+import com.esei.grvidal.nighttime.data.MyDay
 import org.junit.Test
 
 /**
@@ -18,14 +18,17 @@ class ExampleUnitTest {
 
 
 
-        val myday = MyDay(4,7,2020)
+        val myday = MyDay(4,12,2020)
        val  monthArray = ChipDayFactory.datesCreator(myday)
 
          var number = 0
         var week = 0
-        for( test in monthArray){
+        for( testWeeks in monthArray){
+            for(testDays in testWeeks)
+                println(" $number ->  week -  $week   $testDays ").also{
+                    number++;
+                }
 
-            println(number++.toString() + "-> " + "  week - "+ week.toString()+ "  "+ test.day.toString() + ":" + test.month.toString() + ":" + test.year.toString())
 
             if((number%7) == 0) week++
         }

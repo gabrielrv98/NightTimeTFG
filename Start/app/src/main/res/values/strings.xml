@@ -5,4 +5,13 @@
     <string name="amigos">amigos</string>
     <string name="chat">chat</string>
     <string name="error">error</string>
+
+
+    <string name="lunes">L</string>
+    <string name="martes">M</string>
+    <string name="miercoles">Mi</string>
+    <string name="jueves">J</string>
+    <string name="viernes">V</string>
+    <string name="sabado">S</string>
+    <string name="domingo">D</string>
 </resources>

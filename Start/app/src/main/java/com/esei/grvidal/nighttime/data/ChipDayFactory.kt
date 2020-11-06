@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.ui
+package com.esei.grvidal.nighttime.data
 
 import java.time.LocalDate
 
@@ -9,6 +9,9 @@ class ChipDayFactory {
 
     companion object ChipDayFactory {
 
+        /**
+         *  val today when somone gets it, it updates to the actual date
+         */
         private val today: MyDay
             get() {
                 val calendar = LocalDate.now()

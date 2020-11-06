@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 fun MainScreen() {
     //saving the sate of the NavButton selected selected
 
-    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar.vectorAsset) }
+    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Calendar.vectorAsset) }
     val text: String = when (icon) {
         NavButtonsIcon.Bar.vectorAsset -> stringResource(id = R.string.Bar_st)
         NavButtonsIcon.Calendar.vectorAsset -> stringResource(id = R.string.Calendario)
@@ -64,6 +64,26 @@ fun MainScreen() {
     }
 }
 
+@Composable
+fun ScreenScaffolded(
+    icon: VectorAsset,
+    setIcon: (VectorAsset) -> Unit,
+    content: @Composable () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text = "NightTime")
+            })
+        },
+        bottomBar = {
+                bottomBar(icon, setIcon)
+        }
+    ) {
+        content()
+
+    }
+}
 
 @Composable
 fun MainView(text: String = "empty") {
@@ -95,31 +115,7 @@ fun MainView(text: String = "empty") {
 
 
 
-@Composable
-fun ScreenScaffolded(
-    icon: VectorAsset,
-    setIcon: (VectorAsset) -> Unit,
-    content: @Composable () -> Unit
-) {
-    Scaffold(
-        topBar = {
-            TopAppBar(title = {
-                Text(text = "NightTime")
-            })
-        },
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colors.background
-            ) {
-                bottomBar(icon, setIcon)
-            }
-        }
-        ) {
-        content()
 
-    }
-}
 
 
 

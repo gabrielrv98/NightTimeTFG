@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime
 
+import android.widget.LinearLayout
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -38,36 +39,42 @@ enum class NavButtonsIcon (val vectorAsset: VectorAsset) {
 @Composable
 fun bottomBar(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
 
-    Column {
+    Surface(modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colors.background
+    ){
+        Column {
 
-        //Row with a divider line
-        Row( horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(3.dp)
-        ) {
+            //Row with a divider line
+            Row( horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(3.dp)
+            ) {
 
-            Surface(
-                modifier = Modifier.fillMaxWidth()
-                    .preferredHeight(1.dp),
-                color = MaterialTheme.colors.onSurface,
-                shape = RoundedCornerShape(25),
-                elevation = 1.dp,
-                content = {}
-            )
-            //Divider(color = MaterialTheme.colors.onSurface, thickness = 1.dp)
-        }
+                Surface(
+                    modifier = Modifier.fillMaxWidth()
+                        .preferredHeight(1.dp),
+                    color = MaterialTheme.colors.onSurface,
+                    shape = RoundedCornerShape(25),
+                    elevation = 1.dp,
+                    content = {}
+                )
+                //Divider(color = MaterialTheme.colors.onSurface, thickness = 1.dp)
+            }
 
-        //Navigation Buttons
-        Row(
-            modifier = Modifier.padding(top = 6.dp).fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            //Navigation Buttons
+            Row(
+                modifier = Modifier.padding(top = 6.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
 
-        ) {
-            NavButtons(icon, setIcon)
+            ) {
+                NavButtons(icon, setIcon)
 
 
+            }
         }
     }
+
+
 }
 
 
