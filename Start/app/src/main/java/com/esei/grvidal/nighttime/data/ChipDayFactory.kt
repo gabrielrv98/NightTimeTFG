@@ -14,8 +14,13 @@ fun LocalDate.toMyDate(): MyDay{
 data class MyDay(val day: Int, val month: Int, val year: Int){
     val previousMonth: MyDay
     get() {
-        return LocalDate.of(year,month,day).minusMonths(1).toMyDate()
+        return LocalDate.of(year, month, day).minusMonths(1).toMyDate()
     }
+
+    val nextMonth: MyDay
+        get() {
+            return LocalDate.of(year,month,day).plusMonths(1).toMyDate()
+        }
 }
 
 class ChipDayFactory {
