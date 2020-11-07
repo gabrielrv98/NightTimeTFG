@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.ChipDayFactory
-import com.esei.grvidal.nighttime.data.MyDay
+import com.esei.grvidal.nighttime.data.MyDate
 import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
@@ -41,7 +41,7 @@ fun CalendarPageView() {
     //remember date, it's used to show the selected date and move the calendar to the specified month
     val (date, setDate) = remember {
         mutableStateOf(
-            MyDay(
+            MyDate(
                 LocalDate.now().dayOfMonth,
                 LocalDate.now().month.value,
                 LocalDate.now().year
@@ -53,14 +53,12 @@ fun CalendarPageView() {
     //Remembered state of a boolean that express if the dialog with the friendly users must be shown
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
 
-    //
-    val mySetDay = { myDay: MyDay ->
-        if (date.month != myDay.month)
-            setCalendar(ChipDayFactory.datesCreator(myDay))
-        setDate(myDay)
+    /* Eddited set that if the month changes, the calendar will update */
+    val mySetDay = { myDate: MyDate ->
+        if (date.month != myDate.month)
+            setCalendar(ChipDayFactory.datesCreator(myDate))
+        setDate(myDate)
     }
-
-    val submit = { setShowDialog(true) }
 
     //If Friendly users Card is touched a dialog with their names should be shown
     if (showDialog)
@@ -97,16 +95,16 @@ fun CalendarPageView() {
                 User(name = "Jose"),
                 User(name = "Emma"),
                 User(name = "Santi"),
-                User(name = "Filo"),
-
-                )
+                User(name = "Filo")
+            )
         )
 
     Column {
+        //Top of the screen
         Row(
             modifier = modifier.weight(1.4f),
             horizontalArrangement = Arrangement.Center
-        ) {
+        ){
             CalendarWindow(date = date, setDate = mySetDay, calendar = calendar)
         }
 
@@ -114,28 +112,24 @@ fun CalendarPageView() {
 
         Divider(color = MaterialTheme.colors.primary, thickness = 1.dp)
 
+        //Bottom of the screen
+        Row(
+            modifier = modifier.weight(1f).padding(bottom = 50.dp)
+        ){
 
-/*
-        Row {
-            Surface(
-                modifier = Modifier//.fillMaxWidth()
-                    .preferredHeight(1.dp).weight(1f),
-                color = MaterialTheme.colors.primary,
-                elevation = 1.dp,
-                content = {}
-            )
-        }
-*/
-
-        Row(modifier = modifier.weight(1f).padding(bottom = 50.dp)) {
-
-            DayInformation(showFriends = submit, date = date)
+            DayInformation(genteTotal = "27", amigos = "12",
+                showFriends = { setShowDialog(true) }, date = date)
         }
 
     }
 
 }
 
+/**
+ * @param onClose is the action that will be done when the dialog closes, here, it will set
+ * the variable showDialog to false
+ * @param itemsUser list with the users to show
+ */
 @Composable
 fun FriendlyUsersDialog(
     onClose: () -> Unit,
@@ -143,6 +137,7 @@ fun FriendlyUsersDialog(
 ) {
     Dialog(onDismissRequest = onClose) {
 
+        //Surface with the shape, border and color
         Surface(
             modifier = Modifier.clip(MaterialTheme.shapes.medium)
                 .padding(24.dp),
@@ -153,13 +148,16 @@ fun FriendlyUsersDialog(
             Column(
                 modifier = Modifier.padding(12.dp)
             ) {
+                //List with the users
                 LazyColumnFor(
                     items = itemsUser,
                     modifier = Modifier.weight(1f)
                 ) {
+                    //Each user
                     Row(
                         modifier = Modifier.padding(vertical = 12.dp)
                     ) {
+                        //Image
                         Surface(
                             modifier = Modifier.preferredSize(20.dp),
                             shape = CircleShape,
@@ -168,6 +166,7 @@ fun FriendlyUsersDialog(
                             // Image goes here
                         }
 
+                        //Name
                         Column(
                             modifier = Modifier
                                 .padding(start = 8.dp)
@@ -179,6 +178,7 @@ fun FriendlyUsersDialog(
 
                 }
 
+                //Close button
                 Button(
                     modifier = Modifier
                         .padding(top = 6.dp)
@@ -188,20 +188,23 @@ fun FriendlyUsersDialog(
                     Text(text = stringResource(R.string.cerrar))
                 }
             }
-
-
         }
-
-
     }
 }
 
+/**
+ * @param date is the selected date
+ * @param setDate is the setter of the selected date
+ * @param colorBackground is the color of the background
+ * @param calendar List of list (weeks)  of days
+ */
 @Composable
 fun CalendarWindow(
-    date: MyDay, setDate: (MyDay) -> Unit,
+    date: MyDate, setDate: (MyDate) -> Unit,
     colorBackground: Color = MaterialTheme.colors.background,
-    calendar: List<List<MyDay>>
+    calendar: List<List<MyDate>>
 ) {
+    //Name of the month shown on the top
     val monthName = when (date.month) {
         1 -> stringResource(id = R.string.enero)
         2 -> stringResource(id = R.string.febrero)
@@ -219,30 +222,36 @@ fun CalendarWindow(
         else -> stringResource(id = R.string.error)
     }
 
+
     Surface(
         modifier = Modifier.fillMaxHeight().fillMaxHeight(),
         color = colorBackground,
         elevation = 1.dp
     ) {
+
         Column(
             modifier = Modifier.padding(horizontal = 6.dp)
         ) {
 
+            //Header of the Calendar
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                //Button previous month
                 IconButton(
                     modifier = Modifier.weight(1f),
                     onClick = { setDate(date.previousMonth) }) {
                     Icon(asset = Icons.Default.ArrowBack)
                 }
+                //Name of the month
                 Text(
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.h6,
                     text = monthName.toUpperCase(Locale.ENGLISH),
                     textAlign = TextAlign.Center
                 )
+                //Button next month
                 IconButton(
                     modifier = Modifier.weight(1f),
                     onClick = { setDate(date.nextMonth) }) {
@@ -250,6 +259,7 @@ fun CalendarWindow(
                 }
             }
 
+            //Header with the name of the days
             Row {
                 Surface(
                     color = ContentColorAmbient.current.copy(alpha = 0.15f),
@@ -298,7 +308,7 @@ fun CalendarWindow(
 
             }
 
-            Divider(thickness = 1.dp, color = ContentColorAmbient.current.copy(alpha = 0.15f) )
+            Divider(thickness = 1.dp, color = ContentColorAmbient.current.copy(alpha = 0.15f))
 
 
             /*
@@ -310,19 +320,21 @@ LazyColumnFor(
         .padding(bottom = 0.dp)
 ) {
 */
+            //Calendar indeed
             ScrollableColumn(
                 modifier = Modifier.padding(top = 0.dp, start = 6.dp, end = 6.dp)
                     .padding(bottom = 0.dp)
             ) {
 
                 for (week in calendar) {
-
+                    //Week Row
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.padding(vertical = 9.dp)
                     ) {
                         for (days in week) {
 
+                            //Each day in the week
                             Box(
                                 modifier = Modifier.weight(1f),
                                 alignment = Alignment.Center
@@ -338,6 +350,13 @@ LazyColumnFor(
     }
 }
 
+/**
+ * Shows a text in the middle of the box
+ *
+ * @param text is the Text to shown
+ * @param modifier is the modifier, the default option is the default modifier
+ * @param textAlign is the Align of the text, default option is center
+ */
 @Composable
 fun CenteredText(
     text: String,
@@ -351,12 +370,31 @@ fun CenteredText(
     )
 }
 
+/**
+ * This fun will show a Day with the right padding and a centered text with the number of the day,
+ * if its selected a circle arround it will appear, and if the day isn't in the selected month the
+ * number will show gray
+ *
+ * @param date is the selected date
+ * @param setDate is the setter for the selected date
+ * @param chipDate is the date of the chip
+ * @param text is the text of the chip, default is the day of chip
+ * @param textModifier is the modifier of the text, default has 10.dp of padding
+ * @param textAlign is the Align of the text, default is center
+ * @param style is the style of the text, default is h5 of the selected Theme
+ * @param fontSize is the size of the font of the text, default is 18
+ * @param colorNotMonth is the color of the text if the chipDate is from a month different from the
+ * selected date
+ * @param colorNotSelected is the color of the chip if it's not selected but has the same month as
+ * the selected date
+ * @param colorBackground is the color of the background of the calendar
+ */
 @Composable
 private fun DayChip(
-    date: MyDay,
-    setDate: (MyDay) -> Unit,
-    chipDay: MyDay,
-    text: String = chipDay.day.toString(),
+    date: MyDate,
+    setDate: (MyDate) -> Unit,
+    chipDate: MyDate,
+    text: String = chipDate.day.toString(),
     textModifier: Modifier = Modifier.padding(10.dp),
     textAlign: TextAlign = TextAlign.Center,
     style: TextStyle = MaterialTheme.typography.h5,
@@ -372,13 +410,13 @@ private fun DayChip(
             .preferredWidth(45.dp)
             .preferredHeight(45.dp)
             .clickable(
-                onClick = { setDate(chipDay) },
+                onClick = { setDate(chipDate) },
                 indication = null
             ),
         shape = RoundedCornerShape(50),
-        border = if (date == chipDay) BorderStroke(2.dp, MaterialTheme.colors.primary)
+        border = if (date == chipDate) BorderStroke(2.dp, MaterialTheme.colors.primary)
         else null,
-        elevation = if (date == chipDay) 1.dp
+        elevation = if (date == chipDate) 1.dp
         else 0.dp,
         color = colorBackground
 
@@ -390,8 +428,8 @@ private fun DayChip(
             style = style,
             fontSize = fontSize,
             color = when {
-                chipDay.month != date.month -> colorNotMonth
-                chipDay == date -> colorSelected
+                chipDate.month != date.month -> colorNotMonth
+                chipDate == date -> colorSelected
                 else -> colorNotSelected
             }
         )
@@ -399,13 +437,22 @@ private fun DayChip(
 
 }
 
+/**
+ * Is the information about the people who is comming out tonight, it will update if the selected date changes
+ *
+ * @param genteTotal total ammount of people who is comming out
+ * @param amigos total ammount of people who is comming out AND you have them added as a friend
+ * @param showFriends lamda expresion that will update a boolean variable that will show a dialog with your friends
+ * @param date Selected date
+ */
 @Composable
 fun DayInformation(
-    genteTotal: String = "27",
-    amigos: String = "12",
+    genteTotal: String = "?",
+    amigos: String = "?",
     showFriends: () -> Unit,
-    date: MyDay
+    date: MyDate
 ) {
+    //Formated date string
     val formattedDay = StringBuilder(8)
         .append(date.day)
         .append("/")
@@ -417,14 +464,12 @@ fun DayInformation(
     Row(
         modifier = Modifier
             .padding(horizontal = 6.dp)
-//            .padding(vertical = 12.dp)
     ) {
-
         Column(
             modifier = Modifier.fillMaxHeight().weight(0.6f),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
+            //Formatted text of the selected date
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -437,21 +482,19 @@ fun DayInformation(
                 )
             }
 
+            //Info about the people on the selected date
             Column(
                 modifier = Modifier
                     .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                InfoChip(info = amigos, text = "Amigos", onClick = showFriends)
-                InfoChip(info = genteTotal, text = "Gente total")
+                InfoChip(numberOfPeople = amigos, peopleDescription = "Amigos", onClick = showFriends)
+                InfoChip(numberOfPeople = genteTotal, peopleDescription = "Gente total")
             }
-
-
         }
 
-
-
+//Cool divider
         Box(
             modifier = Modifier
                 .padding(start = 6.dp)
@@ -460,16 +503,15 @@ fun DayInformation(
                 .background(MaterialTheme.colors.primary)
         )
 
+//Column with the Events on the selected date
         Column(
             modifier = Modifier.weight(1.4f)
                 .fillMaxHeight()
                 .padding(start = 6.dp),
             horizontalAlignment = Alignment.End
         ) {
-
             Surface(
                 modifier = Modifier.fillMaxHeight(),
-                //border = BorderStroke(2.dp, MaterialTheme.colors.primary),
                 color = MaterialTheme.colors.background,
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -481,28 +523,30 @@ fun DayInformation(
                         bottom = 0.dp
                     )
                 ) {
-
                     Event("Lazaros", "Copas a 3 euros")
-
                     Event("Lokal", "Musica de los 90")
-
                     Event("Patio andaluz", "Fiesta de la espuma")
                     Event("Luxus", "Hoy cerrado por fiesta infantil, nos vemos gente")
                     Event("Urbe", "Cocaina gratis")
-                    Event(
-                        "Dulce flor", "Ahora un 30% en nuevos productos y perfumes con un coste " +
-                                "inferior a 2$"
-                    )
-
+                    Event("Dulce flor", "Ahora un 30% en nuevos productos y perfumes con un coste " +
+                                "inferior a 2$")
                 }
-
             }
         }
     }
 }
 
+/**
+ * Formated Eventç
+ *
+ * @param barName name that will be shown as bold text
+ * @param eventDescription description of the event
+ */
 @Composable
-fun Event(barName: String, eventDescription: String) {
+fun Event(
+    barName: String,
+    eventDescription: String
+) {
     Surface(
         modifier = Modifier.fillMaxWidth()
             .padding(vertical = 6.dp),
@@ -527,10 +571,18 @@ fun Event(barName: String, eventDescription: String) {
     }
 }
 
+/**
+ * Little piece of button with a bold number and a description under it, all surrounded with  a black border,
+ * a lambda expression can be sent and it will act as a button
+ *
+ * @param numberOfPeople number of people who has confirmed
+ * @param peopleDescription description of the people ( friends or all )
+ * @param onClick nullable lambda with the action when onClick is activated
+ */
 @Composable
 fun InfoChip(
-    info: String = "?",
-    text: String = "personas",
+    numberOfPeople: String = "?",
+    peopleDescription: String = "personas",
     onClick: (() -> Unit)? = null
 ) {
 
@@ -555,14 +607,14 @@ fun InfoChip(
         ) {
 
             Text(
-                text = info,
+                text = numberOfPeople,
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
             )
 
             Text(
-                text = text,
+                text = peopleDescription,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier
             )
@@ -577,7 +629,7 @@ fun InfoChip(
 fun CalendarWindowPreview() {
     val (date, setDate) = remember {
         mutableStateOf(
-            MyDay(
+            MyDate(
                 LocalDate.now().dayOfMonth,
                 LocalDate.now().month.value,
                 LocalDate.now().year
@@ -600,6 +652,6 @@ fun CalendarPreview() {
 @Composable
 fun DayInfoPreview() {
     NightTimeTheme {
-        DayInformation(showFriends = {}, date = MyDay(6, 11, 2020))
+        DayInformation(showFriends = {}, date = MyDate(6, 11, 2020))
     }
 }

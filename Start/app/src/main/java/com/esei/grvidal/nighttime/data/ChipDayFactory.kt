@@ -3,21 +3,21 @@ package com.esei.grvidal.nighttime.data
 import java.time.LocalDate
 
 
-fun LocalDate.toMyDate(): MyDay{
-    return MyDay(
+fun LocalDate.toMyDate(): MyDate{
+    return MyDate(
         this.dayOfMonth,
         this.monthValue,
         this.year
     )
 }
 
-data class MyDay(val day: Int, val month: Int, val year: Int){
-    val previousMonth: MyDay
+data class MyDate(val day: Int, val month: Int, val year: Int){
+    val previousMonth: MyDate
     get() {
         return LocalDate.of(year, month, day).minusMonths(1).toMyDate()
     }
 
-    val nextMonth: MyDay
+    val nextMonth: MyDate
         get() {
             return LocalDate.of(year,month,day).plusMonths(1).toMyDate()
         }
@@ -31,10 +31,10 @@ class ChipDayFactory {
         /**
          *  val today when someone gets it, it updates to the actual date
          */
-        private val today: MyDay
+        private val today: MyDate
             get() {
                 val calendar = LocalDate.now()
-                return MyDay(
+                return MyDate(
                     calendar.dayOfMonth,
                     calendar.monthValue,
                     calendar.year
@@ -47,10 +47,10 @@ class ChipDayFactory {
          * @return An array of arrays composed with 7 days in the selected month surrounded by the previous days
          * or the next days if needed
          */
-        fun datesCreator(selectedDate: MyDay = today): List<List<MyDay>> {
+        fun datesCreator(selectedDate: MyDate = today): List<List<MyDate>> {
 
             //Array with the dates to return
-            val monthArray = mutableListOf<MyDay>()
+            val monthArray = mutableListOf<MyDate>()
 
 
             //localDate is used to calculate the days before day 1 to complete the Layout
@@ -78,7 +78,7 @@ class ChipDayFactory {
                 //Loop to create the previous days
                 for (day in previousMonthDay .. localDateLastMonth.lengthOfMonth()) {
                     monthArray.add(
-                        MyDay(
+                        MyDate(
                             day,
                             previousMonthMonth,
                             previousMonthYear
@@ -93,7 +93,7 @@ class ChipDayFactory {
             //Loop to create the days of the month
             for(day in 1 .. maxDaysActualMonth){
                 monthArray.add(
-                    MyDay(
+                    MyDate(
                         day,
                         localDate.monthValue,
                         localDate.year
@@ -117,7 +117,7 @@ class ChipDayFactory {
                 //Loop to create the previous days
                 for (day in 1 .. ( 7 - lastDay.dayOfWeek.value) ){
                     monthArray.add(
-                        MyDay(
+                        MyDate(
                             day,
                             nextMonthMonth,
                             nextMonthYear

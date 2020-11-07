@@ -4,8 +4,8 @@ import androidx.compose.foundation.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
@@ -23,49 +23,43 @@ import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
 
-
-enum class NavButtonsIcon (val vectorAsset: VectorAsset) {
+/**
+ * Enum of vectorAsset of the navButtons
+ */
+enum class NavButtonsIcon(val vectorAsset: VectorAsset) {
     Bar(Icons.Default.LocalBar),
     Calendar(Icons.Default.Today),
     Friends(Icons.Default.People),
     Chat(Icons.Default.AddComment)
 }
 
-
+/**
+ * NavigationBottomBar with a divider and the selectable icons
+ *
+ * @param icon selected enum of the NavButtonIcon
+ * @param setIcon setter of the selected NavButtonIcon
+ */
 @Composable
 fun bottomBar(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
 
-    Surface(modifier = Modifier.fillMaxWidth(),
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colors.background
-    ){
+    ) {
         Column {
-
-            //Row with a divider line
-            Row( horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(3.dp)
-            ) {
-
-                Surface(
-                    modifier = Modifier.fillMaxWidth()
-                        .preferredHeight(1.dp),
-                    color = MaterialTheme.colors.onSurface,
-                    shape = RoundedCornerShape(25),
-                    elevation = 1.dp,
-                    content = {}
-                )
-                //Divider(color = MaterialTheme.colors.onSurface, thickness = 1.dp)
-            }
+            Divider(
+                modifier = Modifier.padding(3.dp),
+                color = MaterialTheme.colors.onSurface,
+                thickness = 1.dp
+            )
 
             //Navigation Buttons
             Row(
                 modifier = Modifier.padding(top = 6.dp).fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
-
             ) {
                 NavButtons(icon, setIcon)
-
-
             }
         }
     }
@@ -74,23 +68,29 @@ fun bottomBar(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
 }
 
 
-//Stateful composable with the logic
+/**
+ * Function that creates the navButtons in the right order
+ *
+ * @param icon Selected navButtonsIcon
+ * @param setIcon setter of the selected navButtonsIcon
+ */
 @Composable
 fun NavButtons(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
 
-
-    //da forma
     NavButtons(icon, setIcon, asset = NavButtonsIcon.Bar)
-
     NavButtons(icon, setIcon, asset = NavButtonsIcon.Calendar)
-
     NavButtons(icon, setIcon, asset = NavButtonsIcon.Friends)
-
     NavButtons(icon, setIcon, asset = NavButtonsIcon.Chat)
-
 }
 
 //TODO Navegar a la sigueinte pestaña
+/**
+ * Formatted Icons
+ *
+ * @param icon Selected navButtonsIcon
+ * @param setIcon setter of the selected navButtonsIcon
+ * @param asset enum of the NavButtonsIcon
+ */
 @Composable
 fun NavButtons(
     icon: NavButtonsIcon,
@@ -106,6 +106,15 @@ fun NavButtons(
     )
 }
 
+/**
+ * Formatted Icons with the right color and the underline if they are selected
+ *
+ * @param icon VectorAsset of the own icon
+ * @param onIconSelected setter of the selected navButtonsIcon
+ * @param isSelected boolean that is true if the icon is selected
+ * @param modifier Modifier
+ *
+ */
 @Composable
 fun SelectableIconButton(
     icon: VectorAsset,
@@ -144,9 +153,9 @@ fun SelectableIconButton(
     }
 }
 
-@Preview( "bottomBar")
+@Preview("bottomBar")
 @Composable
-fun bottomBarPreview(){
+fun bottomBarPreview() {
     val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar) }
 
     bottomBar(icon, setIcon)

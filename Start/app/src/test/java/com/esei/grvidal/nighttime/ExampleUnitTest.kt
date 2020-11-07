@@ -1,7 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import com.esei.grvidal.nighttime.data.ChipDayFactory
-import com.esei.grvidal.nighttime.data.MyDay
+import com.esei.grvidal.nighttime.data.MyDate
 import org.junit.Test
 
 /**
@@ -18,7 +18,7 @@ class ExampleUnitTest {
 
 
 
-        val myday = MyDay(4,12,2020)
+        val myday = MyDate(4,12,2020)
        val  monthArray = ChipDayFactory.datesCreator(myday)
 
          var number = 0
