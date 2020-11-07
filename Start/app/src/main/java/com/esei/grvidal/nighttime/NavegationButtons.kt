@@ -1,14 +1,11 @@
 package com.esei.grvidal.nighttime
 
-import android.widget.LinearLayout
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
@@ -25,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
-import java.util.*
 
 
 enum class NavButtonsIcon (val vectorAsset: VectorAsset) {
@@ -37,7 +33,7 @@ enum class NavButtonsIcon (val vectorAsset: VectorAsset) {
 
 
 @Composable
-fun bottomBar(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
+fun bottomBar(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
 
     Surface(modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colors.background
@@ -80,29 +76,29 @@ fun bottomBar(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
 
 //Stateful composable with the logic
 @Composable
-fun NavButtons(icon: VectorAsset, setIcon: (VectorAsset) -> Unit) {
+fun NavButtons(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
 
 
     //da forma
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Bar.vectorAsset)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Bar)
 
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Calendar.vectorAsset)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Calendar)
 
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Friends.vectorAsset)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Friends)
 
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Chat.vectorAsset)
+    NavButtons(icon, setIcon, asset = NavButtonsIcon.Chat)
 
 }
 
 //TODO Navegar a la sigueinte pestaña
 @Composable
 fun NavButtons(
-    icon: VectorAsset,
-    onIconChange: (VectorAsset) -> Unit,
-    asset: VectorAsset
+    icon: NavButtonsIcon,
+    onIconChange: (NavButtonsIcon) -> Unit,
+    asset: NavButtonsIcon
 ) {
     SelectableIconButton(
-        icon = asset,
+        icon = asset.vectorAsset,
         onIconSelected = {
             onIconChange(asset)
         },
@@ -151,7 +147,7 @@ fun SelectableIconButton(
 @Preview( "bottomBar")
 @Composable
 fun bottomBarPreview(){
-    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar.vectorAsset) }
+    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar) }
 
     bottomBar(icon, setIcon)
 
