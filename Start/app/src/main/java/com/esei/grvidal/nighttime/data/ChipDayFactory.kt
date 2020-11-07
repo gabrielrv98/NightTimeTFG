@@ -2,7 +2,21 @@ package com.esei.grvidal.nighttime.data
 
 import java.time.LocalDate
 
-data class MyDay(val day: Int, val month: Int, val year: Int)
+
+fun LocalDate.toMyDate(): MyDay{
+    return MyDay(
+        this.dayOfMonth,
+        this.monthValue,
+        this.year
+    )
+}
+
+data class MyDay(val day: Int, val month: Int, val year: Int){
+    val previousMonth: MyDay
+    get() {
+        return LocalDate.of(year,month,day).minusMonths(1).toMyDate()
+    }
+}
 
 class ChipDayFactory {
 
