@@ -29,7 +29,7 @@ class ChipDayFactory {
     companion object ChipDayFactory {
 
         /**
-         *  val today when somone gets it, it updates to the actual date
+         *  val today when someone gets it, it updates to the actual date
          */
         private val today: MyDay
             get() {

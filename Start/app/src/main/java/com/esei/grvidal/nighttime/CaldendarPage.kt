@@ -26,7 +26,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.ChipDayFactory
 import com.esei.grvidal.nighttime.data.MyDay
-import com.esei.grvidal.nighttime.data.Usuario
+import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
 import java.util.*
@@ -66,38 +66,38 @@ fun CalendarPageView() {
     if (showDialog)
         FriendlyUsersDialog(
             onClose = { setShowDialog(false) },
-            //todo esto esta hardcodeado
+            //todo this is hardcoded
             listOf(
-                Usuario(name = "Nuria"),
-                Usuario(name = "Miguel"),
-                Usuario(name = "Maria"),
-                Usuario(name = "Marcos"),
-                Usuario(name = "Laura"),
-                Usuario(name = "Sara"),
-                Usuario(name = "Julio"),
-                Usuario(name = "Juan"),
-                Usuario(name = "Pedro"),
-                Usuario(name = "Salva"),
-                Usuario(name = "Gabriel"),
-                Usuario(name = "Jose"),
-                Usuario(name = "Emma"),
-                Usuario(name = "Santi"),
-                Usuario(name = "Filo"),
-                Usuario(name = "Nuria"),
-                Usuario(name = "Miguel"),
-                Usuario(name = "Maria"),
-                Usuario(name = "Marcos"),
-                Usuario(name = "Laura"),
-                Usuario(name = "Sara"),
-                Usuario(name = "Julio"),
-                Usuario(name = "Juan"),
-                Usuario(name = "Pedro"),
-                Usuario(name = "Salva"),
-                Usuario(name = "Gabriel"),
-                Usuario(name = "Jose"),
-                Usuario(name = "Emma"),
-                Usuario(name = "Santi"),
-                Usuario(name = "Filo"),
+                User(name = "Nuria"),
+                User(name = "Miguel"),
+                User(name = "Maria"),
+                User(name = "Marcos"),
+                User(name = "Laura"),
+                User(name = "Sara"),
+                User(name = "Julio"),
+                User(name = "Juan"),
+                User(name = "Pedro"),
+                User(name = "Salva"),
+                User(name = "Gabriel"),
+                User(name = "Jose"),
+                User(name = "Emma"),
+                User(name = "Santi"),
+                User(name = "Filo"),
+                User(name = "Nuria"),
+                User(name = "Miguel"),
+                User(name = "Maria"),
+                User(name = "Marcos"),
+                User(name = "Laura"),
+                User(name = "Sara"),
+                User(name = "Julio"),
+                User(name = "Juan"),
+                User(name = "Pedro"),
+                User(name = "Salva"),
+                User(name = "Gabriel"),
+                User(name = "Jose"),
+                User(name = "Emma"),
+                User(name = "Santi"),
+                User(name = "Filo"),
 
                 )
         )
@@ -139,7 +139,7 @@ fun CalendarPageView() {
 @Composable
 fun FriendlyUsersDialog(
     onClose: () -> Unit,
-    itemsUser: List<Usuario>
+    itemsUser: List<User>
 ) {
     Dialog(onDismissRequest = onClose) {
 
@@ -185,7 +185,7 @@ fun FriendlyUsersDialog(
                         .align(Alignment.End),
                     onClick = onClose
                 ) {
-                    Text(text = "Cerrar")
+                    Text(text = stringResource(R.string.cerrar))
                 }
             }
 
