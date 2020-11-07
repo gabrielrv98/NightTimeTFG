@@ -83,12 +83,12 @@ fun NavButtons(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
     NavButtons(icon, setIcon, asset = NavButtonsIcon.Chat)
 }
 
-//TODO Navegar a la sigueinte pestaña
+//TODO Nav to the next View
 /**
  * Formatted Icons
  *
  * @param icon Selected navButtonsIcon
- * @param setIcon setter of the selected navButtonsIcon
+ * @param onIconChange setter of the selected navButtonsIcon
  * @param asset enum of the NavButtonsIcon
  */
 @Composable

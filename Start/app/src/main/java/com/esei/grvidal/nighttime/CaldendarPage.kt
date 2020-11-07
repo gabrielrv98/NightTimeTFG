@@ -53,7 +53,7 @@ fun CalendarPageView() {
     //Remembered state of a boolean that express if the dialog with the friendly users must be shown
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
 
-    /* Eddited set that if the month changes, the calendar will update */
+    // Edited set that if the month changes, the calendar will update
     val mySetDay = { myDate: MyDate ->
         if (date.month != myDate.month)
             setCalendar(ChipDayFactory.datesCreator(myDate))
@@ -107,8 +107,6 @@ fun CalendarPageView() {
         ){
             CalendarWindow(date = date, setDate = mySetDay, calendar = calendar)
         }
-
-        //todo Eliminar este Divider es solo una referencia
 
         Divider(color = MaterialTheme.colors.primary, thickness = 1.dp)
 
@@ -312,7 +310,7 @@ fun CalendarWindow(
 
 
             /*
-            If you swipe up when it's not needed (or "possible") ypu'll get
+            If you swipe up when it's not needed (or "possible") you will get
             IlegalStateException entered drag with non-zero pending scroll: -101.1
 LazyColumnFor(
     items = calendar,
@@ -438,11 +436,11 @@ private fun DayChip(
 }
 
 /**
- * Is the information about the people who is comming out tonight, it will update if the selected date changes
+ * Is the information about the people who is coming out tonight, it will update if the selected date changes
  *
- * @param genteTotal total ammount of people who is comming out
- * @param amigos total ammount of people who is comming out AND you have them added as a friend
- * @param showFriends lamda expresion that will update a boolean variable that will show a dialog with your friends
+ * @param genteTotal total amount of people who is coming out
+ * @param amigos total amount of people who is coming out AND you have them added as a friend
+ * @param showFriends lambda expression that will update a boolean variable that will show a dialog with your friends
  * @param date Selected date
  */
 @Composable
@@ -537,7 +535,7 @@ fun DayInformation(
 }
 
 /**
- * Formated Eventç
+ * Formatted Event
  *
  * @param barName name that will be shown as bold text
  * @param eventDescription description of the event
