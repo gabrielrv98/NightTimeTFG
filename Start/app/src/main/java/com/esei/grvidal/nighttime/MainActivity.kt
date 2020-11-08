@@ -11,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.ui.tooling.preview.Preview
 
@@ -62,6 +63,7 @@ fun ScreenScaffolded(
         }
     ) {
         content()
+        Divider()
 
     }
 }
@@ -84,13 +86,22 @@ fun MainView(selectedIcon: NavButtonsIcon) {
             }
             if (text == "Calendario")
                 CalendarPageView()
+            else if (text == "Bar")
+                BarPageView()
             else {
-                Row {
-                    Text(text = "Night Time main page")
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    Row {
+                        Text(text = "Night Time main page")
+                    }
+                    Row {
+                        Text(text = text)
+                    }
                 }
-                Row {
-                    Text(text = text)
-                }
+
 
             }
 

@@ -31,6 +31,7 @@ import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
 import java.util.*
 
+
 /**
  * Show the Calendar page, with the calendar on the top and the information below it
  */
@@ -102,21 +103,29 @@ fun CalendarPageView() {
     Column {
         //Top of the screen
         Row(
-            modifier = modifier.weight(1.4f),
+            modifier = modifier.weight(1.2f),
             horizontalArrangement = Arrangement.Center
-        ){
-            CalendarWindow(date = date, setDate = mySetDay, calendar = calendar)
+        ) {
+            //val color = MaterialTheme.colors.background.copy(alpha = 0.2f)
+            //ContentColorAmbient.current.copy(alpha = 0.02f)
+            CalendarWindow(
+                date = date,
+                setDate = mySetDay,
+                calendar = calendar
+            , colorBackground = MaterialTheme.colors.background.copy(alpha = 0.9f))
         }
 
-        Divider(color = MaterialTheme.colors.primary, thickness = 1.dp)
+        //Divider(color = MaterialTheme.colors.primary, thickness = 1.dp)
 
         //Bottom of the screen
         Row(
             modifier = modifier.weight(1f).padding(bottom = 50.dp)
-        ){
+        ) {
 
-            DayInformation(genteTotal = "27", amigos = "12",
-                showFriends = { setShowDialog(true) }, date = date)
+            DayInformation(
+                genteTotal = "27", amigos = "12",
+                showFriends = { setShowDialog(true) }, date = date
+            )
         }
 
     }
@@ -124,6 +133,8 @@ fun CalendarPageView() {
 }
 
 /**
+ * Dialog that shows the friends who are coming out the selected date
+ *
  * @param onClose is the action that will be done when the dialog closes, here, it will set
  * the variable showDialog to false
  * @param itemsUser list with the users to show
@@ -137,11 +148,16 @@ fun FriendlyUsersDialog(
 
         //Surface with the shape, border and color
         Surface(
-            modifier = Modifier.clip(MaterialTheme.shapes.medium)
-                .padding(24.dp),
+            modifier = Modifier
+                .padding(24.dp)
+                .border(
+                    border = BorderStroke(3.dp, MaterialTheme.colors.primary),
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(1.dp),
             color = MaterialTheme.colors.background,
             shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(3.dp, MaterialTheme.colors.primary)
+            //border = BorderStroke(3.dp, MaterialTheme.colors.primary)
         ) {
             Column(
                 modifier = Modifier.padding(12.dp)
@@ -191,6 +207,8 @@ fun FriendlyUsersDialog(
 }
 
 /**
+ * Top View of the calendar
+ *
  * @param date is the selected date
  * @param setDate is the setter of the selected date
  * @param colorBackground is the color of the background
@@ -222,11 +240,11 @@ fun CalendarWindow(
 
 
     Surface(
-        modifier = Modifier.fillMaxHeight().fillMaxHeight(),
+        modifier = Modifier.fillMaxHeight().fillMaxHeight()
+            .padding(bottom = 6.dp),
         color = colorBackground,
-        elevation = 1.dp
+        elevation = 0.dp
     ) {
-
         Column(
             modifier = Modifier.padding(horizontal = 6.dp)
         ) {
@@ -328,7 +346,7 @@ LazyColumnFor(
                     //Week Row
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.padding(vertical = 9.dp)
+                        modifier = Modifier.padding(vertical = 4.dp)
                     ) {
                         for (days in week) {
 
@@ -349,7 +367,7 @@ LazyColumnFor(
 }
 
 /**
- * Shows a text in the middle of the box
+ * Shows a text in the middle of a box
  *
  * @param text is the Text to shown
  * @param modifier is the modifier, the default option is the default modifier
@@ -358,13 +376,15 @@ LazyColumnFor(
 @Composable
 fun CenteredText(
     text: String,
-    modifier: Modifier = Modifier,
-    textAlign: TextAlign = TextAlign.Center
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    textAlign: TextAlign = TextAlign.Center,
+    textStyle: TextStyle = currentTextStyle()
 ) {
     Text(
         text = text,
         modifier = modifier,
-        textAlign = textAlign
+        textAlign = textAlign,
+        style = textStyle
     )
 }
 
@@ -450,7 +470,7 @@ fun DayInformation(
     showFriends: () -> Unit,
     date: MyDate
 ) {
-    //Formated date string
+    //Formatted date string
     val formattedDay = StringBuilder(8)
         .append(date.day)
         .append("/")
@@ -459,79 +479,128 @@ fun DayInformation(
         .append(date.year)
         .toString()
 
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 6.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxHeight().weight(0.6f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            //Formatted text of the selected date
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 15.dp, top = 12.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = formattedDay,
-                    style = MaterialTheme.typography.h6
-                )
-            }
 
-            //Info about the people on the selected date
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                InfoChip(numberOfPeople = amigos, peopleDescription = "Amigos", onClick = showFriends)
-                InfoChip(numberOfPeople = genteTotal, peopleDescription = "Gente total")
-            }
-        }
-
-//Cool divider
-        Box(
+        Row(
             modifier = Modifier
-                .padding(start = 6.dp)
-                .fillMaxHeight()
-                .preferredWidth(1.dp)
-                .background(MaterialTheme.colors.primary)
-        )
+                .padding(horizontal = 6.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxHeight().weight(0.7f)
+                    .padding(vertical = 10.dp)
+                    .padding(horizontal = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                //Formatted text of the selected date
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp, top = 12.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CenteredText(
+                            modifier = Modifier
+                                .background(Color.White)
+                                .border(
+                                    border = BorderStroke(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colors.primary
+                                    ),
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                                .fillMaxWidth(),
+                            text = formattedDay,
+                            textStyle = MaterialTheme.typography.h6
+                        )
+
+                        Button(
+                            modifier = Modifier.padding(top = 12.dp),
+                            onClick = {}
+                        ) {
+                            Text(text  = stringResource(id = R.string.elegirDia))
+                        }
+                    }
+                }
+
+                //Info about the people on the selected date
+                Column(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+
+                    //Button to show a dialog with all the friends
+                    Button(onClick = showFriends,
+                    shape = RoundedCornerShape(15.dp)
+                    ) {
+                        InfoChip(
+                            numberOfPeople = amigos,
+                            peopleDescription = stringResource(id = R.string.amigos)
+                        )
+                    }
+
+                    //A chip with the number of the total confirmed people
+                    Surface(
+                        modifier = Modifier.padding(6.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+                        shape = RoundedCornerShape(15.dp),
+                        elevation = 1.dp,
+                        color = MaterialTheme.colors.surface
+                    ) {
+
+                        InfoChip(
+                            modifier = Modifier.padding(12.dp),
+                            numberOfPeople = genteTotal,
+                            peopleDescription = stringResource(id = R.string.genteTotal)
+                        )
+                    }
+                }
+            }
+
+//Cool vertical divider
+
+            Box(
+                modifier = Modifier
+                    //.padding(horizontal = 3.dp)
+                    .padding(top = 8.dp)
+                    .fillMaxHeight()
+                    .preferredWidth(1.dp)
+                    .background(MaterialTheme.colors.primary)
+            )
 
 //Column with the Events on the selected date
-        Column(
-            modifier = Modifier.weight(1.4f)
-                .fillMaxHeight()
-                .padding(start = 6.dp),
-            horizontalAlignment = Alignment.End
-        ) {
+
             Surface(
-                modifier = Modifier.fillMaxHeight(),
-                color = MaterialTheme.colors.background,
-                shape = RoundedCornerShape(8.dp)
+                modifier = Modifier.weight(1.35f).fillMaxHeight(),
+                color = MaterialTheme.colors.background
             ) {
                 ScrollableColumn(
-                    modifier = Modifier.padding(
-                        start = 10.dp,
-                        end = 12.dp,
-                        top = 10.dp,
-                        bottom = 0.dp
-                    )
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(
+                            top = 10.dp,
+                            bottom = 0.dp
+                        )
+                        .padding(horizontal = 10.dp)
                 ) {
                     Event("Lazaros", "Copas a 3 euros")
                     Event("Lokal", "Musica de los 90")
                     Event("Patio andaluz", "Fiesta de la espuma")
                     Event("Luxus", "Hoy cerrado por fiesta infantil, nos vemos gente")
                     Event("Urbe", "Cocaina gratis")
-                    Event("Dulce flor", "Ahora un 30% en nuevos productos y perfumes con un coste " +
-                                "inferior a 2$")
+                    Event(
+                        "Dulce flor", "Ahora un 30% en nuevos productos y perfumes con un coste " +
+                                "inferior a 2$"
+                    )
                 }
+
             }
         }
-    }
+
 }
 
 /**
@@ -569,56 +638,39 @@ fun Event(
     }
 }
 
+
 /**
- * Little piece of button with a bold number and a description under it, all surrounded with  a black border,
- * a lambda expression can be sent and it will act as a button
+ * Chip with a bold number and a description under it, all surrounded with  a black border
  *
+ * @param modifier custom modifier
  * @param numberOfPeople number of people who has confirmed
  * @param peopleDescription description of the people ( friends or all )
- * @param onClick nullable lambda with the action when onClick is activated
+ * @param styleTitle custom style of the Title
+ * @param styleDescription custom style of the description
  */
 @Composable
-fun InfoChip(
-    numberOfPeople: String = "?",
-    peopleDescription: String = "personas",
-    onClick: (() -> Unit)? = null
+private fun InfoChip(
+    modifier: Modifier = Modifier,
+    numberOfPeople: String = "",
+    peopleDescription: String = "",
+    styleTitle : TextStyle = MaterialTheme.typography.body1,
+    styleDescription : TextStyle =  MaterialTheme.typography.body2
 ) {
-
-    var surfaceModifier = Modifier.padding(6.dp)
-
-    if (onClick is () -> Unit) {
-        surfaceModifier = surfaceModifier
-            .clip(RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-    }
-
-
-    Surface(
-        modifier = surfaceModifier,
-        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
-        shape = RoundedCornerShape(15.dp),
-        elevation = 1.dp
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            Text(
-                text = numberOfPeople,
-                style = MaterialTheme.typography.body1,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-            )
+        Text(
+            text = numberOfPeople,
+            style = styleTitle,
+            fontWeight = FontWeight.Bold
+        )
 
-            Text(
-                text = peopleDescription,
-                style = MaterialTheme.typography.body2,
-                modifier = Modifier
-            )
-        }
-
-
+        Text(
+            text = peopleDescription,
+            style =styleDescription
+        )
     }
 }
 
@@ -637,7 +689,7 @@ fun CalendarWindowPreview() {
     CalendarWindow(date, setDate, calendar = ChipDayFactory.datesCreator())
 }
 
-@Preview("Calendar")
+@Preview("Page")
 @Composable
 fun CalendarPreview() {
     NightTimeTheme {
