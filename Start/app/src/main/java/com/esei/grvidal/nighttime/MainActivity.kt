@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.ui.tooling.preview.Preview
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -62,8 +63,19 @@ fun ScreenScaffolded(
                 bottomBar(icon, setIcon)
         }
     ) {
-        content()
-        Divider()
+        val fillMaxModifier = Modifier.fillMaxSize()
+        Surface(
+            modifier = fillMaxModifier.padding(bottom = 57.dp),//TODO Bottom padding of the size of the bottomBar
+            color = MaterialTheme.colors.background
+        ){
+            Column(
+                modifier = fillMaxModifier
+            ){
+                content()
+            }
+
+        }
+
 
     }
 }

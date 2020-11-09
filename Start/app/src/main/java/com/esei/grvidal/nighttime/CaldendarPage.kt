@@ -103,7 +103,7 @@ fun CalendarPageView() {
     Column {
         //Top of the screen
         Row(
-            modifier = modifier.weight(1.2f),
+            modifier = modifier.weight(1.5f),
             horizontalArrangement = Arrangement.Center
         ) {
             //val color = MaterialTheme.colors.background.copy(alpha = 0.2f)
@@ -111,15 +111,16 @@ fun CalendarPageView() {
             CalendarWindow(
                 date = date,
                 setDate = mySetDay,
-                calendar = calendar
-            , colorBackground = MaterialTheme.colors.background.copy(alpha = 0.9f))
+                calendar = calendar,
+                colorBackground = MaterialTheme.colors.background.copy(alpha = 0.2f)       //doesn't really work
+            )
         }
 
         //Divider(color = MaterialTheme.colors.primary, thickness = 1.dp)
 
         //Bottom of the screen
         Row(
-            modifier = modifier.weight(1f).padding(bottom = 50.dp)
+            modifier = modifier.weight(1f)
         ) {
 
             DayInformation(
@@ -156,8 +157,7 @@ fun FriendlyUsersDialog(
                 )
                 .padding(1.dp),
             color = MaterialTheme.colors.background,
-            shape = MaterialTheme.shapes.medium,
-            //border = BorderStroke(3.dp, MaterialTheme.colors.primary)
+            shape = MaterialTheme.shapes.medium
         ) {
             Column(
                 modifier = Modifier.padding(12.dp)
@@ -434,8 +434,7 @@ private fun DayChip(
         shape = RoundedCornerShape(50),
         border = if (date == chipDate) BorderStroke(2.dp, MaterialTheme.colors.primary)
         else null,
-        elevation = if (date == chipDate) 1.dp
-        else 0.dp,
+        elevation = 0.dp,
         color = colorBackground
 
     ) {
@@ -486,7 +485,7 @@ fun DayInformation(
         ) {
             Column(
                 modifier = Modifier.fillMaxHeight().weight(0.7f)
-                    .padding(vertical = 10.dp)
+                    //.padding(vertical = 10.dp)
                     .padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -528,7 +527,8 @@ fun DayInformation(
                 //Info about the people on the selected date
                 Column(
                     modifier = Modifier
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 8.dp)
+                        .fillMaxHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
