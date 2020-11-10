@@ -60,45 +60,46 @@ fun CalendarPageView() {
             setCalendar(ChipDayFactory.datesCreator(myDate))
         setDate(myDate)
     }
+    val userList = //todo this is hardcoded
+        listOf(
+            User(name = "Nuria"),
+            User(name = "Miguel"),
+            User(name = "Maria"),
+            User(name = "Marcos"),
+            User(name = "Laura"),
+            User(name = "Sara"),
+            User(name = "Julio"),
+            User(name = "Juan"),
+            User(name = "Pedro"),
+            User(name = "Salva"),
+            User(name = "Gabriel"),
+            User(name = "Jose"),
+            User(name = "Emma"),
+            User(name = "Santi"),
+            User(name = "Filo"),
+            User(name = "Nuria"),
+            User(name = "Miguel"),
+            User(name = "Maria"),
+            User(name = "Marcos"),
+            User(name = "Laura"),
+            User(name = "Sara"),
+            User(name = "Julio"),
+            User(name = "Juan"),
+            User(name = "Pedro"),
+            User(name = "Salva"),
+            User(name = "Gabriel"),
+            User(name = "Jose"),
+            User(name = "Emma"),
+            User(name = "Santi"),
+            User(name = "Filo")
+        )
 
     //If Friendly users Card is touched a dialog with their names should be shown
     if (showDialog)
-        FriendlyUsersDialog(
-            onClose = { setShowDialog(false) },
-            //todo this is hardcoded
-            listOf(
-                User(name = "Nuria"),
-                User(name = "Miguel"),
-                User(name = "Maria"),
-                User(name = "Marcos"),
-                User(name = "Laura"),
-                User(name = "Sara"),
-                User(name = "Julio"),
-                User(name = "Juan"),
-                User(name = "Pedro"),
-                User(name = "Salva"),
-                User(name = "Gabriel"),
-                User(name = "Jose"),
-                User(name = "Emma"),
-                User(name = "Santi"),
-                User(name = "Filo"),
-                User(name = "Nuria"),
-                User(name = "Miguel"),
-                User(name = "Maria"),
-                User(name = "Marcos"),
-                User(name = "Laura"),
-                User(name = "Sara"),
-                User(name = "Julio"),
-                User(name = "Juan"),
-                User(name = "Pedro"),
-                User(name = "Salva"),
-                User(name = "Gabriel"),
-                User(name = "Jose"),
-                User(name = "Emma"),
-                User(name = "Santi"),
-                User(name = "Filo")
-            )
-        )
+
+        CustomDialog(onClose = {setShowDialog(false)} ) {
+            FriendlyUsersDialog(itemsUser = userList, modifier = Modifier.preferredHeight(600.dp))
+        }
 
     Column {
         //Top of the screen
@@ -112,7 +113,7 @@ fun CalendarPageView() {
                 date = date,
                 setDate = mySetDay,
                 calendar = calendar,
-                colorBackground = MaterialTheme.colors.background.copy(alpha = 0.2f)       //doesn't really work
+                colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f)       //doesn't really work
             )
         }
 
@@ -136,74 +137,44 @@ fun CalendarPageView() {
 /**
  * Dialog that shows the friends who are coming out the selected date
  *
- * @param onClose is the action that will be done when the dialog closes, here, it will set
- * the variable showDialog to false
+ * @param modifier custom modifier
  * @param itemsUser list with the users to show
  */
 @Composable
 fun FriendlyUsersDialog(
-    onClose: () -> Unit,
-    itemsUser: List<User>
+    itemsUser :List<User>,
+    modifier :Modifier = Modifier
 ) {
-    Dialog(onDismissRequest = onClose) {
-
-        //Surface with the shape, border and color
-        Surface(
-            modifier = Modifier
-                .padding(24.dp)
-                .border(
-                    border = BorderStroke(3.dp, MaterialTheme.colors.primary),
-                    shape = MaterialTheme.shapes.medium
-                )
-                .padding(1.dp),
-            color = MaterialTheme.colors.background,
-            shape = MaterialTheme.shapes.medium
+    //List with the users
+    LazyColumnFor(
+        items = itemsUser,
+        modifier = modifier
+    ) {
+        //Each user
+        Row(
+            modifier = Modifier.padding(vertical = 12.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(12.dp)
+            //Image
+            Surface(
+                modifier = Modifier.preferredSize(20.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
             ) {
-                //List with the users
-                LazyColumnFor(
-                    items = itemsUser,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    //Each user
-                    Row(
-                        modifier = Modifier.padding(vertical = 12.dp)
-                    ) {
-                        //Image
-                        Surface(
-                            modifier = Modifier.preferredSize(20.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
-                        ) {
-                            // Image goes here
-                        }
+                // Image goes here
+            }
 
-                        //Name
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .align(Alignment.CenterVertically)
-                        ) {
-                            Text(text = (it.name + " - Apellidos"))
-                        }
-                    }
-
-                }
-
-                //Close button
-                Button(
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .align(Alignment.End),
-                    onClick = onClose
-                ) {
-                    Text(text = stringResource(R.string.cerrar))
-                }
+            //Name
+            Column(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
+                Text(text = (it.name + " - Apellidos"))
             }
         }
+
     }
+
 }
 
 /**
@@ -264,7 +235,7 @@ fun CalendarWindow(
                 Text(
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.h6,
-                    text = monthName.toUpperCase(Locale.ENGLISH),
+                    text = monthName.toUpperCase(Locale.getDefault()),
                     textAlign = TextAlign.Center
                 )
                 //Button next month
@@ -480,8 +451,7 @@ fun DayInformation(
 
 
         Row(
-            modifier = Modifier
-                .padding(horizontal = 6.dp)
+            modifier = Modifier.padding(horizontal = 6.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxHeight().weight(0.7f)
@@ -534,8 +504,9 @@ fun DayInformation(
                 ) {
 
                     //Button to show a dialog with all the friends
-                    Button(onClick = showFriends,
-                    shape = RoundedCornerShape(15.dp)
+                    Button(
+                        onClick = showFriends,
+                        shape = RoundedCornerShape(15.dp)
                     ) {
                         InfoChip(
                             numberOfPeople = amigos,
@@ -698,10 +669,47 @@ fun CalendarPreview() {
     }
 }
 
-@Preview("DayInfo")
+
+@Preview("Dialog")
 @Composable
-fun DayInfoPreview() {
+fun DialogPreview() {
+    val userList = //todo this is hardcoded
+        listOf(
+            User(name = "Nuria"),
+            User(name = "Miguel"),
+            User(name = "Maria"),
+            User(name = "Marcos"),
+            User(name = "Laura"),
+            User(name = "Sara"),
+            User(name = "Julio"),
+            User(name = "Juan"),
+            User(name = "Pedro"),
+            User(name = "Salva"),
+            User(name = "Gabriel"),
+            User(name = "Jose"),
+            User(name = "Emma"),
+            User(name = "Santi"),
+            User(name = "Filo"),
+            User(name = "Nuria"),
+            User(name = "Miguel"),
+            User(name = "Maria"),
+            User(name = "Marcos"),
+            User(name = "Laura"),
+            User(name = "Sara"),
+            User(name = "Julio"),
+            User(name = "Juan"),
+            User(name = "Pedro"),
+            User(name = "Salva"),
+            User(name = "Gabriel"),
+            User(name = "Jose"),
+            User(name = "Emma"),
+            User(name = "Santi"),
+            User(name = "Filo")
+        )
     NightTimeTheme {
-        DayInformation(showFriends = {}, date = MyDate(6, 11, 2020))
+
+        CustomDialog(onClose = {} ) {
+            FriendlyUsersDialog(itemsUser = userList, modifier = Modifier)
+        }
     }
 }
