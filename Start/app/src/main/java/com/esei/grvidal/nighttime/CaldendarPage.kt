@@ -456,6 +456,7 @@ fun DayInformation(
             Column(
                 modifier = Modifier.fillMaxHeight().weight(0.7f)
                     //.padding(vertical = 10.dp)
+                    .padding(top = 6.dp)
                     .padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
