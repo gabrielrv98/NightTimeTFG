@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime
+package com.esei.grvidal.nighttime.data
 
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.esei.grvidal.nighttime.pages.Bar
+import com.esei.grvidal.nighttime.pages.BarChip
+import com.esei.grvidal.nighttime.pages.BarDAO
 
+//import androidx.compose.material.Text
 
 
 @Composable
@@ -43,7 +47,7 @@ fun FriendChip(bar : Bar){
         modifier = Modifier.padding(8.dp)
     ){
 
-        Text(text = bar.name)
+        Text(bar.name)
         Text(text = bar.description)
     }
 }

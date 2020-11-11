@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -21,14 +20,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.ui.tooling.preview.Preview
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import com.esei.grvidal.nighttime.data.City
+import com.esei.grvidal.nighttime.data.CityDao
+import com.esei.grvidal.nighttime.pages.BarPageView
+import com.esei.grvidal.nighttime.pages.CalendarPageView
 import java.util.*
 
 
@@ -50,10 +51,39 @@ class MainActivity : AppCompatActivity() {
 fun MainScreen() {
 
     //saving the sate of the NavButton selected selected
-    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Calendar) }
+    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar) }
 
     ScreenScaffolded(icon, setIcon) {
-        MainView(icon)
+
+        val text: String = when (icon) {
+            NavButtonsIcon.Bar -> stringResource(id = R.string.Bar_st)
+            NavButtonsIcon.Calendar -> stringResource(id = R.string.Calendario)
+            NavButtonsIcon.Friends -> stringResource(id = R.string.amigos)
+            NavButtonsIcon.Chat -> stringResource(id = R.string.chat)
+        }
+
+
+        when (icon) {
+            NavButtonsIcon.Calendar -> CalendarPageView(it)
+            NavButtonsIcon.Bar -> BarPageView(it)
+            else -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row {
+                        Text(text = "Night Time main page")
+                    }
+                    Row {
+                        Text(text = text)
+                    }
+                }
+
+
+            }
+        }
+        //MainView(icon,it)
     }
 }
 
@@ -61,7 +91,7 @@ fun MainScreen() {
 fun ScreenScaffolded(
     icon: NavButtonsIcon,
     setIcon: (NavButtonsIcon) -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable (City) -> Unit
 ) {
     val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
     val (cityId, setCityId) = remember {
@@ -120,50 +150,7 @@ fun ScreenScaffolded(
             Column(
                 modifier = fillMaxModifier
             ) {
-                content()
-            }
-
-        }
-
-
-    }
-}
-
-@Composable
-fun MainView(selectedIcon: NavButtonsIcon) {
-    // A surface container using the 'background' color from the theme
-    Surface(
-        color = MaterialTheme.colors.background,
-        elevation = 1.dp
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight()
-        ) {
-            val text: String = when (selectedIcon) {
-                NavButtonsIcon.Bar -> stringResource(id = R.string.Bar_st)
-                NavButtonsIcon.Calendar -> stringResource(id = R.string.Calendario)
-                NavButtonsIcon.Friends -> stringResource(id = R.string.amigos)
-                NavButtonsIcon.Chat -> stringResource(id = R.string.chat)
-            }
-            if (text == "Calendario")
-                CalendarPageView()
-            else if (text == "Bar")
-                BarPageView()
-            else {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Row {
-                        Text(text = "Night Time main page")
-                    }
-                    Row {
-                        Text(text = text)
-                    }
-                }
-
-
+                content(cityId)
             }
 
         }

@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime
+package com.esei.grvidal.nighttime.data
 
 data class City(val id:Int, val name:String)
 

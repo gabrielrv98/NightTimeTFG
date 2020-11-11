@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime
+package com.esei.grvidal.nighttime.pages
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -22,9 +22,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.ui.tooling.preview.Preview
+import com.esei.grvidal.nighttime.CustomDialog
+import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.ChipDayFactory
+import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.data.MyDate
 import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -36,7 +38,7 @@ import java.util.*
  * Show the Calendar page, with the calendar on the top and the information below it
  */
 @Composable
-fun CalendarPageView() {
+fun CalendarPageView(cityId : City) {
 
     val modifier = Modifier.fillMaxWidth().fillMaxHeight()
     //remember date, it's used to show the selected date and move the calendar to the specified month
@@ -666,7 +668,7 @@ fun CalendarWindowPreview() {
 fun CalendarPreview() {
     NightTimeTheme {
 
-        CalendarPageView()
+        CalendarPageView(City(0,"Ourense"))
     }
 }
 
