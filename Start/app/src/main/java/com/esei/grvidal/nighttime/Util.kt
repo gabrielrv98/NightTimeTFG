@@ -4,10 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
@@ -47,22 +45,26 @@ fun CustomDialog(
             shape = MaterialTheme.shapes.medium,
             elevation = 1.dp
         ) {
-            Column(
-                modifier = Modifier.padding(12.dp)
-            ) {
+            Column{
 
-                 Row{
+                //searchBar()
+
+                 Row(
+                     modifier = Modifier.padding(horizontal = 20.dp)
+                         .padding(top = 20.dp, bottom = 0.dp)
+                 ) {
                      content()
                  }
 
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.Bottom
                 ){
                     //Close button
                     Button(
                         modifier = Modifier
-                            .padding(top = 6.dp) ,
+                            .padding(bottom = 18.dp, end = 24.dp, top = 12.dp) ,
                         onClick = onClose
                     ) {
                         Text(text = stringResource(R.string.cerrar))
@@ -75,13 +77,23 @@ fun CustomDialog(
 
 }
 
+//TODO ADD SEARCH BAR
+/*
 @Composable
 fun searchBar(){
-    //var text = remember{ mutableStateOf("") }
-    //TextField(value = text.value , onValueChange ={text.value = it })
+    val text = remember { mutableStateOf(TextFieldValue()) }
+    OutlinedTextField(
+        value = text.value,
+        onValueChange = {
+            text.value = it
+        },
+        label = { Text("Label") }
+    )
 
 }
 
+
+ */
 
 
 
