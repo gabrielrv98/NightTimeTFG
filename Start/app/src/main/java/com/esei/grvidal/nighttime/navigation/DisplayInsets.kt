@@ -1,5 +1,5 @@
 package com.esei.grvidal.nighttime.navigation
-
+/*
 /**
  * Help measure the insets of the screen to populate with the new composable that will be called as the other screen
  */
@@ -369,3 +369,5 @@ private data class InsetsSizeModifier(
         it.coerceIn(constraints.minHeight, constraints.maxHeight)
     }
 }
+
+ */

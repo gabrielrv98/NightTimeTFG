@@ -1,6 +1,5 @@
 package com.esei.grvidal.nighttime
 
-import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -9,18 +8,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.KEY_ROUTE
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.*
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.data.CityDao
 import java.util.*
@@ -28,8 +30,10 @@ import java.util.*
 
 @Composable
 fun ScreenScaffolded(
-    icon: NavButtonsIcon,
-    setIcon: (NavButtonsIcon) -> Unit,
+   // icon: NavButtonsIcon,
+   // setIcon: (NavButtonsIcon) -> Unit,
+    navController : NavHostController,
+    items : List<BottomNavigationScreens>,
     content: @Composable (City) -> Unit
 ) {
     val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
@@ -66,7 +70,8 @@ fun ScreenScaffolded(
             )
         },
         bottomBar = {
-            bottomBar(icon, setIcon)
+            //bottomBar(icon, setIcon)
+            bottomBarNavigation(navController,items)
         }
     ) {
 
@@ -97,6 +102,9 @@ fun ScreenScaffolded(
 
     }
 }
+
+
+
 
 
 @Composable

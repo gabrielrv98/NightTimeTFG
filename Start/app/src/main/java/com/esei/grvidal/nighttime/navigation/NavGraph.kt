@@ -1,4 +1,5 @@
 package com.esei.grvidal.nighttime.navigation
+/*
 
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
@@ -26,4 +27,4 @@ class Actions(navigator: Navigator<Destination>) {
     }
 }
 
-
+*/

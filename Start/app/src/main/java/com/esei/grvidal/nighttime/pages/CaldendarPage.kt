@@ -1,11 +1,13 @@
 package com.esei.grvidal.nighttime.pages
 
+import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -251,7 +253,7 @@ fun CalendarWindow(
             //Header with the name of the days
             Row {
                 Surface(
-                    color = ContentColorAmbient.current.copy(alpha = 0.15f),
+                    color = AmbientContentColor.current.copy(alpha = 0.15f),
                     modifier = Modifier.padding(top = 0.dp, bottom = 6.dp, start = 6.dp, end = 6.dp)
                 ) {
                     val myModifier = Modifier.padding(horizontal = 15.dp)
@@ -297,7 +299,7 @@ fun CalendarWindow(
 
             }
 
-            Divider(thickness = 1.dp, color = ContentColorAmbient.current.copy(alpha = 0.15f))
+            Divider(thickness = 1.dp, color = AmbientContentColor.current.copy(alpha = 0.15f))
 
 
             /*
@@ -351,7 +353,7 @@ fun CenteredText(
     text: String,
     modifier: Modifier = Modifier.fillMaxWidth(),
     textAlign: TextAlign = TextAlign.Center,
-    textStyle: TextStyle = currentTextStyle()
+    textStyle: TextStyle = TextStyle.Default//todo no se si esta bien
 ) {
     Text(
         text = text,
@@ -668,7 +670,7 @@ fun CalendarWindowPreview() {
 fun CalendarPreview() {
     NightTimeTheme {
 
-        CalendarPageView(City(0,"Ourense"))
+        //CalendarPageView(City(0,"Ourense"))
     }
 }
 

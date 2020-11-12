@@ -32,4 +32,10 @@
     <string name="octubre">Octubre</string>
     <string name="noviembre">Noviembre</string>
     <string name="diciembre">Diciembre</string>
+
+
+    <string name="calendar_route">Calendario</string>
+    <string name="bar_route">Bares</string>
+    <string name="friends_route">Amigos</string>
+    <string name="profile_route">Perfil</string>
 </resources>
