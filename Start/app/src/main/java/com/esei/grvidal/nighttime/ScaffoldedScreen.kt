@@ -12,26 +12,26 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.KEY_ROUTE
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.*
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.data.CityDao
 import java.util.*
 
-
+/**
+ * Screen with the Scaffolded format, with the topBar with the button to change the city
+ * and the bottomBar with the navigation buttons
+ *
+ * @param navController Controller of the navigation
+ * @param items list of the selectable navigation buttons
+ * @param content content to be shown on the center of the screen
+ */
 @Composable
 fun ScreenScaffolded(
-   // icon: NavButtonsIcon,
-   // setIcon: (NavButtonsIcon) -> Unit,
     navController : NavHostController,
     items : List<BottomNavigationScreens>,
     content: @Composable (City) -> Unit
@@ -39,7 +39,7 @@ fun ScreenScaffolded(
     val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
     val (cityId, setCityId) = remember {
         mutableStateOf(CityDao().getAllCities()[0])
-    }//todo cambiar
+    }//todo cambiar, inicia siempre en ourense, deberia ser con sharedPreferences o algo asi
 
     Scaffold(
         topBar = {
@@ -49,7 +49,7 @@ fun ScreenScaffolded(
                 },
                 actions = {
                     Surface(
-                        modifier = Modifier//.padding(end = (50).dp),
+                        modifier = Modifier
                             .clip(RoundedCornerShape(25))
                             .clickable(onClick = { setCityDialog(true) }),
                         color = MaterialTheme.colors.primary
@@ -69,10 +69,7 @@ fun ScreenScaffolded(
                 }
             )
         },
-        bottomBar = {
-            //bottomBar(icon, setIcon)
-            bottomBarNavigation(navController,items)
-        }
+        bottomBar = { bottomBarNavigation(navController,items) }
     ) {
 
         if (cityDialog) {
@@ -104,9 +101,12 @@ fun ScreenScaffolded(
 }
 
 
-
-
-
+/**
+ * Dialog with the cities that can be selected
+ *
+ * @param items list of the cities
+ * @param editCity setter of the selected city
+ */
 @Composable
 fun CityDialog(
     items: List<City>,
