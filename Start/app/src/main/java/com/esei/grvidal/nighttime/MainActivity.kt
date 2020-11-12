@@ -4,6 +4,7 @@ package com.esei.grvidal.nighttime
 
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Icon
@@ -33,25 +34,28 @@ import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.pages.BarPageView
 import com.esei.grvidal.nighttime.pages.CalendarPageView
 import java.util.*
+import kotlin.coroutines.coroutineContext
 
 
 class MainActivity : AppCompatActivity() {
 
-    private val user by viewModels<User> { }
+    //private val user by viewModels<User> { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             NightTimeTheme {
-                MainScreen()
+                MainScreen(backDispatcher = onBackPressedDispatcher)
             }
         }
     }
 }
 
 
+
+
 @Composable
-fun MainScreen() {
+fun MainScreen(backDispatcher: OnBackPressedDispatcher) {
 
     //saving the sate of the NavButton selected selected
     val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar) }
@@ -90,27 +94,6 @@ fun MainScreen() {
 }
 
 
-@Composable
-fun CityDialog(
-    items: List<City>,
-    editCity: (City) -> Unit
-) {
-    LazyColumnFor(items = items) {
-        Row(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 6.dp)
-        ) {
-            Surface(
-                modifier = Modifier
-                    .clickable(onClick = { editCity(it) } ),
-                color = MaterialTheme.colors.background
-            ) {
-                Text(
-                    text = it.name
-                )
-            }
-        }
-    }
-}
 
 
 
@@ -125,7 +108,7 @@ fun CityDialog(
 @Composable
 fun PreviewScreen() {
     NightTimeTheme {
-        MainScreen()
+        //MainScreen(backDispatcher = onBackPressedDispatcher)
 
     }
 }

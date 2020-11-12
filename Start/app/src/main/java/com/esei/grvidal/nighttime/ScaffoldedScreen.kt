@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -94,5 +95,28 @@ fun ScreenScaffolded(
         }
 
 
+    }
+}
+
+
+@Composable
+fun CityDialog(
+    items: List<City>,
+    editCity: (City) -> Unit
+) {
+    LazyColumnFor(items = items) {
+        Row(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 6.dp)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .clickable(onClick = { editCity(it) } ),
+                color = MaterialTheme.colors.background
+            ) {
+                Text(
+                    text = it.name
+                )
+            }
+        }
     }
 }
