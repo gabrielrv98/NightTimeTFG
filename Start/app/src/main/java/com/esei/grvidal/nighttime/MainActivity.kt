@@ -4,6 +4,7 @@ package com.esei.grvidal.nighttime
 
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
@@ -28,12 +29,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.data.CityDao
+import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.pages.BarPageView
 import com.esei.grvidal.nighttime.pages.CalendarPageView
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
+
+    private val user by viewModels<User> { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -43,8 +48,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
-//todo add Change of City
 
 
 @Composable
@@ -83,81 +86,9 @@ fun MainScreen() {
 
             }
         }
-        //MainView(icon,it)
     }
 }
 
-@Composable
-fun ScreenScaffolded(
-    icon: NavButtonsIcon,
-    setIcon: (NavButtonsIcon) -> Unit,
-    content: @Composable (City) -> Unit
-) {
-    val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
-    val (cityId, setCityId) = remember {
-        mutableStateOf(CityDao().getAllCities()[0])
-    }//todo cambiar
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "NightTime")
-                },
-                actions = {
-                    Surface(
-                        modifier = Modifier//.padding(end = (50).dp),
-                            .clip(RoundedCornerShape(25))
-                            .clickable(onClick = { setCityDialog(true) }),
-                        color = MaterialTheme.colors.primary
-                        ) {
-                        Row{
-                            Text(
-                                modifier = Modifier.padding(6.dp),
-                                text = cityId.name.toUpperCase(Locale.getDefault()),
-                                maxLines = 1
-                            )
-                            Icon(
-                                modifier = Modifier.padding(6.dp),
-                                asset = Icons.Default.Search
-                            )
-                        }
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            bottomBar(icon, setIcon)
-        }
-    ) {
-
-        if (cityDialog) {
-            CustomDialog(onClose = { setCityDialog(false) }) {
-                CityDialog(
-                    items = CityDao().getAllCities(),
-                    editCity = {city ->
-                        setCityId(city)
-                        setCityDialog(false)}
-                )
-            }
-        }
-
-        val fillMaxModifier = Modifier.fillMaxSize()
-        Surface(
-            modifier = fillMaxModifier.padding(bottom = 57.dp),//TODO Bottom padding of the size of the bottomBar
-            color = MaterialTheme.colors.background
-        ) {
-            Column(
-                modifier = fillMaxModifier
-            ) {
-                content(cityId)
-            }
-
-        }
-
-
-    }
-}
 
 @Composable
 fun CityDialog(

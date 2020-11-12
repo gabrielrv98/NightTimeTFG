@@ -1,6 +1,8 @@
 package com.esei.grvidal.nighttime.data
 
-class User(val name: String ){
+import androidx.lifecycle.ViewModel
+
+class User(val name: String ) : ViewModel() {
 
     val nextDate :MyDate
     get() {
