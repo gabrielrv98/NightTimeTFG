@@ -4,14 +4,9 @@ import androidx.lifecycle.ViewModel
 
 class User(val name: String) : ViewModel() {
 
-    val nextDate: MyDate
-        get() {
-            TODO()
-        }
-    val city: City
-        get() {
-            TODO()
-        }
+    var nextDate: MyDate? = null
+
+    var city: City = City(0,"Ourense")
 
 
 }
