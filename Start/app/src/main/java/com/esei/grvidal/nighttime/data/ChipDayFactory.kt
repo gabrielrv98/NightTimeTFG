@@ -12,6 +12,7 @@ fun LocalDate.toMyDate(): MyDate{
 }
 
 data class MyDate(val day: Int, val month: Int, val year: Int){
+
     val previousMonth: MyDate
     get() {
         return LocalDate.of(year, month, day).minusMonths(1).toMyDate()

@@ -48,6 +48,7 @@ fun CalendarPage(cityId: City) {
  */
     //remember date, it's used to show the selected date and move the calendar to the specified month
     val (date, setDate) = remember {
+        MyDate().
         mutableStateOf(
             MyDate(
                 LocalDate.now().dayOfMonth,
@@ -80,12 +81,12 @@ fun CalendarPage(cityId: City) {
         }
 
     val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
+    //val buttonString =
     CalendarPageView(
         calendar = {
             CalendarWindow(
                 //Name of the month shown on the top
                 monthName = monthName(date.month),
-                date = date,
                 colorBackground = colorBackground,
                 previousMonthClick = { mySetDay(date.previousMonth) },
                 nextMonthClick = { mySetDay(date.nextMonth) }
@@ -130,7 +131,18 @@ fun CalendarPage(cityId: City) {
                 genteTotal = datePeople.total.toString(),
                 amigos = datePeople.amigos.toString(),
                 showFriends = { setShowDialog(true) },
-                OnChooseDateClick = { user2.component1().nextDate = date },
+                OnChooseDateClick = {
+                    //if (!date.isBefore())
+                    if (date != user2.component1().nextDate)
+                        user2.component1().nextDate = date
+                    else user2.component1().nextDate = null
+                },
+                selectDateEnable = !date.isBefore(),
+                buttonText = if (!date.isBefore()) {
+                    if (date == user2.component1().nextDate)
+                        stringResource(id = R.string.deseleccionar)
+                    else stringResource(id = R.string.elegirDia)
+                } else stringResource(id = R.string.diaPasado),
                 events = {
                     BarDao.getEvents(cityId.id, date).forEach {
                         it?.let {
@@ -143,6 +155,10 @@ fun CalendarPage(cityId: City) {
         }
     )
 
+}
+
+fun MyDate.isBefore(): Boolean {
+    return LocalDate.of(this.year, this.month, this.day).isBefore(LocalDate.now())
 }
 
 @Composable
@@ -247,7 +263,6 @@ fun FriendlyUsersDialog(
  */
 @Composable
 fun CalendarWindow(
-    date: MyDate,
     monthName: String,
     previousMonthClick: () -> Unit,
     nextMonthClick: () -> Unit,
@@ -481,7 +496,9 @@ fun DayInformation(
     amigos: String = "?",
     showFriends: () -> Unit,
     OnChooseDateClick: () -> Unit,
-    events: @Composable () -> Unit
+    events: @Composable () -> Unit,
+    selectDateEnable: Boolean,
+    buttonText: String
 ) {
 
 
@@ -523,9 +540,12 @@ fun DayInformation(
 
                     Button(
                         modifier = Modifier.padding(top = 12.dp),
-                        onClick = OnChooseDateClick
+                        onClick = OnChooseDateClick,
+                        enabled = selectDateEnable
                     ) {
-                        Text(text = stringResource(id = R.string.elegirDia))
+                        Text(
+                            text = buttonText
+                        )
                     }
                 }
             }
@@ -626,7 +646,7 @@ fun Event(
         ) {
             Text(
                 text = barName,
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -684,7 +704,6 @@ fun CalendarWindowPreview() {
             CalendarWindow(
                 //Name of the month shown on the top
                 monthName = monthName(date.month),
-                date = date,
                 colorBackground = colorBackground,
                 previousMonthClick = { },
                 nextMonthClick = { }
@@ -730,6 +749,7 @@ fun CalendarWindowPreview() {
                 amigos = datePeople.amigos.toString(),
                 showFriends = { },
                 OnChooseDateClick = { },
+                buttonText = stringResource(id = R.string.elegirDia),
                 events = {
                     BarDao.getEvents(0, date).forEach {
                         it?.let {
@@ -737,7 +757,8 @@ fun CalendarWindowPreview() {
                         }
                     }
 
-                }
+                },
+                selectDateEnable = true,
             )
         }
     )
