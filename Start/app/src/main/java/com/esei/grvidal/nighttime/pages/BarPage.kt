@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -20,10 +21,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
+import androidx.navigation.compose.navigate
+import androidx.navigation.compose.rememberNavController
+import com.esei.grvidal.nighttime.BottomNavigationScreens
+import com.esei.grvidal.nighttime.NavigationScreens
 
 
 class BarDAO{
@@ -42,33 +50,54 @@ data class Bar(val id: Int, val name: String, val description: String)
  * Show the Bar page, //todo acabar
  */
 @Composable
-fun BarPageView(cityId : City) {
+fun BarPageView(cityId : City, navController: NavController) {
 
     val barList = BarDAO().bares
     //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
     Column{
-
-        Header(cityId.name)
-        LazyColumnFor(
-            items = barList,
-            modifier = Modifier.fillMaxSize()
-                .padding(top = 24.dp)
-                .padding(horizontal = 24.dp)
-        ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                .padding( vertical = 3.dp)
-            ){
-                BarChip(it)
+        tryy(cityId = cityId, barList,navController)
+        /*
+        val navController2 = rememberNavController()
+        NavHost(navController2, startDestination = BottomNavigationScreens.Bar.route){
+            composable(BottomNavigationScreens.Bar.route) {
+                tryy(cityId = cityId, barList,navController2)
             }
 
-           Divider(startIndent = 30.dp, modifier = Modifier.padding(vertical = 3.dp))
-
+            composable(NavigationScreens.BarDetails.route){
+                BarDetails()
+            }
         }
+
+
+         */
+
     }
 }
 
+@Composable
+fun tryy(cityId : City, barList : List<Bar>, navController: NavController){
+    Header(cityId.name)
+    LazyColumnFor(
+        items = barList,
+        modifier = Modifier.fillMaxSize()
+            .padding(top = 24.dp)
+            .padding(horizontal = 24.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding( vertical = 3.dp)
+        ){
+            BarChip(it)
+            Button(onClick = {navController.navigate(NavigationScreens.BarDetails.route)}) {
+                Text("ver")
+            }
+        }
+
+        Divider(startIndent = 30.dp, modifier = Modifier.padding(vertical = 3.dp))
+
+    }
+}
 @Composable
 fun Header(cityName :String){
     val text = stringResource(id = R.string.baresZona) + " $cityName"
@@ -161,6 +190,6 @@ fun daySchedule(
 @Composable
 fun BarPreview(){
     NightTimeTheme {
-        BarPageView(City(0,"Ourense"))
+        //BarPageView(City(0,"Ourense"))
     }
 }

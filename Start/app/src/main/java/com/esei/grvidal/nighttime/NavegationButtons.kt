@@ -1,47 +1,78 @@
 package com.esei.grvidal.nighttime
 
-import androidx.compose.foundation.Icon
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.*
+import androidx.compose.material.ButtonConstants.defaultButtonColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddComment
-import androidx.compose.material.icons.filled.LocalBar
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.KEY_ROUTE
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigate
 import androidx.ui.tooling.preview.Preview
 
 /**
- * Enum of vectorAsset of the navButtons
+ * Bottom navigation icons with their route to the view
+ *
+ * @param route String that represents the route of the View
+ * @param resourceId String from resources used to backtrack the users view
+ * @param icon VectorAsset of the representeted icon
  */
-enum class NavButtonsIcon(val vectorAsset: VectorAsset) {
-    Bar(Icons.Default.LocalBar),
-    Calendar(Icons.Default.Today),
-    Friends(Icons.Default.People),
-    Chat(Icons.Default.AddComment)
+sealed class BottomNavigationScreens(
+    val route: String,
+    @StringRes val resourceId: Int,
+    val icon: VectorAsset
+) {
+    object Calendar :
+        BottomNavigationScreens("Calendar", R.string.calendar_route, Icons.Default.Today)
+
+    object Bar :
+        BottomNavigationScreens("Bar", R.string.bar_route, Icons.Default.LocalBar)
+
+    object Friends :
+        BottomNavigationScreens("Friends", R.string.friends_route, Icons.Default.People)
+
+    object Profile :
+        BottomNavigationScreens("Profile", R.string.profile_route, Icons.Default.Person)
 }
 
 /**
- * NavigationBottomBar with a divider and the selectable icons
+ * Screens of the App
  *
- * @param icon selected enum of the NavButtonIcon
- * @param setIcon setter of the selected NavButtonIcon
+ * @param route String that represents the route of the View
+ * @param resourceId String from resources used to backtrack the users view
+ */
+sealed class NavigationScreens(
+    val route: String,
+    @StringRes val resourceId: Int
+) {
+    object BarDetails :
+        NavigationScreens("BarDetails", R.string.barDetails_route )
+
+}
+
+
+/**
+ *  Formated view of the BottomBar
+ *
+ *  @param navController controller of the navigation
+ *  @param items list of the bottom buttons
+ *
  */
 @Composable
-fun bottomBar(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
-
+fun bottomBarNavigation(
+    navController: NavHostController,
+    items: List<BottomNavigationScreens>
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colors.background
@@ -59,52 +90,41 @@ fun bottomBar(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                NavButtons(icon, setIcon)
+
+                val currentRoute = currentRoute(navController)
+                items.forEach {screen ->
+                    SelectableIconButton(
+                        icon = screen.icon,
+                        isSelected = currentRoute == screen.route,
+                        onIconSelected = {
+                            // This is the equivalent to popUpTo the start destination
+                            navController.popBackStack(navController.graph.startDestination, false)
+
+                            // This if check gives us a "singleTop" behavior where we do not create a
+                            // second instance of the composable if we are already on that destination
+                            if (currentRoute != screen.route) {
+                                navController.navigate(screen.route)
+                            }
+                        }
+                    )
+                }
             }
         }
     }
 
-
 }
-
 
 /**
- * Function that creates the navButtons in the right order
+ * Method to recover the navigation's backtrack and return it as a string
  *
- * @param icon Selected navButtonsIcon
- * @param setIcon setter of the selected navButtonsIcon
+ * @param navController controller to be analyzed
  */
 @Composable
-fun NavButtons(icon: NavButtonsIcon, setIcon: (NavButtonsIcon) -> Unit) {
-
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Bar)
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Calendar)
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Friends)
-    NavButtons(icon, setIcon, asset = NavButtonsIcon.Chat)
+private fun currentRoute(navController: NavHostController): String? {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    return navBackStackEntry?.arguments?.getString(KEY_ROUTE)
 }
 
-//TODO Nav to the next View
-/**
- * Formatted Icons
- *
- * @param icon Selected navButtonsIcon
- * @param onIconChange setter of the selected navButtonsIcon
- * @param asset enum of the NavButtonsIcon
- */
-@Composable
-fun NavButtons(
-    icon: NavButtonsIcon,
-    onIconChange: (NavButtonsIcon) -> Unit,
-    asset: NavButtonsIcon
-) {
-    SelectableIconButton(
-        icon = asset.vectorAsset,
-        onIconSelected = {
-            onIconChange(asset)
-        },
-        isSelected = icon == asset
-    )
-}
 
 /**
  * Formatted Icons with the right color and the underline if they are selected
@@ -130,9 +150,11 @@ fun SelectableIconButton(
     Button(
         onClick = { onIconSelected() },
         shape = CircleShape,
-        backgroundColor = Color.Transparent,
+        colors = defaultButtonColors(
+            MaterialTheme.colors.background
+        ),
         border = null,
-        elevation = 0.dp,
+        elevation = null,
         modifier = modifier
     ) {
         Column {
@@ -156,8 +178,6 @@ fun SelectableIconButton(
 @Preview("bottomBar")
 @Composable
 fun bottomBarPreview() {
-    val (icon, setIcon) = remember { mutableStateOf(NavButtonsIcon.Bar) }
-
-    bottomBar(icon, setIcon)
+    SelectableIconButton(Icons.Default.LocalBar,{},true)
 
 }
