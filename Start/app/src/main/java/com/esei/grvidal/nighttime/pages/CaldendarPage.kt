@@ -2,6 +2,7 @@ package com.esei.grvidal.nighttime.pages
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,119 +32,20 @@ import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
 import java.util.*
-/*
-/**
- * Show the Calendar page, with the calendar on the top and the information below it
- */
-@Composable
-fun CalendarPageView(cityId: City) {
-
-
-    //remember date, it's used to show the selected date and move the calendar to the specified month
-    val (date, setDate) = remember {
-        mutableStateOf(
-            MyDate(
-                LocalDate.now().dayOfMonth,
-                LocalDate.now().month.value,
-                LocalDate.now().year
-            )
-        )
-    }
-    //Remembered state of the days that must be shown on the calendar
-    val (calendar, setCalendar) = remember { mutableStateOf(ChipDayFactory.datesCreator()) }
-    //Remembered state of a boolean that express if the dialog with the friendly users must be shown
-    val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
-
-    // Edited set that if the month changes, the calendar will update
-    val mySetDay = { myDate: MyDate ->
-        if (date.month != myDate.month)
-            setCalendar(ChipDayFactory.datesCreator(myDate))
-        setDate(myDate)
-    }
-    val userList = //todo this is hardcoded
-        listOf(
-            User(name = "Nuria"),
-            User(name = "Miguel"),
-            User(name = "Maria"),
-            User(name = "Marcos"),
-            User(name = "Laura"),
-            User(name = "Sara"),
-            User(name = "Julio"),
-            User(name = "Juan"),
-            User(name = "Pedro"),
-            User(name = "Salva"),
-            User(name = "Gabriel"),
-            User(name = "Jose"),
-            User(name = "Emma"),
-            User(name = "Santi"),
-            User(name = "Filo"),
-            User(name = "Nuria"),
-            User(name = "Miguel"),
-            User(name = "Maria"),
-            User(name = "Marcos"),
-            User(name = "Laura"),
-            User(name = "Sara"),
-            User(name = "Julio"),
-            User(name = "Juan"),
-            User(name = "Pedro"),
-            User(name = "Salva"),
-            User(name = "Gabriel"),
-            User(name = "Jose"),
-            User(name = "Emma"),
-            User(name = "Santi"),
-            User(name = "Filo")
-        )
-
-    //If Friendly users Card is touched a dialog with their names should be shown
-    if (showDialog)
-
-        CustomDialog(onClose = { setShowDialog(false) }) {
-            FriendlyUsersDialog(itemsUser = userList, modifier = Modifier.preferredHeight(600.dp))
-        }
-//--------------------------------------
-
-    val modifier = Modifier.fillMaxWidth().fillMaxHeight()
-
-    Column {
-        //Top of the screen
-        Row(
-            modifier = modifier.weight(1.5f),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            //val color = MaterialTheme.colors.background.copy(alpha = 0.2f)
-            //ContentColorAmbient.current.copy(alpha = 0.02f)
-            CalendarWindow(
-                date = date,
-                setDate = mySetDay,
-                calendar = calendar,
-                colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f)       //doesn't really work
-            )
-        }
-
-        //Divider(color = MaterialTheme.colors.primary, thickness = 1.dp)
-
-        //Bottom of the screen
-        Row(
-            modifier = modifier.weight(1f)
-        ) {
-
-            DayInformation(
-                genteTotal = "27", amigos = "12",
-                showFriends = { setShowDialog(true) }, date = date
-            )
-        }
-    }
-}
-
- */
 
 /**
  * Show the Calendar page, with the calendar on the top and the information below it
  */
 @Composable
 fun CalendarPage(cityId: City) {
+    val user = User("Me")//todo cambiar a user como era en la app donde aprendi
+    val user2 = remember { mutableStateOf(User("me")) }
+/*
+    if (user2.component1().nextDate == null){
+        Text("null")
+    }else Text(user2.component1().nextDate.toString())
 
-
+ */
     //remember date, it's used to show the selected date and move the calendar to the specified month
     val (date, setDate) = remember {
         mutableStateOf(
@@ -170,20 +73,52 @@ fun CalendarPage(cityId: City) {
     if (showDialog)
 
         CustomDialog(onClose = { setShowDialog(false) }) {
-            FriendlyUsersDialog(itemsUser = CalendarDao.getFriends(cityId.id,date), modifier = Modifier.preferredHeight(600.dp))
+            FriendlyUsersDialog(
+                itemsUser = CalendarDao.getFriends(cityId.id, date),
+                modifier = Modifier.preferredHeight(600.dp)
+            )
         }
 
+    val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
     CalendarPageView(
         calendar = {
             CalendarWindow(
+                //Name of the month shown on the top
+                monthName = monthName(date.month),
                 date = date,
-                setDate = mySetDay,
-                calendar = calendar,
-                colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working
-            )
+                colorBackground = colorBackground,
+                previousMonthClick = { mySetDay(date.previousMonth) },
+                nextMonthClick = { mySetDay(date.nextMonth) }
+            ) {
+                for (week in calendar) {
+                    //Week Row
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        for (days in week) {
+
+                            //Each day in the week
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                alignment = Alignment.Center
+                            ) {
+
+                                DayChip(
+                                    isNextUserDate = user2.component1().nextDate == days,
+                                    date = date,
+                                    setDate = mySetDay,
+                                    chipDate = days,
+                                    colorBackground = colorBackground
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         },
         bottomInfo = {
-            val datePeople = CalendarDao.getPeopleOnDate(cityId.id,date)
+            val datePeople = CalendarDao.getPeopleOnDate(cityId.id, date)
             DayInformation(
                 formattedDay = StringBuilder(8)
                     .append(date.day)
@@ -195,11 +130,11 @@ fun CalendarPage(cityId: City) {
                 genteTotal = datePeople.total.toString(),
                 amigos = datePeople.amigos.toString(),
                 showFriends = { setShowDialog(true) },
-                OnChooseDateClick = {},
+                OnChooseDateClick = { user2.component1().nextDate = date },
                 events = {
-                    BarDao.getEvents(cityId.id,date).forEach {
-                        it?.let{
-                            Event(it.barName,it.eventDescription)
+                    BarDao.getEvents(cityId.id, date).forEach {
+                        it?.let {
+                            Event(it.barName, it.eventDescription)
                         }
                     }
 
@@ -211,9 +146,29 @@ fun CalendarPage(cityId: City) {
 }
 
 @Composable
+fun monthName(month: Int): String {
+    return when (month) {
+        1 -> stringResource(id = R.string.enero)
+        2 -> stringResource(id = R.string.febrero)
+        3 -> stringResource(id = R.string.marzo)
+        4 -> stringResource(id = R.string.abril)
+        5 -> stringResource(id = R.string.mayo)
+        6 -> stringResource(id = R.string.junio)
+        7 -> stringResource(id = R.string.julio)
+        8 -> stringResource(id = R.string.agosto)
+        9 -> stringResource(id = R.string.septiembre)
+        10 -> stringResource(id = R.string.octubre)
+        11 -> stringResource(id = R.string.noviembre)
+        12 -> stringResource(id = R.string.diciembre)
+
+        else -> stringResource(id = R.string.error)
+    }
+}
+
+@Composable
 fun CalendarPageView(
     calendar: @Composable () -> Unit = {},
-    bottomInfo : @Composable () -> Unit = {},
+    bottomInfo: @Composable () -> Unit = {},
     modifierParam: Modifier = Modifier
 ) {
     val modifier = modifierParam.fillMaxWidth().fillMaxHeight()
@@ -292,28 +247,13 @@ fun FriendlyUsersDialog(
  */
 @Composable
 fun CalendarWindow(
-    date: MyDate, setDate: (MyDate) -> Unit,
+    date: MyDate,
+    monthName: String,
+    previousMonthClick: () -> Unit,
+    nextMonthClick: () -> Unit,
     colorBackground: Color = MaterialTheme.colors.background,
-    calendar: List<List<MyDate>>
+    contentDay: @Composable () -> Unit = {}
 ) {
-    //Name of the month shown on the top
-    val monthName = when (date.month) {
-        1 -> stringResource(id = R.string.enero)
-        2 -> stringResource(id = R.string.febrero)
-        3 -> stringResource(id = R.string.marzo)
-        4 -> stringResource(id = R.string.abril)
-        5 -> stringResource(id = R.string.mayo)
-        6 -> stringResource(id = R.string.junio)
-        7 -> stringResource(id = R.string.julio)
-        8 -> stringResource(id = R.string.agosto)
-        9 -> stringResource(id = R.string.septiembre)
-        10 -> stringResource(id = R.string.octubre)
-        11 -> stringResource(id = R.string.noviembre)
-        12 -> stringResource(id = R.string.diciembre)
-
-        else -> stringResource(id = R.string.error)
-    }
-
 
     Surface(
         modifier = Modifier.fillMaxHeight().fillMaxHeight()
@@ -333,7 +273,8 @@ fun CalendarWindow(
                 //Button previous month
                 IconButton(
                     modifier = Modifier.weight(1f),
-                    onClick = { setDate(date.previousMonth) }) {
+                    onClick = previousMonthClick
+                ) {
                     Icon(asset = Icons.Default.ArrowBack)
                 }
                 //Name of the month
@@ -346,7 +287,8 @@ fun CalendarWindow(
                 //Button next month
                 IconButton(
                     modifier = Modifier.weight(1f),
-                    onClick = { setDate(date.nextMonth) }) {
+                    onClick = nextMonthClick
+                ) {
                     Icon(asset = Icons.Default.ArrowForward)
                 }
             }
@@ -418,24 +360,7 @@ LazyColumnFor(
                     .padding(bottom = 0.dp)
             ) {
 
-                for (week in calendar) {
-                    //Week Row
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        for (days in week) {
-
-                            //Each day in the week
-                            Box(
-                                modifier = Modifier.weight(1f),
-                                alignment = Alignment.Center
-                            ) {
-                                DayChip(date, setDate, days, colorBackground = colorBackground)
-                            }
-                        }
-                    }
-                }
+                contentDay()
 
             }
         }
@@ -485,6 +410,7 @@ fun CenteredText(
  */
 @Composable
 private fun DayChip(
+    isNextUserDate: Boolean = false,
     date: MyDate,
     setDate: (MyDate) -> Unit,
     chipDate: MyDate,
@@ -509,11 +435,17 @@ private fun DayChip(
             ),
         shape = RoundedCornerShape(50),
         border = if (date == chipDate) BorderStroke(2.dp, MaterialTheme.colors.primary)
+        else if (isNextUserDate) BorderStroke(
+            2.dp,
+            MaterialTheme.colors.secondary
+        ) //opcion A // todo primrar
         else null,
         elevation = 0.dp,
-        color = colorBackground
+        //color = colorBackground//opcion A
+        color = if (isNextUserDate) MaterialTheme.colors.secondary else colorBackground//opcion B
 
     ) {
+
         Text(
             text = text,
             modifier = textModifier,
@@ -521,11 +453,15 @@ private fun DayChip(
             style = style,
             fontSize = fontSize,
             color = when {
-                chipDate.month != date.month -> colorNotMonth
                 chipDate == date -> colorSelected
+                //isNextUserDate -> MaterialTheme.colors.secondary //opcion A
+                isNextUserDate -> MaterialTheme.colors.onSecondary //opcion B
+                chipDate.month != date.month -> colorNotMonth
                 else -> colorNotSelected
             }
         )
+
+
     }
 
 }
@@ -540,12 +476,12 @@ private fun DayChip(
  */
 @Composable
 fun DayInformation(
-    formattedDay : String,
+    formattedDay: String,
     genteTotal: String = "?",
     amigos: String = "?",
     showFriends: () -> Unit,
-    OnChooseDateClick : () -> Unit,
-    events : @Composable () -> Unit
+    OnChooseDateClick: () -> Unit,
+    events: @Composable () -> Unit
 ) {
 
 
@@ -740,16 +676,71 @@ private fun InfoChip(
 @Preview("CalendarWindow")
 @Composable
 fun CalendarWindowPreview() {
-    val (date, setDate) = remember {
-        mutableStateOf(
-            MyDate(
-                LocalDate.now().dayOfMonth,
-                LocalDate.now().month.value,
-                LocalDate.now().year
+
+    val date = MyDate(20, 11, 2020)
+    val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
+    CalendarPageView(
+        calendar = {
+            CalendarWindow(
+                //Name of the month shown on the top
+                monthName = monthName(date.month),
+                date = date,
+                colorBackground = colorBackground,
+                previousMonthClick = { },
+                nextMonthClick = { }
+            ) {
+                for (week in ChipDayFactory.datesCreator()) {
+                    //Week Row
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        for (days in week) {
+
+                            //Each day in the week
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                alignment = Alignment.Center
+                            ) {
+
+                                DayChip(
+                                    isNextUserDate = MyDate(24, 11, 2020) == days,
+                                    date = date,
+                                    setDate = {},
+                                    chipDate = days,
+                                    colorBackground = colorBackground
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        bottomInfo = {
+            val datePeople = CalendarDao.getPeopleOnDate(0, date)
+            DayInformation(
+                formattedDay = StringBuilder(8)
+                    .append(date.day)
+                    .append("/")
+                    .append(date.month)
+                    .append("/")
+                    .append(date.year)
+                    .toString(),
+                genteTotal = datePeople.total.toString(),
+                amigos = datePeople.amigos.toString(),
+                showFriends = { },
+                OnChooseDateClick = { },
+                events = {
+                    BarDao.getEvents(0, date).forEach {
+                        it?.let {
+                            Event(it.barName, it.eventDescription)
+                        }
+                    }
+
+                }
             )
-        )
-    }
-    CalendarWindow(date, setDate, calendar = ChipDayFactory.datesCreator())
+        }
+    )
 }
 
 @Preview("Page")
