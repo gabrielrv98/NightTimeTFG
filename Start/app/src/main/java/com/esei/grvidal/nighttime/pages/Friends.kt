@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.esei.grvidal.nighttime.pages.Bar
 import com.esei.grvidal.nighttime.pages.BarChip
 import com.esei.grvidal.nighttime.pages.BarDAO
@@ -18,7 +19,7 @@ import com.esei.grvidal.nighttime.pages.BarDAO
 
 
 @Composable
-fun FriendsPageView() {
+fun FriendsPageView(navController: NavController) {
 
     val barList = BarDAO().bares
 
@@ -29,7 +30,7 @@ fun FriendsPageView() {
     ) {
 
         Row(){
-            BarChip(it)
+            //BarChip(it)
         }
 
         Divider(thickness = 1.dp,color = Color.Red)

@@ -25,7 +25,7 @@ import androidx.ui.tooling.preview.Preview
  *
  * @param route String that represents the route of the View
  * @param resourceId String from resources used to backtrack the users view
- * @param icon VectorAsset of the representeted icon
+ * @param icon VectorAsset of the represented icon
  */
 sealed class BottomNavigationScreens(
     val route: String,
@@ -56,13 +56,13 @@ sealed class NavigationScreens(
     @StringRes val resourceId: Int
 ) {
     object BarDetails :
-        NavigationScreens("BarDetails", R.string.barDetails_route )
+        NavigationScreens("BarDetails", R.string.barDetails_route)
 
 }
 
 
 /**
- *  Formated view of the BottomBar
+ *  Formatted view of the BottomBar
  *
  *  @param navController controller of the navigation
  *  @param items list of the bottom buttons
@@ -92,7 +92,7 @@ fun bottomBarNavigation(
             ) {
 
                 val currentRoute = currentRoute(navController)
-                items.forEach {screen ->
+                items.forEach { screen ->
                     SelectableIconButton(
                         icon = screen.icon,
                         isSelected = currentRoute == screen.route,
@@ -178,6 +178,6 @@ fun SelectableIconButton(
 @Preview("bottomBar")
 @Composable
 fun bottomBarPreview() {
-    SelectableIconButton(Icons.Default.LocalBar,{},true)
+    SelectableIconButton(Icons.Default.LocalBar, {}, true)
 
 }

@@ -6,9 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.ui.tooling.preview.Preview
 
 import androidx.compose.ui.platform.setContent
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController 
+import androidx.navigation.compose.navArgument
+import androidx.navigation.compose.rememberNavController
 import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -59,16 +61,19 @@ Navigation with their own files ( no dependencies )
             composable(BottomNavigationScreens.Bar.route) {
                 BarPageView(cityId = city, navController)
             }
-            composable(NavigationScreens.BarDetails.route){
-                BarDetails()
+            composable(
+                NavigationScreens.BarDetails.route + "/{barId}",
+                arguments = listOf(navArgument("barId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                BarDetails(backStackEntry.arguments?.getInt("barId"))
             }
 
             composable(BottomNavigationScreens.Friends.route) {
-                FriendsPageView()
+                FriendsPageView(navController)
             }
 
             composable(BottomNavigationScreens.Profile.route) {
-                ProfilePageView()
+                ProfilePageView(navController)
             }
 
         }
