@@ -11,7 +11,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +47,6 @@ fun CalendarPage(cityId: City) {
  */
     //remember date, it's used to show the selected date and move the calendar to the specified month
     val (date, setDate) = remember {
-        MyDate().
         mutableStateOf(
             MyDate(
                 LocalDate.now().dayOfMonth,
@@ -256,10 +254,11 @@ fun FriendlyUsersDialog(
 /**
  * Top View of the calendar
  *
- * @param date is the selected date
- * @param setDate is the setter of the selected date
+ * @param monthName name of the month to show as title
+ * @param previousMonthClick action to do when left arrow is clicked
+ * @param nextMonthClick action to do when right arrow is clicked
+ * @param contentDay Composable with the days to show on the calendar
  * @param colorBackground is the color of the background
- * @param calendar List of list (weeks)  of days
  */
 @Composable
 fun CalendarWindow(
@@ -406,7 +405,7 @@ fun CenteredText(
 
 /**
  * This fun will show a Day with the right padding and a centered text with the number of the day,
- * if its selected a circle arround it will appear, and if the day isn't in the selected month the
+ * if its selected a circle around it will appear, and if the day isn't in the selected month the
  * number will show gray
  *
  * @param date is the selected date
@@ -449,12 +448,11 @@ private fun DayChip(
                 indication = null
             ),
         shape = RoundedCornerShape(50),
-        border = if (date == chipDate) BorderStroke(2.dp, MaterialTheme.colors.primary)
-        else if (isNextUserDate) BorderStroke(
-            2.dp,
-            MaterialTheme.colors.secondary
-        ) //opcion A // todo primrar
-        else null,
+        border = when {
+            date == chipDate -> BorderStroke(2.dp, MaterialTheme.colors.primary)
+            isNextUserDate -> BorderStroke( 2.dp, MaterialTheme.colors.secondary) //opcion A // todo mirar
+            else -> null
+        },
         elevation = 0.dp,
         //color = colorBackground//opcion A
         color = if (isNextUserDate) MaterialTheme.colors.secondary else colorBackground//opcion B
@@ -484,10 +482,14 @@ private fun DayChip(
 /**
  * Is the information about the people who is coming out tonight, it will update if the selected date changes
  *
+ * @param formattedDay selected date in the format dd/MM/yyyyy
  * @param genteTotal total amount of people who is coming out
  * @param amigos total amount of people who is coming out AND you have them added as a friend
  * @param showFriends lambda expression that will update a boolean variable that will show a dialog with your friends
- * @param date Selected date
+ * @param selectDateEnable enable the button, should be false if the day is before actual date
+ * @param buttonText text to show on the button
+ * @param OnChooseDateClick action to do when the button is pressed
+ * @param events Events to show on that day
  */
 @Composable
 fun DayInformation(
@@ -495,10 +497,10 @@ fun DayInformation(
     genteTotal: String = "?",
     amigos: String = "?",
     showFriends: () -> Unit,
+    selectDateEnable: Boolean,
+    buttonText: String,
     OnChooseDateClick: () -> Unit,
     events: @Composable () -> Unit,
-    selectDateEnable: Boolean,
-    buttonText: String
 ) {
 
 
@@ -777,7 +779,7 @@ fun CalendarPreview() {
 @Preview("Dialog")
 @Composable
 fun DialogPreview() {
-    val userList = //todo this is hardcoded
+    val userList =
         listOf(
             User(name = "Nuria"),
             User(name = "Miguel"),
