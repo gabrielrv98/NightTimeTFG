@@ -52,39 +52,67 @@ class BarDAO {
 
 data class Bar(val id: Int, val name: String, val description: String) {
     lateinit var schedule: List<Boolean>
+    var time: String = "21:00 - 06:00"
 }
 
 /**
- * Show the Bar page, //todo acabar
+ * Statefull composable with the logic of the Bar View
  */
 @Composable
-fun BarPageView(cityId: City, navController: NavController) {
-
+fun BarPage(cityId: City, navController: NavController) {
     val barList = BarDAO().bares
     //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
 
+    TitleColumn(title = stringResource(id = R.string.baresZona) + " " + cityId.name) {
+        BarList(barList) {
+            val bar = it as Bar
+            BarChip(
+                name = bar.name,
+                description = bar.description,
+                time = bar.time,
+                schedule = bar.schedule,
+                onBarClick = {
+                    navController.navigate(
+                        NavigationScreens.BarDetails.route + "/" + bar.id
+                    )
+                })
+        }
+    }
+}
+
+@Composable
+fun TitleColumn(
+    title: String,
+    content: @Composable () -> Unit = {}
+) {
     Column {
         Header(
-            text = stringResource(id = R.string.baresZona) + cityId.name
+            text = title
         )
-        LazyColumnFor(
-            items = barList,
-            modifier = Modifier.fillMaxSize()
-                .padding(top = 24.dp)
-                .padding(horizontal = 24.dp)
+        content()
+
+    }
+}
+
+@Composable
+fun BarList(
+    barList: List<Any>,
+    content: @Composable (Any) -> Unit = {}
+) {
+    LazyColumnFor(
+        items = barList,
+        modifier = Modifier.fillMaxSize()
+            .padding(top = 24.dp)
+            .padding(horizontal = 24.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(vertical = 3.dp)
         ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 3.dp)
-            ) {
-                BarChip(it, navController)
-            }
-
-            Divider(startIndent = 30.dp, modifier = Modifier.padding(vertical = 3.dp))
-
+            content(it)
         }
-
+        Divider(startIndent = 30.dp, modifier = Modifier.padding(vertical = 3.dp))
 
     }
 }
@@ -117,14 +145,16 @@ fun Header(
 
 
 @Composable
-fun BarChip(bar: Bar, navController: NavController) {
+fun BarChip(
+    onBarClick: () -> Unit = {},
+    name: String,
+    description: String = "",
+    time: String,
+    schedule: List<Boolean>
+) {
     Column(
         modifier = Modifier.padding(8.dp)
-            .clickable(onClick = {
-                navController.navigate(
-                    NavigationScreens.BarDetails.route + "/" + bar.id
-                )
-            })
+            .clickable(onClick = onBarClick)
     ) {
         Row(
             modifier = Modifier.padding(bottom = 6.dp),
@@ -136,24 +166,24 @@ fun BarChip(bar: Bar, navController: NavController) {
                     .padding(start = 6.dp),
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold,
-                text = bar.name
+                text = name
             )
             Text(
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.body2,
-                text = makeLongShort(bar.description, 25)
+                text = makeLongShort(description, 25)
             )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(Modifier.width(5.dp))
-            WeekSchedule(schedule = bar.schedule)
+            WeekSchedule(schedule = schedule)
 
             Text(
                 modifier = Modifier.padding(start = 18.dp),
                 color = Color.Gray,
-                text = "21:00 - 5:00",
+                text = time,
                 style = MaterialTheme.typography.body2
             )
         }
@@ -247,10 +277,24 @@ fun daySchedule2(
     }
 }
 
-@Preview("BarPage")
+@Preview("BarDetail")
 @Composable
 fun BarPreview() {
     NightTimeTheme {
-        //BarPageView(City(0,"Ourense"))
+        val barList = BarDAO().bares
+        //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
+
+        TitleColumn(title = stringResource(id = R.string.baresZona) + " Ourense" ) {
+            BarList(barList) {
+                val bar = it as Bar
+                BarChip(
+                    name = bar.name,
+                    description = bar.description,
+                    time = bar.time,
+                    schedule = bar.schedule,
+                    onBarClick = {}
+                )
+            }
+        }
     }
 }

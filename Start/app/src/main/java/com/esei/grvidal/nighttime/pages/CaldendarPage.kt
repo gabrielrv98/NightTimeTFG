@@ -26,22 +26,18 @@ import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.ChipDayFactory
-import com.esei.grvidal.nighttime.data.City
-import com.esei.grvidal.nighttime.data.MyDate
-import com.esei.grvidal.nighttime.data.User
+import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
 import java.util.*
-
-
+/*
 /**
  * Show the Calendar page, with the calendar on the top and the information below it
  */
 @Composable
-fun CalendarPageView(cityId : City) {
+fun CalendarPageView(cityId: City) {
 
-    val modifier = Modifier.fillMaxWidth().fillMaxHeight()
+
     //remember date, it's used to show the selected date and move the calendar to the specified month
     val (date, setDate) = remember {
         mutableStateOf(
@@ -100,9 +96,12 @@ fun CalendarPageView(cityId : City) {
     //If Friendly users Card is touched a dialog with their names should be shown
     if (showDialog)
 
-        CustomDialog(onClose = {setShowDialog(false)} ) {
+        CustomDialog(onClose = { setShowDialog(false) }) {
             FriendlyUsersDialog(itemsUser = userList, modifier = Modifier.preferredHeight(600.dp))
         }
+//--------------------------------------
+
+    val modifier = Modifier.fillMaxWidth().fillMaxHeight()
 
     Column {
         //Top of the screen
@@ -132,9 +131,110 @@ fun CalendarPageView(cityId : City) {
                 showFriends = { setShowDialog(true) }, date = date
             )
         }
+    }
+}
 
+ */
+
+/**
+ * Show the Calendar page, with the calendar on the top and the information below it
+ */
+@Composable
+fun CalendarPage(cityId: City) {
+
+
+    //remember date, it's used to show the selected date and move the calendar to the specified month
+    val (date, setDate) = remember {
+        mutableStateOf(
+            MyDate(
+                LocalDate.now().dayOfMonth,
+                LocalDate.now().month.value,
+                LocalDate.now().year
+            )
+        )
+    }
+    //Remembered state of the days that must be shown on the calendar
+    val (calendar, setCalendar) = remember { mutableStateOf(ChipDayFactory.datesCreator()) }
+    //Remembered state of a boolean that express if the dialog with the friendly users must be shown
+    val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+
+    // Edited set that if the month changes, the calendar will update
+    val mySetDay = { myDate: MyDate ->
+        if (date.month != myDate.month)
+            setCalendar(ChipDayFactory.datesCreator(myDate))
+        setDate(myDate)
     }
 
+
+    //If Friendly users Card is touched a dialog with their names should be shown
+    if (showDialog)
+
+        CustomDialog(onClose = { setShowDialog(false) }) {
+            FriendlyUsersDialog(itemsUser = CalendarDao.getFriends(cityId.id,date), modifier = Modifier.preferredHeight(600.dp))
+        }
+
+    CalendarPageView(
+        calendar = {
+            CalendarWindow(
+                date = date,
+                setDate = mySetDay,
+                calendar = calendar,
+                colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working
+            )
+        },
+        bottomInfo = {
+            val datePeople = CalendarDao.getPeopleOnDate(cityId.id,date)
+            DayInformation(
+                formattedDay = StringBuilder(8)
+                    .append(date.day)
+                    .append("/")
+                    .append(date.month)
+                    .append("/")
+                    .append(date.year)
+                    .toString(),
+                genteTotal = datePeople.total.toString(),
+                amigos = datePeople.amigos.toString(),
+                showFriends = { setShowDialog(true) },
+                OnChooseDateClick = {},
+                events = {
+                    BarDao.getEvents(cityId.id,date).forEach {
+                        it?.let{
+                            Event(it.barName,it.eventDescription)
+                        }
+                    }
+
+                }
+            )
+        }
+    )
+
+}
+
+@Composable
+fun CalendarPageView(
+    calendar: @Composable () -> Unit = {},
+    bottomInfo : @Composable () -> Unit = {},
+    modifierParam: Modifier = Modifier
+) {
+    val modifier = modifierParam.fillMaxWidth().fillMaxHeight()
+    Column {
+        //Top of the screen
+        Row(
+            modifier = modifier.weight(1.5f),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            //val color = MaterialTheme.colors.background.copy(alpha = 0.2f)
+            //ContentColorAmbient.current.copy(alpha = 0.02f)
+            calendar()
+        }
+        //Bottom of the screen
+        Row(
+            modifier = modifier.weight(1f)
+        ) {
+
+            bottomInfo()
+        }
+    }
 }
 
 /**
@@ -145,8 +245,8 @@ fun CalendarPageView(cityId : City) {
  */
 @Composable
 fun FriendlyUsersDialog(
-    itemsUser :List<User>,
-    modifier :Modifier = Modifier
+    itemsUser: List<User?>,
+    modifier: Modifier = Modifier
 ) {
     //List with the users
     LazyColumnFor(
@@ -172,7 +272,9 @@ fun FriendlyUsersDialog(
                     .padding(start = 8.dp)
                     .align(Alignment.CenterVertically)
             ) {
-                Text(text = (it.name + " - Apellidos"))
+                if (it != null) {
+                    Text(text = (it.name + " - Apellidos"))
+                }
             }
         }
 
@@ -438,143 +540,129 @@ private fun DayChip(
  */
 @Composable
 fun DayInformation(
+    formattedDay : String,
     genteTotal: String = "?",
     amigos: String = "?",
     showFriends: () -> Unit,
-    date: MyDate
+    OnChooseDateClick : () -> Unit,
+    events : @Composable () -> Unit
 ) {
-    //Formatted date string
-    val formattedDay = StringBuilder(8)
-        .append(date.day)
-        .append("/")
-        .append(date.month)
-        .append("/")
-        .append(date.year)
-        .toString()
 
 
-        Row(
-            modifier = Modifier.padding(horizontal = 6.dp)
+    Row(
+        modifier = Modifier.padding(horizontal = 6.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight().weight(0.7f)
+                //.padding(vertical = 10.dp)
+                .padding(top = 6.dp)
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                modifier = Modifier.fillMaxHeight().weight(0.7f)
-                    //.padding(vertical = 10.dp)
-                    .padding(top = 6.dp)
-                    .padding(horizontal = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            //Formatted text of the selected date
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp, top = 12.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                //Formatted text of the selected date
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp, top = 12.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CenteredText(
-                            modifier = Modifier
-                                .background(Color.White)
-                                .border(
-                                    border = BorderStroke(
-                                        width = 1.dp,
-                                        color = MaterialTheme.colors.primary
-                                    ),
-                                    shape = MaterialTheme.shapes.medium
-                                )
-                                .fillMaxWidth(),
-                            text = formattedDay,
-                            textStyle = MaterialTheme.typography.h6
-                        )
-
-                        Button(
-                            modifier = Modifier.padding(top = 12.dp),
-                            onClick = {}
-                        ) {
-                            Text(text  = stringResource(id = R.string.elegirDia))
-                        }
-                    }
-                }
-
-                //Info about the people on the selected date
                 Column(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .fillMaxHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    CenteredText(
+                        modifier = Modifier
+                            .background(Color.White)
+                            .border(
+                                border = BorderStroke(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colors.primary
+                                ),
+                                shape = MaterialTheme.shapes.medium
+                            )
+                            .fillMaxWidth(),
+                        text = formattedDay,
+                        textStyle = MaterialTheme.typography.h6
+                    )
 
-                    //Button to show a dialog with all the friends
                     Button(
-                        onClick = showFriends,
-                        shape = RoundedCornerShape(15.dp)
+                        modifier = Modifier.padding(top = 12.dp),
+                        onClick = OnChooseDateClick
                     ) {
-                        InfoChip(
-                            numberOfPeople = amigos,
-                            peopleDescription = stringResource(id = R.string.amigos)
-                        )
-                    }
-
-                    //A chip with the number of the total confirmed people
-                    Surface(
-                        modifier = Modifier.padding(6.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
-                        shape = RoundedCornerShape(15.dp),
-                        elevation = 1.dp,
-                        color = MaterialTheme.colors.surface
-                    ) {
-
-                        InfoChip(
-                            modifier = Modifier.padding(12.dp),
-                            numberOfPeople = genteTotal,
-                            peopleDescription = stringResource(id = R.string.genteTotal)
-                        )
+                        Text(text = stringResource(id = R.string.elegirDia))
                     }
                 }
             }
 
-//Cool vertical divider
-
-            Box(
+            //Info about the people on the selected date
+            Column(
                 modifier = Modifier
-                    //.padding(horizontal = 3.dp)
-                    .padding(top = 8.dp)
-                    .fillMaxHeight()
-                    .preferredWidth(1.dp)
-                    .background(MaterialTheme.colors.primary)
-            )
-
-//Column with the Events on the selected date
-
-            Surface(
-                modifier = Modifier.weight(1.35f).fillMaxHeight(),
-                color = MaterialTheme.colors.background
+                    .padding(vertical = 8.dp)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                ScrollableColumn(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(
-                            top = 10.dp,
-                            bottom = 0.dp
-                        )
-                        .padding(horizontal = 10.dp)
+
+                //Button to show a dialog with all the friends
+                Button(
+                    onClick = showFriends,
+                    shape = RoundedCornerShape(15.dp)
                 ) {
-                    Event("Lazaros", "Copas a 3 euros")
-                    Event("Lokal", "Musica de los 90")
-                    Event("Patio andaluz", "Fiesta de la espuma")
-                    Event("Luxus", "Hoy cerrado por fiesta infantil, nos vemos gente")
-                    Event("Urbe", "Cocaina gratis")
-                    Event(
-                        "Dulce flor", "Ahora un 30% en nuevos productos y perfumes con un coste " +
-                                "inferior a 2$"
+                    InfoChip(
+                        numberOfPeople = amigos,
+                        peopleDescription = stringResource(id = R.string.amigos)
                     )
                 }
 
+                //A chip with the number of the total confirmed people
+                Surface(
+                    modifier = Modifier.padding(6.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+                    shape = RoundedCornerShape(15.dp),
+                    elevation = 1.dp,
+                    color = MaterialTheme.colors.surface
+                ) {
+
+                    InfoChip(
+                        modifier = Modifier.padding(12.dp),
+                        numberOfPeople = genteTotal,
+                        peopleDescription = stringResource(id = R.string.genteTotal)
+                    )
+                }
             }
         }
+
+//Cool vertical divider
+
+        Box(
+            modifier = Modifier
+                //.padding(horizontal = 3.dp)
+                .padding(top = 8.dp)
+                .fillMaxHeight()
+                .preferredWidth(1.dp)
+                .background(MaterialTheme.colors.primary)
+        )
+
+//Column with the Events on the selected date
+
+        Surface(
+            modifier = Modifier.weight(1.35f).fillMaxHeight(),
+            color = MaterialTheme.colors.background
+        ) {
+            ScrollableColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(
+                        top = 10.dp,
+                        bottom = 0.dp
+                    )
+                    .padding(horizontal = 10.dp)
+            ) {
+                events()
+            }
+
+        }
+    }
 
 }
 
@@ -628,8 +716,8 @@ private fun InfoChip(
     modifier: Modifier = Modifier,
     numberOfPeople: String = "",
     peopleDescription: String = "",
-    styleTitle : TextStyle = MaterialTheme.typography.body1,
-    styleDescription : TextStyle =  MaterialTheme.typography.body2
+    styleTitle: TextStyle = MaterialTheme.typography.body1,
+    styleDescription: TextStyle = MaterialTheme.typography.body2
 ) {
     Column(
         modifier = modifier,
@@ -644,7 +732,7 @@ private fun InfoChip(
 
         Text(
             text = peopleDescription,
-            style =styleDescription
+            style = styleDescription
         )
     }
 }
@@ -712,7 +800,7 @@ fun DialogPreview() {
         )
     NightTimeTheme {
 
-        CustomDialog(onClose = {} ) {
+        CustomDialog(onClose = {}) {
             FriendlyUsersDialog(itemsUser = userList, modifier = Modifier)
         }
     }

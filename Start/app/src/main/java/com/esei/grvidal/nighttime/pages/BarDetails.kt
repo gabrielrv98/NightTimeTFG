@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -16,8 +15,7 @@ fun BarDetails(barId: Int?) {
     if (barId == null) {
         errorComposable()
     } else {
-        ShowDetails(BarDAO().bares.get(barId))
-        Text("Estos son los detalles de $barId")
+        ShowDetails(BarDAO().bares[barId])
     }
 }
 

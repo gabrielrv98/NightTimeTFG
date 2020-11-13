@@ -70,13 +70,40 @@ sealed class NavigationScreens(
  */
 @Composable
 fun bottomBarNavigation(
+    content : @Composable () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colors.background
+    ) {
+        Column {
+            Divider(
+                modifier = Modifier.padding(3.dp),
+                color = MaterialTheme.colors.onSurface,
+                thickness = 1.dp
+            )
+
+            //Navigation Buttons
+            Row(
+                modifier = Modifier.padding(top = 6.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                content()
+            }
+        }
+    }
+
+}
+@Composable
+fun bottomBarNavigationStateFull2(
     navController: NavHostController,
     items: List<BottomNavigationScreens>
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colors.background
-    ) {
+    ){
         Column {
             Divider(
                 modifier = Modifier.padding(3.dp),
@@ -111,8 +138,8 @@ fun bottomBarNavigation(
             }
         }
     }
-
 }
+
 
 /**
  * Method to recover the navigation's backtrack and return it as a string
@@ -120,7 +147,7 @@ fun bottomBarNavigation(
  * @param navController controller to be analyzed
  */
 @Composable
-private fun currentRoute(navController: NavHostController): String? {
+fun currentRoute(navController: NavHostController): String? {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     return navBackStackEntry?.arguments?.getString(KEY_ROUTE)
 }

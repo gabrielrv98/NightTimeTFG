@@ -29,8 +29,7 @@ import java.util.*
  */
 @Composable
 fun ScreenScaffolded(
-    navController : NavHostController,
-    items : List<BottomNavigationScreens>,
+    bottomBar :  @Composable () -> Unit = { bottomBarNavigation{} },
     content: @Composable (City) -> Unit
 ) {
     val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
@@ -66,7 +65,7 @@ fun ScreenScaffolded(
                 }
             )
         },
-        bottomBar = { bottomBarNavigation(navController,items) }
+        bottomBar = bottomBar
     ) {
 
         if (cityDialog) {

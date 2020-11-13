@@ -7,10 +7,7 @@ import androidx.ui.tooling.preview.Preview
 
 import androidx.compose.ui.platform.setContent
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -50,16 +47,38 @@ Navigation with their own files ( no dependencies )
         BottomNavigationScreens.Profile
     )
 
-    ScreenScaffolded(navController, bottomNavigationItems) {
+    ScreenScaffolded(
+        bottomBar = {
+            bottomBarNavigation {
+                val currentRoute = currentRoute(navController)
+                bottomNavigationItems.forEach { screen ->
+                    SelectableIconButton(
+                        icon = screen.icon,
+                        isSelected = currentRoute == screen.route,
+                        onIconSelected = {
+                            // This is the equivalent to popUpTo the start destination
+                            navController.popBackStack(navController.graph.startDestination, false)
+
+                            // This if check gives us a "singleTop" behavior where we do not create a
+                            // second instance of the composable if we are already on that destination
+                            if (currentRoute != screen.route) {
+                                navController.navigate(screen.route)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) {
         val city = it
 
 
         NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
             composable(BottomNavigationScreens.Calendar.route) {
-                CalendarPageView(cityId = city)
+                CalendarPage(cityId = city)
             }
             composable(BottomNavigationScreens.Bar.route) {
-                BarPageView(cityId = city, navController)
+                BarPage(cityId = city, navController)
             }
             composable(
                 NavigationScreens.BarDetails.route + "/{barId}",
@@ -78,6 +97,7 @@ Navigation with their own files ( no dependencies )
 
         }
     }
+
 
 }
 
