@@ -2,10 +2,7 @@ package com.esei.grvidal.nighttime
 
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -118,10 +115,12 @@ fun CityDialog(
         ) {
             Surface(
                 modifier = Modifier
+                    .preferredWidth(120.dp)
                     .clickable(onClick = { editCity(it) } ),
                 color = MaterialTheme.colors.background
             ) {
                 Text(
+                    modifier = Modifier,
                     text = it.name
                 )
             }

@@ -8,12 +8,10 @@ import androidx.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.esei.grvidal.nighttime.pages.BarDetails
+import androidx.navigation.compose.rememberNavController 
+import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
-import com.esei.grvidal.nighttime.pages.BarPageView
-import com.esei.grvidal.nighttime.pages.CalendarPageView
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,14 +29,14 @@ class MainActivity : AppCompatActivity() {
 }
 
 /**
- * Static function that will manage the navigation system
+ * MainScreen with the function that will allow it to manage the navigation system
  */
 @Composable
-fun MainScreen() {
+private fun MainScreen() {
 /* Actual Navigation system
         https://proandroiddev.com/implement-bottom-bar-navigation-in-jetpack-compose-b530b1cd9ee2
 
-Navigation with own files ( no dependencies )
+Navigation with their own files ( no dependencies )
     https://medium.com/google-developer-experts/how-to-handle-navigation-in-jetpack-compose-a9ac47f7f975
  */
     val navController = rememberNavController()
@@ -53,20 +51,29 @@ Navigation with own files ( no dependencies )
     ScreenScaffolded(navController, bottomNavigationItems) {
         val city = it
 
+
         NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
             composable(BottomNavigationScreens.Calendar.route) {
-                CalendarPageView(cityId = city )
+                CalendarPageView(cityId = city)
             }
             composable(BottomNavigationScreens.Bar.route) {
                 BarPageView(cityId = city, navController)
             }
-
             composable(NavigationScreens.BarDetails.route){
                 BarDetails()
             }
-             
+
+            composable(BottomNavigationScreens.Friends.route) {
+                FriendsPageView()
+            }
+
+            composable(BottomNavigationScreens.Profile.route) {
+                ProfilePageView()
+            }
+
         }
     }
+
 }
 
 

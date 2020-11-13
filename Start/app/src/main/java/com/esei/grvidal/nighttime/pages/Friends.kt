@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.data
+package com.esei.grvidal.nighttime.pages
 
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,6 @@ import com.esei.grvidal.nighttime.pages.Bar
 import com.esei.grvidal.nighttime.pages.BarChip
 import com.esei.grvidal.nighttime.pages.BarDAO
 
-//import androidx.compose.material.Text
 
 
 @Composable
