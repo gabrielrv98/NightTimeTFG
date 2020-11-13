@@ -11,6 +11,7 @@
     <string name="baresZona">Estos son los bares por</string>
 
 
+    <string name="horario">Horiario</string>
     <string name="lunes">L</string>
     <string name="martes">M</string>
     <string name="miercoles">Mi</string>
@@ -39,4 +40,10 @@
     <string name="friends_route">Amigos</string>
     <string name="profile_route">Perfil</string>
     <string name="barDetails_route">BarDetails</string>
+    <string name="descripcion">En pocas palabras ....</string>
+    <string name="localizacion">Localizacion</string>
+    <string name="mutlimedia">Multimedia</string>
+    <string name="openMaps">Abrir Maps</string>
+    <string name="diaPasado">Eligue otro</string>
+    <string name="deseleccionar">Deseleccionar dia</string>
 </resources>

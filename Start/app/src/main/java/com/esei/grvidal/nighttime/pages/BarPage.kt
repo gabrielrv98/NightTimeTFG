@@ -7,6 +7,9 @@ import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,8 +55,19 @@ class BarDAO {
 }
 
 data class Bar(val id: Int, val name: String, val description: String) {
+    var multimedia: List<Any>? = listOf(
+        Icons.Outlined.PartyMode,
+        Icons.Outlined.LocalDining,
+        Icons.Outlined.Photo,
+        Icons.Outlined.Photo,
+        Icons.Outlined.Dehaze,
+        Icons.Outlined.Photo,
+        Icons.Outlined.PartyMode,
+        Icons.Outlined.CompareArrows
+    )
     lateinit var schedule: List<Boolean>
     var time: String = "21:00 - 06:00"
+    var address : String = "Rúa Pizarro, 8, 32005 Ourense"
 }
 
 /**
@@ -102,7 +117,7 @@ fun BarList(
     LazyColumnFor(
         items = barList,
         modifier = Modifier.fillMaxSize()
-            .padding(top = 24.dp)
+            .padding(top = 12.dp)
             .padding(horizontal = 24.dp)
     ) {
 
@@ -120,12 +135,13 @@ fun BarList(
 @Composable
 fun Header(
     text: String,
-    border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colors.primary)
+    border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colors.primary),
+    style : TextStyle = MaterialTheme.typography.h6
 ) {
 
     Row(
         modifier = Modifier
-            .padding(top = 24.dp)
+            .padding(top = 24.dp, bottom = 12.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
@@ -138,7 +154,7 @@ fun Header(
                 )
                 .padding(vertical = 6.dp, horizontal = 10.dp),
             text = text,
-            style = MaterialTheme.typography.h6
+            style = style
         )
     }
 }
