@@ -32,7 +32,7 @@ fun ChatConversationPage(navController: NavHostController, chatId :Int?){
         val fullChat = user.getChatConversation(chatId)
         val onBackClick = {
             navController.popBackStack(navController.graph.startDestination, false)
-            navController.navigate(BottomNavigationScreens.Profile.route)
+            navController.navigate(BottomNavigationScreens.Friends.route)
         }
         ShowConversation(fullChat.otherUserName,onBackClick ){
 
