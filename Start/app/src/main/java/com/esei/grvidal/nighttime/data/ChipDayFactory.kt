@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.data
 
+import java.lang.StringBuilder
 import java.time.LocalDate
 
 
@@ -22,6 +23,15 @@ data class MyDate(val day: Int, val month: Int, val year: Int){
         get() {
             return LocalDate.of(year,month,day).plusMonths(1).toMyDate()
         }
+
+    fun toStringFormatted() : String{
+        return StringBuilder().append(day)
+            .append("-")
+            .append(month)
+            .append("-")
+            .append(year)
+            .toString()
+    }
 }
 
 class ChipDayFactory {

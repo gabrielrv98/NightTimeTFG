@@ -46,4 +46,6 @@
     <string name="openMaps">Abrir Maps</string>
     <string name="diaPasado">Eligue otro</string>
     <string name="deseleccionar">Mejor no</string>
+    <string name="errorBarId">Ha habido un error con el bar seleccionado</string>
+    <string name="ChatConversation">ChatConversation</string>
 </resources>

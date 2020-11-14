@@ -28,6 +28,7 @@ import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.NavigationScreens
+import com.esei.grvidal.nighttime.data.MyDate
 
 
 class BarDAO {
@@ -40,6 +41,13 @@ class BarDAO {
         },
         Bar(2, "Urbe", "Las mejores aspiradoras").apply {
             schedule = listOf(false, true, false, false, false, true, false)
+            events = listOf(
+                EventData(MyDate(26, 11, 2020), "Copas gratis"),
+                EventData(MyDate(6, 12, 2020), "Todo a mitad de precio"),
+                EventData(MyDate(12, 12, 2020), "Un euro rebajado"),
+                EventData(MyDate(14, 12, 2020), "Mas caro de lo normal"),
+                EventData(MyDate(21, 12, 2020), "Dj personalizado")
+            )
         },
         Bar(
             3,
@@ -50,11 +58,21 @@ class BarDAO {
         },
         Bar(4, "Mil petalos", "Chicas siempre listas para darlo todo").apply {
             schedule = listOf(true, true, true, true, true, true, true)
+            events = listOf(
+                EventData(MyDate(26, 11, 2020), "Copas gratis"),
+                EventData(MyDate(6, 12, 2020), "Todo a mitad de precio"),
+                EventData(MyDate(12, 12, 2020), "Un euro rebajado"),
+                EventData(MyDate(14, 12, 2020), "Mas caro de lo normal"),
+                EventData(MyDate(21, 12, 2020), "Dj personalizado")
+            )
         }
     )
 }
 
+data class EventData(val fecha: MyDate, val description: String)
+
 data class Bar(val id: Int, val name: String, val description: String) {
+    var events: List<EventData>? = null
     var multimedia: List<Any>? = listOf(
         Icons.Outlined.PartyMode,
         Icons.Outlined.LocalDining,
@@ -67,7 +85,7 @@ data class Bar(val id: Int, val name: String, val description: String) {
     )
     lateinit var schedule: List<Boolean>
     var time: String = "21:00 - 06:00"
-    var address : String = "Rúa Pizarro, 8, 32005 Ourense"
+    var address: String = "Rúa Pizarro, 8, 32005 Ourense"
 }
 
 /**
@@ -135,15 +153,15 @@ fun BarList(
 
 @Composable
 fun Header(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     text: String,
     border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colors.primary),
-    style : TextStyle = MaterialTheme.typography.h6
+    style: TextStyle = MaterialTheme.typography.h6
 ) {
 
     Row(
         modifier = modifier
-            .padding( bottom = 12.dp)
+            .padding(bottom = 12.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
@@ -302,7 +320,7 @@ fun BarPreview() {
         val barList = BarDAO().bares
         //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
 
-        TitleColumn(title = stringResource(id = R.string.baresZona) + " Ourense" ) {
+        TitleColumn(title = stringResource(id = R.string.baresZona) + " Ourense") {
             BarList(barList) {
                 val bar = it as Bar
                 BarChip(

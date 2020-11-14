@@ -56,6 +56,8 @@ sealed class NavigationScreens(
 ) {
     object BarDetails :
         NavigationScreens("BarDetails", R.string.barDetails_route)
+    object ChatConversation :
+        NavigationScreens("ChatConversation", R.string.ChatConversation)
 
 }
 

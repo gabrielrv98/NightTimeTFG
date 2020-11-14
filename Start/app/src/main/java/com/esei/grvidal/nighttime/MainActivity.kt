@@ -120,6 +120,18 @@ Navigation with their own files ( no dependencies )
                 }
             }
 
+            composable(NavigationScreens.ChatConversation.route + "/{ChatId}",
+                arguments = listOf(navArgument("chatId") { type = NavType.IntType })
+            ) {backStackEntry ->
+                ScreenScaffolded(
+                    topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) } )},
+                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
+                ) {
+                    BarDetails(backStackEntry.arguments?.getInt("chatId"),navController)
+                }
+
+            }
+
         }
 
 

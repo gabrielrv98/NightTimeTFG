@@ -2,14 +2,14 @@ package com.esei.grvidal.nighttime.pages
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.material.*
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -29,24 +29,24 @@ import com.esei.grvidal.nighttime.R
 
 
 @Composable
-fun BarDetails(barId: Int?,navController : NavHostController) {
+fun BarDetails(barId: Int?, navController: NavHostController) {
     if (barId == null) {
         errorComposable()
     } else {
-        ShowDetails(BarDAO().bares[barId],navController)
+        ShowDetails(BarDAO().bares[barId], navController)
     }
 }
 
 @Composable
 fun errorComposable() {
     Text(
-        text = "Ha habido un error con el bar seleccionado",
+        text = stringResource(id = R.string.errorBarId),
         color = MaterialTheme.colors.error
     )
 }
 
 @Composable
-fun ShowDetails(bar: Bar,navController : NavHostController) {
+fun ShowDetails(bar: Bar, navController: NavHostController) {
 
     val (showAlert, setShowAlert) = remember { mutableStateOf(false) }
     val (selectedImage, setSelectedImage) = remember { mutableStateOf<VectorAsset?>(null) }
@@ -54,9 +54,9 @@ fun ShowDetails(bar: Bar,navController : NavHostController) {
     Column {
         IconButton(
             onClick = {
-            navController.popBackStack(navController.graph.startDestination, false)
-            navController.navigate(BottomNavigationScreens.Bar.route)
-        }) {
+                navController.popBackStack(navController.graph.startDestination, false)
+                navController.navigate(BottomNavigationScreens.Bar.route)
+            }) {
             Icon(asset = Icons.Default.ArrowBack)
         }
         Header(
@@ -81,7 +81,7 @@ fun ShowDetails(bar: Bar,navController : NavHostController) {
                 )
             }
             //Schedule
-            DetailView(title = stringResource(R.string.horario), icon = Icons.Default.Alarm,
+            DetailView(title = stringResource(R.string.horario), icon = Icons.Outlined.Alarm,
                 titleToRight = {
                     Text(text = bar.time)
                 }
@@ -96,7 +96,7 @@ fun ShowDetails(bar: Bar,navController : NavHostController) {
                 context.startActivity(intent)
             }
             //Localization
-            DetailView(title = stringResource(R.string.localizacion), icon = Icons.Default.Place,
+            DetailView(title = stringResource(R.string.localizacion), icon = Icons.Outlined.Place,
                 titleToRight = {
                     //Button that trigers Google Maps
                     Button(onClick = moveToMaps) {
@@ -114,22 +114,56 @@ fun ShowDetails(bar: Bar,navController : NavHostController) {
             //Text Multimedia with the Icon
             DetailView(
                 title = stringResource(id = R.string.mutlimedia),
-                icon = Icons.Default.PhotoLibrary
+                icon = Icons.Outlined.PhotoLibrary
             )
 
-        }
-
-        BigPicture(showAlert, setShowAlert, selectedImage, setSelectedImage)
+        }//End Column with padding
 
         //If multimedia is not null, it will be shown
         bar.multimedia?.let {
+            LazyRowFor(
+                items = it,
+                modifier = Modifier.fillMaxWidth()
+                    .align(Alignment.Start)
+            ) {image ->
+                    Image(
+                        image as VectorAsset,
+                        modifier = Modifier.padding(2.dp).preferredSize(120.dp)
+                            .background(Color.Gray)
+                            .clickable(onClick = {
+                                setSelectedImage(image as VectorAsset)
+                                setShowAlert(true)
+                            })
+                    )
+            }
+            /*
             MultimediaView(
                 photos = it, onImageClick = {
                     setShowAlert(true)
                 },
                 setSelectedImage = setSelectedImage
             )
+
+             */
         }
+        BigPicture(showAlert, setShowAlert, selectedImage, setSelectedImage)
+
+        DetailView(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            title = "Proximos eventos",
+            icon = Icons.Outlined.LocalDrink){
+            bar.events?.let{
+
+                LazyColumnFor(items = it) {eventData ->
+                    Event(
+                        barName = eventData.fecha.toStringFormatted(),
+                        eventData.description
+                    )
+                }
+            }
+        }
+
+
 
 
     }
@@ -174,6 +208,7 @@ private fun BigPicture(
 
 @Composable
 fun DetailView(
+    modifier :Modifier = Modifier,
     title: String,
     icon: VectorAsset? = null,
     titleToRight: @Composable () -> Unit = {},
@@ -181,7 +216,7 @@ fun DetailView(
 ) {
     //Description Row
     Column(
-        modifier = Modifier
+        modifier = modifier
             .padding(vertical = 12.dp)
     ) {
         Row(
