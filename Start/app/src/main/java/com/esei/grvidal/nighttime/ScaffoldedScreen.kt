@@ -23,7 +23,7 @@ import com.esei.grvidal.nighttime.data.CityDao
 fun ScreenScaffolded(
     modifier : Modifier = Modifier.padding(bottom = 57.dp),//TODO Bottom padding of the size of the bottomBar
     bottomBar: @Composable () -> Unit = { },
-    topBar: @Composable () -> Unit = { TopBarConstructor(setCityDialog = { },nameCity = "") },
+    topBar: @Composable () -> Unit = { },
     content: @Composable () -> Unit,
 
     ) {

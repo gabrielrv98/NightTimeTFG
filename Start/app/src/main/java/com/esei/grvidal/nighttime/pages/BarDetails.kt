@@ -8,10 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
@@ -25,15 +22,18 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.navigate
+import com.esei.grvidal.nighttime.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
 
 
 @Composable
-fun BarDetails(barId: Int?) {
+fun BarDetails(barId: Int?,navController : NavHostController) {
     if (barId == null) {
         errorComposable()
     } else {
-        ShowDetails(BarDAO().bares[barId])
+        ShowDetails(BarDAO().bares[barId],navController)
     }
 }
 
@@ -46,13 +46,19 @@ fun errorComposable() {
 }
 
 @Composable
-fun ShowDetails(bar: Bar) {
+fun ShowDetails(bar: Bar,navController : NavHostController) {
 
     val (showAlert, setShowAlert) = remember { mutableStateOf(false) }
     val (selectedImage, setSelectedImage) = remember { mutableStateOf<VectorAsset?>(null) }
 
     Column {
-
+        IconButton(
+            onClick = {
+            navController.popBackStack(navController.graph.startDestination, false)
+            navController.navigate(BottomNavigationScreens.Bar.route)
+        }) {
+            Icon(asset = Icons.Default.ArrowBack)
+        }
         Header(
             text = bar.name,
             style = MaterialTheme.typography.h4

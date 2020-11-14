@@ -93,28 +93,9 @@ Navigation with their own files ( no dependencies )
             ) { backStackEntry ->
 
                 ScreenScaffolded(
-                    modifier = Modifier,
-                    topBar = {
-                        IconButton(onClick = {
-                            navController.popBackStack(navController.graph.startDestination, false)
-                            navController.navigate(BottomNavigationScreens.Bar.route)
-                        }) {
-                            Icon(asset = Icons.Default.ArrowBack)
-                        }
-                    }
-                    /*
-                    topBar = {
-                        TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) },
-                            navigationIcon = {
-                                IconButton(onClick = {navController.navigate(BottomNavigationScreens.Bar.route)}) {
-                                    Icon(asset = Icons.Default.ArrowBack)
-                                }
-                            })
-                    }
-
-                     */
+                    modifier = Modifier
                 ) {
-                    BarDetails(backStackEntry.arguments?.getInt("barId"))
+                    BarDetails(backStackEntry.arguments?.getInt("barId"),navController)
                 }
 
             }

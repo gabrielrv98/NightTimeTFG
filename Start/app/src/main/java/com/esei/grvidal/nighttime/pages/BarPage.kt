@@ -102,6 +102,7 @@ fun TitleColumn(
 ) {
     Column {
         Header(
+            modifier = Modifier.padding(top = 24.dp),
             text = title
         )
         content()
@@ -134,14 +135,15 @@ fun BarList(
 
 @Composable
 fun Header(
+    modifier : Modifier = Modifier,
     text: String,
     border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colors.primary),
     style : TextStyle = MaterialTheme.typography.h6
 ) {
 
     Row(
-        modifier = Modifier
-            .padding(top = 24.dp, bottom = 12.dp)
+        modifier = modifier
+            .padding( bottom = 12.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
