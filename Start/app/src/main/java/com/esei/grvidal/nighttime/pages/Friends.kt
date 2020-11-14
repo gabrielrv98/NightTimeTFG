@@ -19,7 +19,7 @@ import com.esei.grvidal.nighttime.data.User
 import android.net.Uri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
-
+import java.lang.StringBuilder
 
 
 @Composable
@@ -32,9 +32,15 @@ fun FriendsPageView(navController: NavHostController) {
         modifier = Modifier.padding( top = 24.dp))
 
         LazyColumnFor(items = user.getChats()) {
+
+            val navString = StringBuilder()
+                .append(NavigationScreens.ChatConversation.route)
+                .append("/")
+                .append(it.id)
+                .toString()
+
             ChatEntry(userName = it.userName, lastMessage = it.lastMessage,
-                onEntryClick = {navController.navigate(
-                NavigationScreens.BarDetails.route + "/" + it.id)} )
+                onEntryClick = {navController.navigate(navString) } )
         }
     }
 }
@@ -76,14 +82,3 @@ fun ChatEntry(
 
 }
 
-
-@Composable
-fun FriendChip(bar : Bar){
-    Column(
-        modifier = Modifier.padding(8.dp)
-    ){
-
-        Text(bar.name)
-        Text(text = bar.description)
-    }
-}

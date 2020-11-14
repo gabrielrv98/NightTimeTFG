@@ -31,16 +31,16 @@ import com.esei.grvidal.nighttime.R
 @Composable
 fun BarDetails(barId: Int?, navController: NavHostController) {
     if (barId == null) {
-        errorComposable()
+        errorComposable(errorText = stringResource(id = R.string.errorBarId))
     } else {
         ShowDetails(BarDAO().bares[barId], navController)
     }
 }
 
 @Composable
-fun errorComposable() {
+fun errorComposable(errorText : String) {
     Text(
-        text = stringResource(id = R.string.errorBarId),
+        text = errorText,
         color = MaterialTheme.colors.error
     )
 }
