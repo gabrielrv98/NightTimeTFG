@@ -70,6 +70,34 @@ class User(val name: String) : ViewModel() {
             Message(3,"Yo me encargo"),
             Message(3,"Concierto en aquel sitio!!, cuento contigo" +
                      " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
+            Message(3,"Hola hijo"),
+            Message(3,"Estas bien?"),
+            Message(0,"Con algo de hambre"),
+            Message(3,"Yo me encargo"),
+            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
+                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
+            Message(3,"Hola hijo"),
+            Message(3,"Estas bien?"),
+            Message(0,"Con algo de hambre"),
+            Message(3,"Yo me encargo"),
+            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
+                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
+            Message(3,"Hola hijo"),
+            Message(3,"Estas bien?"),
+            Message(0,"Con algo de hambre"),
+            Message(3,"Yo me encargo"),
+            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
+                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
+            Message(3,"Hola hijo"),
+            Message(3,"Estas bien?"),
+            Message(0,"Con algo de hambre"),
+            Message(3,"Yo me encargo"),
+            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
+                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
                     "Fue increible pero ojala no repetirlo nunca entiendes?")
         ))
     )

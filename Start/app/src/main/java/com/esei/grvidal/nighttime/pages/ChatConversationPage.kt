@@ -5,6 +5,7 @@ import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -37,7 +38,7 @@ fun ChatConversationPage(navController: NavHostController, chatId :Int?){
         ShowConversation(fullChat.otherUserName,onBackClick ){
 
             LazyColumnFor(
-                items = fullChat.conversation
+                items = fullChat.conversation,
             ) {
                 BubbleChat(it.idUser == user.id, it.messageText)
             }
