@@ -2,12 +2,25 @@ package com.esei.grvidal.nighttime
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Text
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.ui.tooling.preview.Preview
 
 import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navigation
+import com.esei.grvidal.nighttime.data.CityDao
 import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -47,66 +60,122 @@ Navigation with their own files ( no dependencies )
         BottomNavigationScreens.Profile
     )
 
-    ScreenScaffolded(
-        bottomBar = {
-            bottomBarNavigation {
-                val currentRoute = currentRoute(navController)
-                bottomNavigationItems.forEach { screen ->
-                    SelectableIconButton(
-                        icon = screen.icon,
-                        isSelected = currentRoute == screen.route,
-                        onIconSelected = {
-                            // This is the equivalent to popUpTo the start destination
-                            navController.popBackStack(navController.graph.startDestination, false)
-
-                            // This if check gives us a "singleTop" behavior where we do not create a
-                            // second instance of the composable if we are already on that destination
-                            if (currentRoute != screen.route) {
-                                navController.navigate(screen.route)
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    ) {
-        val city = it
+    val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
+    val (cityId, setCityId) = remember {
+        mutableStateOf(CityDao().getAllCities()[0])
+    }//todo cambiar, inicia siempre en ourense, deberia ser con sharedPreferences o algo asi
 
 
         NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
             composable(BottomNavigationScreens.Calendar.route) {
-                CalendarPage(cityId = city)
+                ScreenScaffolded(
+                    topBar = { TopBarConstructor(setCityDialog = setCityDialog , nameCity = cityId.name ) },
+                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
+                ) {
+                    CityDialogConstructor(cityDialog, setCityDialog, setCityId)
+                    CalendarPage(cityId = cityId)
+                }
             }
+
             composable(BottomNavigationScreens.Bar.route) {
-                BarPage(cityId = city, navController)
+                ScreenScaffolded(
+                    topBar = { TopBarConstructor(setCityDialog = setCityDialog , nameCity = cityId.name ) },
+                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
+                ) {
+                    CityDialogConstructor(cityDialog, setCityDialog, setCityId)
+                    BarPage(cityId = cityId, navController)
+                }
+
             }
             composable(
                 NavigationScreens.BarDetails.route + "/{barId}",
                 arguments = listOf(navArgument("barId") { type = NavType.IntType })
             ) { backStackEntry ->
-                BarDetails(backStackEntry.arguments?.getInt("barId"))
+
+                ScreenScaffolded(
+                    modifier = Modifier,
+                    topBar = {
+                        IconButton(onClick = {
+                            navController.popBackStack(navController.graph.startDestination, false)
+                            navController.navigate(BottomNavigationScreens.Bar.route)
+                        }) {
+                            Icon(asset = Icons.Default.ArrowBack)
+                        }
+                    }
+                    /*
+                    topBar = {
+                        TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) },
+                            navigationIcon = {
+                                IconButton(onClick = {navController.navigate(BottomNavigationScreens.Bar.route)}) {
+                                    Icon(asset = Icons.Default.ArrowBack)
+                                }
+                            })
+                    }
+
+                     */
+                ) {
+                    BarDetails(backStackEntry.arguments?.getInt("barId"))
+                }
+
             }
 
             composable(BottomNavigationScreens.Friends.route) {
-                FriendsPageView(navController)
+
+                ScreenScaffolded(
+                    topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name) )} ) },
+                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
+                ) {
+                    FriendsPageView(navController)
+                }
             }
 
             composable(BottomNavigationScreens.Profile.route) {
-                ProfilePageView(navController)
+
+                ScreenScaffolded(
+                    topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) } ) },
+                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
+                ) {
+                    ProfilePageView(navController)
+                }
             }
 
         }
-    }
+
 
 
 }
+@Composable
+fun  bottomBarNavConstructor(
+    navController : NavHostController,
+    bottomNavigationItems : List<BottomNavigationScreens>
+) {
+    BottomBarNavigation {
+        val currentRoute = currentRoute(navController)
+        bottomNavigationItems.forEach { screen ->
+            SelectableIconButton(
+                icon = screen.icon,
+                isSelected = currentRoute == screen.route,
+                onIconSelected = {
+                    // This is the equivalent to popUpTo the start destination
+                    navController.popBackStack(navController.graph.startDestination, false)
 
+                    // This if check gives us a "singleTop" behavior where we do not create a
+                    // second instance of the composable if we are already on that destination
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route)
+                    }
+                }
+            )
+        }
+    }
 
+}
 @Preview("Main Page")
 @Composable
 fun PreviewScreen() {
     NightTimeTheme {
-        MainScreen()
+        ScreenScaffolded(){}
+
 
     }
 }

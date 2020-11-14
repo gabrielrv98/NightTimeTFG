@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.KEY_ROUTE
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.navigate
 import androidx.ui.tooling.preview.Preview
 
 /**
@@ -64,12 +63,11 @@ sealed class NavigationScreens(
 /**
  *  Formatted view of the BottomBar
  *
- *  @param navController controller of the navigation
- *  @param items list of the bottom buttons
+ *  @param content Content of the bottom Row
  *
  */
 @Composable
-fun bottomBarNavigation(
+fun BottomBarNavigation(
     content : @Composable () -> Unit
 ) {
     Surface(
@@ -94,50 +92,6 @@ fun bottomBarNavigation(
         }
     }
 
-}
-@Composable
-fun bottomBarNavigationStateFull2(
-    navController: NavHostController,
-    items: List<BottomNavigationScreens>
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colors.background
-    ){
-        Column {
-            Divider(
-                modifier = Modifier.padding(3.dp),
-                color = MaterialTheme.colors.onSurface,
-                thickness = 1.dp
-            )
-
-            //Navigation Buttons
-            Row(
-                modifier = Modifier.padding(top = 6.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                val currentRoute = currentRoute(navController)
-                items.forEach { screen ->
-                    SelectableIconButton(
-                        icon = screen.icon,
-                        isSelected = currentRoute == screen.route,
-                        onIconSelected = {
-                            // This is the equivalent to popUpTo the start destination
-                            navController.popBackStack(navController.graph.startDestination, false)
-
-                            // This if check gives us a "singleTop" behavior where we do not create a
-                            // second instance of the composable if we are already on that destination
-                            if (currentRoute != screen.route) {
-                                navController.navigate(screen.route)
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }
 }
 
 
