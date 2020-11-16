@@ -49,4 +49,6 @@
     <string name="errorBarId">Ha habido un error con el bar seleccionado</string>
     <string name="ChatConversation">ChatConversation</string>
     <string name="errorChatId">Ha habido un error con el chat seleccionado</string>
+    <string name="nextEvents">Proximos eventos:</string>
+    <string name="bajarRapido">Ir al final</string>
 </resources>

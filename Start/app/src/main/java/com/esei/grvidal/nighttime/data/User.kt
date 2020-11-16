@@ -43,72 +43,67 @@ class User(val name: String) : ViewModel() {
 
     private var allChats : List<FullChat> = listOf(
         FullChat(0, "Nuria Sotelo Domarco", listOf(
-            Message(0,"hey que tal?"),
-            Message(1,"Bien, llegando a casa y tu?"),
-            Message(0,"Acabando de trabjar"),
-            Message(0,"Te apetece hacer algo hoy?"),
-            Message(1,"Dicen que hoy abre el Lokal")
+            Message(0,"hey que tal?","8:04 PM"),
+            Message(1,"Bien, llegando a casa y tu?","8:04 PM"),
+            Message(0,"Acabando de trabjar","8:04 PM"),
+            Message(0,"Te apetece hacer algo hoy?","8:04 PM"),
+            Message(1,"Dicen que hoy abre el Lokal","8:04 PM")
         )),
         FullChat(1, "Maria Jose", listOf(
-            Message(3,"Hola hijo"),
-            Message(3,"Estas bien?"),
-            Message(0,"Con algo de hambre"),
-            Message(3,"Yo me encargo"),
-            Message(3,"Ya he hecho lentejas")
+            Message(3,"Hola hijo","8:04 PM"),
+            Message(3,"Estas bien?","8:04 PM"),
+            Message(0,"Con algo de hambre","8:04 PM"),
+            Message(3,"Yo me encargo","8:04 PM"),
+            Message(3,"Ya he hecho lentejas","8:04 PM")
         )),
                 FullChat(2, "Pablo Pablito", listOf(
-            Message(3,"Hola hijo"),
-            Message(3,"Estas bien?"),
-            Message(0,"Con algo de hambre"),
-            Message(3,"Yo me encargo"),
-            Message(3,"Hoy he clavado un clavo")
+            Message(3,"Hola hijo","8:04 PM"),
+            Message(3,"Estas bien?","8:04 PM"),
+            Message(0,"Con algo de hambre","8:04 PM"),
+            Message(3,"Yo me encargo","8:04 PM"),
+            Message(3,"Hoy he clavado un clavo","8:04 PM")
         )),
         FullChat(3, "Elma RockStar", listOf(
-            Message(3,"Hola hijo"),
-            Message(3,"Estas bien?"),
-            Message(0,"Con algo de hambre"),
-            Message(3,"Yo me encargo"),
+            Message(3,"Hola hijo","8:04 PM"),
+            Message(3,"Estas bien?","8:04 PM"),
+            Message(0,"Con algo de hambre","8:04 PM"),
+            Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Concierto en aquel sitio!!, cuento contigo" +
                      " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
-            Message(3,"Hola hijo"),
-            Message(3,"Estas bien?"),
-            Message(0,"Con algo de hambre"),
-            Message(3,"Yo me encargo"),
+                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
+            Message(3,"Hola hijo","8:04 PM"),
+            Message(3,"Estas bien?","8:04 PM"),
+            Message(0,"Con algo de hambre","8:04 PM"),
+            Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Concierto en aquel sitio!!, cuento contigo" +
                     " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
-            Message(3,"Hola hijo"),
-            Message(3,"Estas bien?"),
-            Message(0,"Con algo de hambre"),
-            Message(3,"Yo me encargo"),
+                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
+            Message(3,"Hola hijo","8:04 PM"),
+            Message(3,"Estas bien?","8:04 PM"),
+            Message(0,"Con algo de hambre","8:04 PM"),
+            Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Concierto en aquel sitio!!, cuento contigo" +
                     " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
-            Message(3,"Hola hijo"),
-            Message(3,"Estas bien?"),
-            Message(0,"Con algo de hambre"),
-            Message(3,"Yo me encargo"),
+                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
+            Message(3,"Hola hijo","8:04 PM"),
+            Message(3,"Estas bien?","8:04 PM"),
+            Message(0,"Con algo de hambre","8:04 PM"),
+            Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Concierto en aquel sitio!!, cuento contigo" +
                     " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
-            Message(3,"Hola hijo"),
-            Message(3,"Estas bien?"),
-            Message(0,"Con algo de hambre"),
-            Message(3,"Yo me encargo"),
+                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
+            Message(3,"Hola hijo","8:04 PM"),
+            Message(3,"Estas bien?","8:04 PM"),
+            Message(0,"Con algo de hambre","8:04 PM"),
+            Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Concierto en aquel sitio!!, cuento contigo" +
                     " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?")
+                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM")
         ))
     )
 
 
 }
-
-data class ChatData(val id : Int, val userName: String, val lastMessage : String)
-data class FullChat(val id : Int, val otherUserName : String, val conversation : List<Message> )
-
-data class Message(val idUser: Int, val messageText :String)
 
 data class DatePeople(val amigos: Int, val total: Int)
 object CalendarDao {

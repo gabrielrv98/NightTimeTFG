@@ -27,50 +27,72 @@ import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
 
-
+/**
+ * Check of if the BarId is null, this could be by a problem in navHostController
+ *
+ * @param barId expected Int identification of the bar to show
+ * @param navController navigator with the queue of destinies and it will be used to go back
+ */
 @Composable
 fun BarDetails(barId: Int?, navController: NavHostController) {
+    //Null Check
     if (barId == null) {
         errorComposable(errorText = stringResource(id = R.string.errorBarId))
     } else {
-        ShowDetails(BarDAO().bares[barId], navController)
+        //Accesses to the database to get the information of the bar through its ID
+        ShowDetails(bar = BarDAO().bares[barId],
+            onBackPressed = {
+                navController.popBackStack(navController.graph.startDestination, false)
+                navController.navigate(BottomNavigationScreens.Bar.route)
+            }
+        )
     }
 }
 
+/**
+ * Basic Composable to show if a en error occurred
+ *
+ * @param errorText String with the error description to show on screen
+ */
 @Composable
-fun errorComposable(errorText : String) {
+fun errorComposable(errorText: String) {
     Text(
         text = errorText,
         color = MaterialTheme.colors.error
     )
 }
 
+/**
+ * StateFull composable that manage the main composition of the BarDetails view
+ *
+ * @param bar BarClass that holds all the information that will be shown
+ * @param onBackPressed action to be done when the icon with arrow back is pressed
+ */
 @Composable
-fun ShowDetails(bar: Bar, navController: NavHostController) {
+fun ShowDetails(bar: Bar, onBackPressed: () -> Unit = {}) {
 
     val (showAlert, setShowAlert) = remember { mutableStateOf(false) }
     val (selectedImage, setSelectedImage) = remember { mutableStateOf<VectorAsset?>(null) }
 
     Column {
-        IconButton(
-            onClick = {
-                navController.popBackStack(navController.graph.startDestination, false)
-                navController.navigate(BottomNavigationScreens.Bar.route)
-            }) {
+        //Button with an icon of an arrow back, if pushed it will show the previous View
+        IconButton(onClick = onBackPressed) {
             Icon(asset = Icons.Default.ArrowBack)
         }
+        //Header of the page with the title
         Header(
+            modifier = Modifier.padding(bottom = 12.dp),
             text = bar.name,
             style = MaterialTheme.typography.h4
         )
 
+        //Column with an horizontal padding
         Column(
             modifier = Modifier
-                .padding(top = 12.dp)
                 .padding(horizontal = 12.dp)
         ) {
 
-            // Description
+            // Description of the bar
             DetailView(
                 title = stringResource(R.string.descripcion)
             ) {
@@ -80,7 +102,7 @@ fun ShowDetails(bar: Bar, navController: NavHostController) {
                     style = MaterialTheme.typography.body1
                 )
             }
-            //Schedule
+            //Schedule of the bar
             DetailView(title = stringResource(R.string.horario), icon = Icons.Outlined.Alarm,
                 titleToRight = {
                     Text(text = bar.time)
@@ -88,6 +110,7 @@ fun ShowDetails(bar: Bar, navController: NavHostController) {
             ) {
                 WeekSchedule(bar.schedule)
             }
+
             //Context to call google Maps
             val context = ContextAmbient.current
             val moveToMaps = {
@@ -95,10 +118,10 @@ fun ShowDetails(bar: Bar, navController: NavHostController) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
                 context.startActivity(intent)
             }
-            //Localization
+            //Localization of the bar
             DetailView(title = stringResource(R.string.localizacion), icon = Icons.Outlined.Place,
                 titleToRight = {
-                    //Button that trigers Google Maps
+                    //Button that triggers Google Maps
                     Button(onClick = moveToMaps) {
                         Text(
                             text = stringResource(id = R.string.openMaps),
@@ -117,24 +140,25 @@ fun ShowDetails(bar: Bar, navController: NavHostController) {
                 icon = Icons.Outlined.PhotoLibrary
             )
 
-        }//End Column with padding
+        }//End Column with horizontal padding
 
         //If multimedia is not null, it will be shown
         bar.multimedia?.let {
+            //Lazy column with no horizontal padding
             LazyRowFor(
                 items = it,
                 modifier = Modifier.fillMaxWidth()
                     .align(Alignment.Start)
-            ) {image ->
-                    Image(
-                        image as VectorAsset,
-                        modifier = Modifier.padding(2.dp).preferredSize(120.dp)
-                            .background(Color.Gray)
-                            .clickable(onClick = {
-                                setSelectedImage(image as VectorAsset)
-                                setShowAlert(true)
-                            })
-                    )
+            ) { image ->
+                Image(
+                    image as VectorAsset,
+                    modifier = Modifier.padding(2.dp).preferredSize(120.dp)
+                        .background(Color.Gray)
+                        .clickable(onClick = {
+                            setSelectedImage(image )
+                            setShowAlert(true)
+                        })
+                )
             }
             /*
             MultimediaView(
@@ -146,17 +170,25 @@ fun ShowDetails(bar: Bar, navController: NavHostController) {
 
              */
         }
-        BigPicture(showAlert, setShowAlert, selectedImage, setSelectedImage)
+        //Alert ready to be called
+        BigPicture(showAlert, selectedImage,
+            dismissAlert = {
+                setShowAlert(false)
+                setSelectedImage(null)
+            }
+        )
 
+        //Events of the bar
         DetailView(
             modifier = Modifier.padding(horizontal = 12.dp),
-            title = "Proximos eventos",
-            icon = Icons.Outlined.LocalDrink){
-            bar.events?.let{
+            title = stringResource(id = R.string.nextEvents),
+            icon = Icons.Outlined.LocalDrink
+        ) {
+            bar.events?.let {
 
-                LazyColumnFor(items = it) {eventData ->
+                LazyColumnFor(items = it) { eventData ->
                     Event(
-                        barName = eventData.fecha.toStringFormatted(),
+                        barName = eventData.date.toStringFormatted(),
                         eventData.description
                     )
                 }
@@ -164,23 +196,25 @@ fun ShowDetails(bar: Bar, navController: NavHostController) {
         }
 
 
-
-
     }
 
 }
 
+/**
+ * Composable that will check if the variable showAlert is true, if it is, it will show and alert
+ * with the selected photo using all the screen
+ *
+ * @param showAlert Boolean to show the alert
+ * @param selectedImage Selected image to be shown
+ * @param dismissAlert lambda function to be done when user click outside of the alert or the dismiss button
+ */
 @Composable
 private fun BigPicture(
     showAlert: Boolean,
-    setShowAlert: (Boolean) -> Unit,
     selectedImage: VectorAsset?,
-    setSelectedImage: (VectorAsset?) -> Unit
+    dismissAlert: () -> Unit
 ) {
-    val dismissAlert = {
-        setShowAlert(false)
-        setSelectedImage(null)
-    }
+
     if (showAlert) {
         AlertDialog(
             onDismissRequest = dismissAlert,
@@ -205,16 +239,25 @@ private fun BigPicture(
     }
 }
 
-
+/**
+ * Stateless composable with the shape of a piece of information, with the nullable icon, title, and
+ * optional composable to the right and on the bottom
+ *
+ * @param modifier Modifier with the padding and align
+ * @param title String to show in bold
+ * @param icon Icon to visually represent the title
+ * @param titleToRight optional composable on the right of the title
+ * @param content Composable to show under the DetailView Composable as its content
+ */
 @Composable
 fun DetailView(
-    modifier :Modifier = Modifier,
+    modifier: Modifier = Modifier,
     title: String,
     icon: VectorAsset? = null,
     titleToRight: @Composable () -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
-    //Description Row
+
     Column(
         modifier = modifier
             .padding(vertical = 12.dp)
@@ -244,6 +287,7 @@ fun DetailView(
     }
 }
 
+@Deprecated("DetailView with a LazyRow is actually used" , ReplaceWith("DetailView"))
 @Composable
 fun MultimediaView(
     photos: List<Any>,
@@ -268,7 +312,7 @@ fun MultimediaView(
                     modifier = Modifier.padding(2.dp).preferredSize(120.dp)
                         .background(Color.Gray)
                         .clickable(onClick = {
-                            setSelectedImage(vector as VectorAsset)
+                            setSelectedImage( vector )
                             onImageClick()
                         })
                 )

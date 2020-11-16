@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,14 +20,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
-import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.NavigationScreens
 import com.esei.grvidal.nighttime.data.MyDate
+import com.esei.grvidal.nighttime.navigateWithId
 
 
 class BarDAO {
@@ -69,7 +68,7 @@ class BarDAO {
     )
 }
 
-data class EventData(val fecha: MyDate, val description: String)
+data class EventData(val date: MyDate, val description: String)
 
 data class Bar(val id: Int, val name: String, val description: String) {
     var events: List<EventData>? = null
@@ -89,10 +88,13 @@ data class Bar(val id: Int, val name: String, val description: String) {
 }
 
 /**
- * Statefull composable with the logic of the Bar View
+ * StateFull composable that manage the main composition of the BarPAge view
+ *
+ * @param cityId selected city
+ * @param navController navigator with the queue of destinies and it will be used to navigate or go back
  */
 @Composable
-fun BarPage(cityId: City, navController: NavController) {
+fun BarPage(cityId: City, navController: NavHostController) {
     val barList = BarDAO().bares
     //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
 
@@ -105,22 +107,30 @@ fun BarPage(cityId: City, navController: NavController) {
                 time = bar.time,
                 schedule = bar.schedule,
                 onBarClick = {
-                    navController.navigate(
-                        NavigationScreens.BarDetails.route + "/" + bar.id
+                    navController.navigateWithId(
+                        NavigationScreens.BarDetails.route, bar.id
                     )
                 })
         }
     }
 }
 
+/**
+ * Composable that describes the structure of this View, a title with a body
+ *
+ * @param modifier Modifier with the relative padding
+ * @param title to show with a border
+ * @param content to show below the title
+ */
 @Composable
 fun TitleColumn(
+    modifier :Modifier = Modifier.padding(top = 24.dp),
     title: String,
     content: @Composable () -> Unit = {}
 ) {
     Column {
         Header(
-            modifier = Modifier.padding(top = 24.dp),
+            modifier = modifier,
             text = title
         )
         content()
@@ -128,6 +138,12 @@ fun TitleColumn(
     }
 }
 
+/**
+ * Composable that describes the list of the Bars and formats each row
+ *
+ * @param barList list of bars
+ * @param content content of the rows
+ */
 @Composable
 fun BarList(
     barList: List<Any>,
@@ -151,6 +167,14 @@ fun BarList(
     }
 }
 
+/**
+ * Composable that describes the header of the View
+ *
+ * @param modifier modifier with the relative padding
+ * @param text Title to be shown
+ * @param border Custom border to the title
+ * @param style Style of the title
+ */
 @Composable
 fun Header(
     modifier: Modifier = Modifier,
@@ -179,7 +203,15 @@ fun Header(
     }
 }
 
-
+/**
+ * Composable that describes the information that will be shown about each bar
+ *
+ * @param onBarClick action to be done when a bar is pressed
+ * @param name name of the bar
+ * @param description Description of the bar
+ * @param time Time when its open
+ * @param schedule schedule of what days it is open or not
+ */
 @Composable
 fun BarChip(
     onBarClick: () -> Unit = {},
@@ -226,6 +258,10 @@ fun BarChip(
     }
 }
 
+/**
+ * Composable that manages the Schedule with all days
+ * @param schedule List of 7 booleans, each one represents if that day it's open
+ */
 @Composable
 fun WeekSchedule(schedule: List<Boolean>) {
     DaySchedule(day = stringResource(id = R.string.lunes), schedule[0])
@@ -237,13 +273,26 @@ fun WeekSchedule(schedule: List<Boolean>) {
     DaySchedule(day = stringResource(id = R.string.domingo), schedule[6])
 }
 
+/**
+ * Function that takes a substring of length [maxLetter] from the string [text]
+ *
+ * @param text String of any length
+ * @param maxLetter max Num of letters
+ */
 fun makeLongShort(text: String, maxLetter: Int): String {
     return if (text.length <= maxLetter) text
-    else
-        text.removeRange(maxLetter, text.length).plus(" ...")
+        else text.removeRange(maxLetter, text.length).plus(" ...")
 }
 
-
+/**
+ * Composable that describes if a day of the week that starts with [day] it's open [enable] or not
+ * the day will be in a box with the border [border] and with a shape [shape]
+ *
+ * @param day Letter with the representated day
+ * @param enable boolean to show if its enabled
+ * @param border border arround the letter
+ * @param shape shape of the border
+ */
 @Composable
 fun DaySchedule(
     day: String,
@@ -279,6 +328,16 @@ fun DaySchedule(
     }
 }
 
+/**
+ * Composable that describes if a day of the week that starts with [day] it's open [enable] or not
+ * the day will be in a box with the border [border] and with a shape [shape]
+ *
+ * @param day Letter with the representated day
+ * @param enable boolean to show if its enabled
+ * @param border border arround the letter
+ * @param shape shape of the border
+ */
+@Deprecated("rounded days", ReplaceWith("daySchedule"))
 @Composable
 fun daySchedule2(
     day: String,

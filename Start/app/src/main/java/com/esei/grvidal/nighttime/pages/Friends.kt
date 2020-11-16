@@ -16,12 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.esei.grvidal.nighttime.NavigationScreens
 import com.esei.grvidal.nighttime.data.User
-import android.net.Uri
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.navigate
-import java.lang.StringBuilder
+import com.esei.grvidal.nighttime.navigateWithId
 
-
+/**
+ * Composable that manages the View of the list of chats
+ *
+ * @param navController  controller of hte navigation, its used to go back or navigate to other views
+ */
 @Composable
 fun FriendsPageView(navController: NavHostController) {
 
@@ -33,18 +35,18 @@ fun FriendsPageView(navController: NavHostController) {
 
         LazyColumnFor(items = user.getChats()) {
 
-            val navString = StringBuilder()
-                .append(NavigationScreens.ChatConversation.route)
-                .append("/")
-                .append(it.id)
-                .toString()
-
             ChatEntry(userName = it.userName, lastMessage = it.lastMessage,
-                onEntryClick = {navController.navigate(navString) } )
+                onEntryClick = { navController.navigateWithId( NavigationScreens.ChatConversation.route, it.id )
+                } )
         }
     }
 }
 
+
+
+/**
+ * Composable that shows the information about the chat
+ */
 @Composable
 fun ChatEntry(
     userName : String,

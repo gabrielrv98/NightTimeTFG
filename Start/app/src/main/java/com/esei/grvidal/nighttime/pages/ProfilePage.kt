@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
 @Composable
-fun ProfilePageView(navController: NavController){
+fun ProfilePageView(navController: NavController, userId : Int?){
 
 
 }

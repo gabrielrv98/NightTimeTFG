@@ -33,18 +33,16 @@ import java.time.LocalDate
 import java.util.*
 
 /**
- * Show the Calendar page, with the calendar on the top and the information below it
+ * Show the Calendar page, with the calendar on the top and the information of the selected date  and
+ * selected city [cityId] below it
+ *
+ * @param cityId selected City
  */
 @Composable
 fun CalendarPage(cityId: City) {
     val user = User("Me")//todo cambiar a user como era en la app donde aprendi
-    val user2 = remember { mutableStateOf(User("me")) }
-/*
-    if (user2.component1().nextDate == null){
-        Text("null")
-    }else Text(user2.component1().nextDate.toString())
+    val userNextDateMutable = remember { mutableStateOf(user.nextDate) }
 
- */
     //remember date, it's used to show the selected date and move the calendar to the specified month
     val (date, setDate) = remember {
         mutableStateOf(
@@ -79,7 +77,6 @@ fun CalendarPage(cityId: City) {
         }
 
     val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
-    //val buttonString =
     CalendarPageView(
         calendar = {
             CalendarWindow(
@@ -104,7 +101,7 @@ fun CalendarPage(cityId: City) {
                             ) {
 
                                 DayChip(
-                                    isNextUserDate = user2.component1().nextDate == days,
+                                    isNextUserDate = userNextDateMutable.value == days,
                                     date = date,
                                     setDate = mySetDay,
                                     chipDate = days,
@@ -126,18 +123,18 @@ fun CalendarPage(cityId: City) {
                     .append("/")
                     .append(date.year)
                     .toString(),
-                genteTotal = datePeople.total.toString(),
-                amigos = datePeople.amigos.toString(),
+                totalPeople = datePeople.total.toString(),
+                friends = datePeople.amigos.toString(),
                 showFriends = { setShowDialog(true) },
                 OnChooseDateClick = {
                     //if (!date.isBefore())
-                    if (date != user2.component1().nextDate)
-                        user2.component1().nextDate = date
-                    else user2.component1().nextDate = null
+                    if (date != userNextDateMutable.value)
+                        userNextDateMutable.value = date
+                    else userNextDateMutable.value = null
                 },
                 selectDateEnable = !date.isBefore(),
                 buttonText = if (!date.isBefore()) {
-                    if (date == user2.component1().nextDate)
+                    if (date == userNextDateMutable.value)
                         stringResource(id = R.string.deseleccionar)
                     else stringResource(id = R.string.elegirDia)
                 } else stringResource(id = R.string.diaPasado),
@@ -155,10 +152,18 @@ fun CalendarPage(cityId: City) {
 
 }
 
+/**
+ * Function that returns true if the date that calls the function is before the actual date
+ */
 fun MyDate.isBefore(): Boolean {
     return LocalDate.of(this.year, this.month, this.day).isBefore(LocalDate.now())
 }
 
+/**
+ * Function that returns the name of the month throug a number that represents the month
+ *
+ * @param month number of the month
+ */
 @Composable
 fun monthName(month: Int): String {
     return when (month) {
@@ -179,6 +184,15 @@ fun monthName(month: Int): String {
     }
 }
 
+/**
+ * Stateless composable that describes the structure of the Calendar View
+ * it shows a Composable on the top half [calendar] and some information on the bottom half [bottomInfo]
+ *
+ *
+ * @param calendar
+ * @param bottomInfo
+ * @param modifierParam
+ */
 @Composable
 fun CalendarPageView(
     calendar: @Composable () -> Unit = {},
@@ -393,7 +407,7 @@ fun CenteredText(
     text: String,
     modifier: Modifier = Modifier.fillMaxWidth(),
     textAlign: TextAlign = TextAlign.Center,
-    textStyle: TextStyle = TextStyle.Default//todo no se si esta bien
+    textStyle: TextStyle = AmbientTextStyle.current
 ) {
     Text(
         text = text,
@@ -483,8 +497,8 @@ private fun DayChip(
  * Is the information about the people who is coming out tonight, it will update if the selected date changes
  *
  * @param formattedDay selected date in the format dd/MM/yyyyy
- * @param genteTotal total amount of people who is coming out
- * @param amigos total amount of people who is coming out AND you have them added as a friend
+ * @param totalPeople total amount of people who is coming out
+ * @param friends total amount of people who is coming out AND you have them added as a friend
  * @param showFriends lambda expression that will update a boolean variable that will show a dialog with your friends
  * @param selectDateEnable enable the button, should be false if the day is before actual date
  * @param buttonText text to show on the button
@@ -494,8 +508,8 @@ private fun DayChip(
 @Composable
 fun DayInformation(
     formattedDay: String,
-    genteTotal: String = "?",
-    amigos: String = "?",
+    totalPeople: String = "?",
+    friends: String = "?",
     showFriends: () -> Unit,
     selectDateEnable: Boolean,
     buttonText: String,
@@ -567,7 +581,7 @@ fun DayInformation(
                     shape = RoundedCornerShape(15.dp)
                 ) {
                     InfoChip(
-                        numberOfPeople = amigos,
+                        numberOfPeople = friends,
                         peopleDescription = stringResource(id = R.string.amigos)
                     )
                 }
@@ -583,7 +597,7 @@ fun DayInformation(
 
                     InfoChip(
                         modifier = Modifier.padding(12.dp),
-                        numberOfPeople = genteTotal,
+                        numberOfPeople = totalPeople,
                         peopleDescription = stringResource(id = R.string.genteTotal)
                     )
                 }
@@ -747,8 +761,8 @@ fun CalendarWindowPreview() {
                     .append("/")
                     .append(date.year)
                     .toString(),
-                genteTotal = datePeople.total.toString(),
-                amigos = datePeople.amigos.toString(),
+                totalPeople = datePeople.total.toString(),
+                friends = datePeople.amigos.toString(),
                 showFriends = { },
                 OnChooseDateClick = { },
                 buttonText = stringResource(id = R.string.elegirDia),

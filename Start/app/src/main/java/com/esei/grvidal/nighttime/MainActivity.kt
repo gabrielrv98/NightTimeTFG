@@ -21,9 +21,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navigation
 import com.esei.grvidal.nighttime.data.CityDao
+import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
+import java.lang.StringBuilder
 
 
 class MainActivity : AppCompatActivity() {
@@ -66,80 +68,109 @@ Navigation with their own files ( no dependencies )
     }//todo cambiar, inicia siempre en ourense, deberia ser con sharedPreferences o algo asi
 
 
-        NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
-            composable(BottomNavigationScreens.Calendar.route) {
-                ScreenScaffolded(
-                    topBar = { TopBarConstructor(setCityDialog = setCityDialog , nameCity = cityId.name ) },
-                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
-                ) {
-                    CityDialogConstructor(cityDialog, setCityDialog, setCityId)
-                    CalendarPage(cityId = cityId)
-                }
+    NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
+        composable(BottomNavigationScreens.Calendar.route) {
+            ScreenScaffolded(
+                topBar = {
+                    TopBarConstructor(
+                        setCityDialog = setCityDialog,
+                        nameCity = cityId.name
+                    )
+                },
+                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                CityDialogConstructor(cityDialog, setCityDialog, setCityId)
+                CalendarPage(cityId = cityId)
+            }
+        }
+
+        composable(BottomNavigationScreens.Bar.route) {
+            ScreenScaffolded(
+                topBar = {
+                    TopBarConstructor(
+                        setCityDialog = setCityDialog,
+                        nameCity = cityId.name
+                    )
+                },
+                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                CityDialogConstructor(cityDialog, setCityDialog, setCityId)
+                BarPage(cityId = cityId, navController)
             }
 
-            composable(BottomNavigationScreens.Bar.route) {
-                ScreenScaffolded(
-                    topBar = { TopBarConstructor(setCityDialog = setCityDialog , nameCity = cityId.name ) },
-                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
-                ) {
-                    CityDialogConstructor(cityDialog, setCityDialog, setCityId)
-                    BarPage(cityId = cityId, navController)
-                }
+        }
+        composable(
+            NavigationScreens.BarDetails.route + "/{barId}",
+            arguments = listOf(navArgument("barId") { type = NavType.IntType })
+        ) { backStackEntry ->
 
-            }
-            composable(
-                NavigationScreens.BarDetails.route + "/{barId}",
-                arguments = listOf(navArgument("barId") { type = NavType.IntType })
-            ) { backStackEntry ->
-
-                ScreenScaffolded(
-                    modifier = Modifier
-                ) {
-                    BarDetails(backStackEntry.arguments?.getInt("barId"),navController)
-                }
-
-            }
-
-            composable(BottomNavigationScreens.Friends.route) {
-
-                ScreenScaffolded(
-                    topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name) )} ) },
-                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
-                ) {
-                    FriendsPageView(navController)
-                }
-            }
-
-            composable(BottomNavigationScreens.Profile.route) {
-
-                ScreenScaffolded(
-                    topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) } ) },
-                    bottomBar = { bottomBarNavConstructor( navController, bottomNavigationItems) },
-                ) {
-                    ProfilePageView(navController)
-                }
-            }
-
-            composable(NavigationScreens.ChatConversation.route + "/{ChatId}",
-                arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
-            ) {backStackEntry ->
-                ScreenScaffolded(
-                    topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) } )},
-                ) {
-                    ChatConversationPage(navController,backStackEntry.arguments?.getInt("ChatId"))
-                }
-
+            ScreenScaffolded(
+                modifier = Modifier
+            ) {
+                BarDetails(backStackEntry.arguments?.getInt("barId"), navController)
             }
 
         }
 
+        composable(BottomNavigationScreens.Friends.route) {
 
+            ScreenScaffolded(
+                topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
+                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                FriendsPageView(navController)
+            }
+        }
 
+        composable(
+            NavigationScreens.ChatConversation.route + "/{ChatId}",
+            arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            ChatConversationPageAND(navController, backStackEntry.arguments?.getInt("ChatId"))
+
+            //ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
+
+        }
+
+        composable(
+            BottomNavigationScreens.Profile.route
+        ) {
+            ScreenScaffolded(
+                topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
+                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                ProfilePageView(navController, User("me").id)//todo is hardcoded
+            }
+        }
+
+        composable(
+            BottomNavigationScreens.Profile.route + "/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+        ) {backStackEntry ->
+
+            ScreenScaffolded(
+                topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
+                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                ProfilePageView(navController, backStackEntry.arguments?.getInt("userId"))
+            }
+        }
+    }
+}
+
+fun NavHostController.navigateWithId(route: String, id: Int) {
+
+    val navString = StringBuilder()
+        .append(route)
+        .append("/")
+        .append(id)
+        .toString()
+    this.navigate(navString)
 }
 @Composable
-fun  bottomBarNavConstructor(
-    navController : NavHostController,
-    bottomNavigationItems : List<BottomNavigationScreens>
+fun bottomBarNavConstructor(
+    navController: NavHostController,
+    bottomNavigationItems: List<BottomNavigationScreens>
 ) {
     BottomBarNavigation {
         val currentRoute = currentRoute(navController)
@@ -162,11 +193,12 @@ fun  bottomBarNavConstructor(
     }
 
 }
+
 @Preview("Main Page")
 @Composable
 fun PreviewScreen() {
     NightTimeTheme {
-        ScreenScaffolded(){}
+        ScreenScaffolded() {}
 
 
     }
