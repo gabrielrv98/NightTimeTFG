@@ -42,28 +42,28 @@ class User(val name: String) : ViewModel() {
     }
 
     private var allChats : List<FullChat> = listOf(
-        FullChat(0, "Nuria Sotelo Domarco", listOf(
+        FullChat(0, "Nuria Sotelo Domarco", 1,listOf(
             Message(0,"hey que tal?","8:04 PM"),
             Message(1,"Bien, llegando a casa y tu?","8:04 PM"),
             Message(0,"Acabando de trabjar","8:04 PM"),
             Message(0,"Te apetece hacer algo hoy?","8:04 PM"),
             Message(1,"Dicen que hoy abre el Lokal","8:04 PM")
         )),
-        FullChat(1, "Maria Jose", listOf(
+        FullChat(1, "Maria Jose", 2, listOf(
             Message(3,"Hola hijo","8:04 PM"),
             Message(3,"Estas bien?","8:04 PM"),
             Message(0,"Con algo de hambre","8:04 PM"),
             Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Ya he hecho lentejas","8:04 PM")
         )),
-                FullChat(2, "Pablo Pablito", listOf(
+                FullChat(2, "Pablo Pablito", 3, listOf(
             Message(3,"Hola hijo","8:04 PM"),
             Message(3,"Estas bien?","8:04 PM"),
             Message(0,"Con algo de hambre","8:04 PM"),
             Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Hoy he clavado un clavo","8:04 PM")
         )),
-        FullChat(3, "Elma RockStar", listOf(
+        FullChat(3, "Elma RockStar", 4,listOf(
             Message(3,"Hola hijo","8:04 PM"),
             Message(3,"Estas bien?","8:04 PM"),
             Message(0,"Con algo de hambre","8:04 PM"),
@@ -95,10 +95,16 @@ class User(val name: String) : ViewModel() {
             Message(3,"Hola hijo","8:04 PM"),
             Message(3,"Estas bien?","8:04 PM"),
             Message(0,"Con algo de hambre","8:04 PM"),
+            Message(0,"Pero poca","8:04 PM"),
+            Message(0,"Con algo de hambreeeeeeeeeeeeeeeeeeeee","8:04 PM"),
+            Message(0,"Con algo de hambreeeeeeeeeeeeeeeee","8:04 PM"),
+            Message(0,"Con algo de hambreeeeeee","8:04 PM"),
+            Message(0,"Pero no tanta como la del concierto del ourenrock esa vez fue increible\nUf\n cuantos recuerdos parece mentira eh","8:04 PM"),
             Message(3,"Yo me encargo","8:04 PM"),
             Message(3,"Concierto en aquel sitio!!, cuento contigo" +
                     " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM")
+                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
+            Message(0,"Ok","8:14 PM"),
         ))
     )
 

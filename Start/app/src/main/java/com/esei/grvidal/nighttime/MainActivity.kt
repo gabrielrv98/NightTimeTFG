@@ -3,11 +3,7 @@ package com.esei.grvidal.nighttime
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
-import androidx.navigation.navigation
 import com.esei.grvidal.nighttime.data.CityDao
 import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.pages.*
@@ -126,7 +121,7 @@ Navigation with their own files ( no dependencies )
             NavigationScreens.ChatConversation.route + "/{ChatId}",
             arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
         ) { backStackEntry ->
-            ChatConversationPageAND(navController, backStackEntry.arguments?.getInt("ChatId"))
+            ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
 
             //ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
 

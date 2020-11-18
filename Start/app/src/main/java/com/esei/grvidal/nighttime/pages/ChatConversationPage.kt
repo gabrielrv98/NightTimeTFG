@@ -1,210 +1,400 @@
 package com.esei.grvidal.nighttime.pages
 
-import androidx.compose.foundation.AmbientContentColor
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Text
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.LastBaseline
 import androidx.compose.material.*
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
-import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.FullChat
-import com.esei.grvidal.nighttime.data.Message
 import com.esei.grvidal.nighttime.data.User
-import com.esei.grvidal.nighttime.ui.NightTimeTheme
+import com.esei.grvidal.nighttime.navigateWithId
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.VectorAsset
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.DensityAmbient
+//import androidx.compose.ui.res.imageResource
+import androidx.ui.tooling.preview.Preview
+import com.esei.grvidal.nighttime.data.Message
+import java.time.LocalDate
+
 
 /**
- * Composable that cheks if [chatId] is null, if its false it will show the conversation
+ * Composable that checks if [chatId] is null, if its false it will show the conversation
  *
  * @param navController controller of hte navigation, its used to go back or navigate to other views
  * @param chatId Id of the current char
  */
 @Composable
-fun ChatConversationPage(navController: NavHostController, chatId :Int?){
+fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
     val user = User("me")
 
     //Nullable check
     if (chatId == null) {
         errorComposable(errorText = stringResource(id = R.string.errorChatId))
     } else {
-        val fullChat = user.getChatConversation(chatId)
-        val onBackClick = {
-            navController.popBackStack(navController.graph.startDestination, false)
-            navController.navigate(BottomNavigationScreens.Friends.route)
-        }
-        ShowConversation(fullChat.otherUserName,onBackClick ){
-            Column(
-                modifier = Modifier.fillMaxHeight(),
-                verticalArrangement = Arrangement.Bottom
-            ){
-                Row(
-                    modifier = Modifier.weight(2.5f)
-                ) {
-                    LazyColumnFor(
-                        items = fullChat.initialConversation,
 
-                        ) {
-                        BubbleChat(it.idUser == user.id, it.messageText)
-                    }
-                }
-                MessageInput(modifier = Modifier){
-                    Text("Aqui se escribe")
-                }
-            }
+        ConversationContent(
+            actualChat = user.getChatConversation(chatId),
+            navigateToProfile = { userId ->
+                navController.navigateWithId(
+                    BottomNavigationScreens.Profile.route,
+                    userId
+                )
+            },
+            onBackIconPressed = {
+                navController.popBackStack(navController.graph.startDestination, false)
+                navController.navigate(BottomNavigationScreens.Friends.route)
+            },
+            user = user
+        )
 
 
-        }
     }
 }
 
 /**
- * Structure of the View with an arrow back [onBackClick], a title [userName] and the content [content]
+ * Entry point for a conversation screen.
  *
- * @param userName name of the other user
- * @param onBackClick action to be done when the arrow back is pressed
- * @param content content of the layour
+ * @param actualChat [FullChat] that contains messages to display
+ * @param navigateToProfile User action when navigation to a profile is requested
+ * @param modifier [Modifier] to apply to this layout node
+ * @param onBackIconPressed Sends an event up when the user clicks on the menu
  */
 @Composable
-fun ShowConversation(
-    userName :String,
-    onBackClick : () -> Unit,
-    content : @Composable () -> Unit = {}
-){
-    Column{
-        Row(){
+fun ConversationContent(
+    user: User,
+    actualChat: FullChat,
+    navigateToProfile: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    onBackIconPressed: () -> Unit = { }
+) {
+    val scrollState = rememberScrollState()
+
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colors.background
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            Column(Modifier.fillMaxSize()) {
+
+                Messages(
+                    messages = actualChat.messages,
+                    modifier = Modifier.weight(1f),
+                    scrollState = scrollState,
+                    userId = user.id
+                )
+
+                UserInput(
+                    onMessageSent = { content ->
+                        actualChat.addMessage(
+                            Message(user.id, content, LocalDate.now().toString())
+                        )
+                    },
+                    scrollState
+                )
+
+
+            }
+
+            // Channel name bar floats above the messages
+            ChatNameBar(
+                channelName = actualChat.otherUserName,
+                onBackIconPressed = onBackIconPressed,
+                navigateToProfile = { navigateToProfile(actualChat.otherUserId) },
+            )
+        }
+    }
+}
+
+
+@Composable
+fun ChatNameBar(
+    channelName: String,
+    image: VectorAsset = Icons.Default.Person,
+    modifier: Modifier = Modifier,
+    onBackIconPressed: () -> Unit = { },
+    navigateToProfile: () -> Unit,
+) {
+
+    TopAppBar(
+        modifier = modifier,
+        title = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable(onClick = navigateToProfile),
+                //horizontalArrangement = Arrangement.Center
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Avatar
+                    Image(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .preferredSize(37.dp)//Previous value 42
+                            .border(1.5.dp, MaterialTheme.colors.primary, CircleShape)
+                            .border(3.dp, MaterialTheme.colors.surface, CircleShape)
+                            .clip(CircleShape)
+                            .align(Alignment.Top),
+                        asset = image,
+                        contentScale = ContentScale.Crop
+                    )
+
+                    // Channel name
+                    Text(
+                        modifier = Modifier.padding(start = 8.dp),
+                        text = channelName,
+                        style = MaterialTheme.typography.h6
+                    )
+                }
+
+            }
+        },
+        backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.95f),
+        elevation = 3.dp,
+        contentColor = MaterialTheme.colors.onSurface,
+        actions = {
+            ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
+                // Search icon
+                Icon(
+                    asset = Icons.Outlined.Search,
+                    modifier = Modifier
+                        .clickable(onClick = {}) // TODO: Search in the conversation.
+                        .padding(horizontal = 12.dp, vertical = 16.dp)
+                        .preferredHeight(24.dp),
+                    tint = Color.Transparent
+                )
+            }
+        },
+        navigationIcon = {
             IconButton(
-                onClick = onBackClick) {
+                onClick = onBackIconPressed
+            ) {
                 Icon(asset = Icons.Default.ArrowBack)
             }
-            Header(text = userName,
-                border = BorderStroke(0.dp, Color.Transparent))
         }
-
-        Divider()
-        content()
-    }
+    )
+    Divider()
 }
 
-/**
- * Composable of a chat message
- *
- * @param isUser boolean to show the message on the right if the app user sent it
- * @param text Text of the message
- */
+
 @Composable
-fun BubbleChat(
-    isUser : Boolean,
-    text : String
-){
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 3.dp),
-        horizontalArrangement = if(isUser) Arrangement.End
-        else Arrangement.Start
-    ){
-        Surface(
-            border = BorderStroke(1.dp, MaterialTheme.colors.primary),
-            shape = RoundedCornerShape(10.dp),
+fun Messages(
+    userId: Int,
+    messages: List<Message>,
+    scrollState: ScrollState,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+
+        ScrollableColumn(
+            scrollState = scrollState,
+            reverseScrollDirection = true,
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
-            Text(
-                modifier = Modifier.padding(6.dp),
-                text = text)
-        }
-    }
-}
+            Spacer(modifier = Modifier.preferredHeight(64.dp))
+            messages.forEachIndexed { index, content ->
+                val prevAuthor = messages.getOrNull(index - 1)?.idUser
+                val nextAuthor = messages.getOrNull(index + 1)?.idUser
+                val isFirstMessageByAuthor = prevAuthor != content.idUser
+                val isLastMessageByAuthor = nextAuthor != content.idUser
 
-@Composable
-fun MessageInput(
-    modifier :Modifier = Modifier,
-    content: @Composable() () -> Unit = {}
-){
-    Divider()
-    Row(modifier = modifier){
-       Surface(
-           modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
-               .padding(horizontal = 12.dp),
-           shape = RoundedCornerShape(10.dp),
-           border = BorderStroke(1.dp, AmbientContentColor.current.copy(0.2f))
-       ){
-           Box(
-               modifier = Modifier.padding(4.dp)
-                   .align(Alignment.CenterVertically)
-                   .fillMaxWidth()
-           ){
-               content()
-           }
-
-       }
-    }
-    Divider()
-}
-
-@Preview("Bubble chat")
-@Composable
-fun BubbleChatPreview(){
-    NightTimeTheme {
-        BubbleChat(isUser = false, text = "Mensaje de prueba")
-    }
-}
-
-@Preview("Message input")
-@Composable
-fun MessageInputPreview(){
-    NightTimeTheme {
-        MessageInput(){
-            Text("Mensaje de prueba")
-        }
-    }
-}
-
-@Preview("Chat input")
-@Composable
-fun ChatPreviw(){
-    val previewChat = FullChat(0, "Nuria Sotelo Domarco", listOf(
-        Message(0,"hey que tal?","8:04 PM"),
-        Message(1,"Bien, llegando a casa y tu?","8:04 PM"),
-        Message(0,"Acabando de trabjar","8:04 PM"),
-        Message(0,"Te apetece hacer algo hoy?","8:04 PM"),
-        Message(1,"Dicen que hoy abre el Lokal","8:04 PM")
-    ))
-
-
-    ShowConversation(previewChat.otherUserName, { }){
-        Column(
-            modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.Bottom
-        ){
-            Row(
-                modifier = Modifier.weight(1.8f)
-            ){
-                LazyColumnFor(
-                    items = previewChat.initialConversation,
-
-                    ) {
-                    BubbleChat(it.idUser == 0 , it.messageText)
+                // Hardcode day dividers for simplicity//todo acabar cuando sepa los datos
+                if (index == 0) {
+                    DayHeader("20 Aug")
+                } else if (index == 4) {
+                    DayHeader(stringResource(R.string.hoy))
                 }
+
+                Message(
+                    message = content,
+                    isUserMe = content.idUser == userId,
+                    isFirstMessageByAuthor = isFirstMessageByAuthor,
+                    isLastMessageByAuthor = isLastMessageByAuthor
+                )
+
             }
 
-            MessageInput(modifier = Modifier.weight(0.2f)){
-                Text("Aqui se escribe")
-            }
+        }
+        // Jump to bottom button shows up when user scrolls past a threshold.
+        // Convert to pixels:
+        val jumpThreshold = with(DensityAmbient.current) {
+            (56.dp).toPx()
         }
 
+        // Apply the threshold:
+        val jumpToBottomButtonEnabled = scrollState.value > jumpThreshold
+
+        JumpToBottom(
+            // Only show if the scroller is not at the bottom
+            enabled = jumpToBottomButtonEnabled,
+            onClicked = {
+                scrollState.smoothScrollTo(0f)
+            },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
+}
+
+@Composable
+fun Message(
+    message: Message,
+    isUserMe: Boolean,
+    isFirstMessageByAuthor: Boolean,
+    isLastMessageByAuthor: Boolean
+) {
+
+    val spaceBetweenAuthors = if (isFirstMessageByAuthor) Modifier.padding(top = 8.dp) else Modifier
+    val chatArrang = if (isUserMe) Arrangement.End else Arrangement.Start
+    Row(
+        modifier = spaceBetweenAuthors.fillMaxWidth(),
+        horizontalArrangement = chatArrang
+    ) {
+
+        Column {
+            AuthorAndTextMessage(
+                isUserMe = isUserMe,
+                message = message,
+                isLastMessageByAuthor = isLastMessageByAuthor,
+            )
+        }
 
     }
 }
+
+
+@Composable
+fun AuthorAndTextMessage(
+    isUserMe: Boolean,
+    message: Message,
+    isLastMessageByAuthor: Boolean
+) {
+
+    ChatItemBubble(isUserMe, message, isLastMessageByAuthor)
+
+    if (isLastMessageByAuthor) {
+        //ChatTimestamp(message)
+        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
+            Text(
+                modifier = Modifier.padding( start = if ( isUserMe)  50.dp else 25.dp),
+                text = message.timestamp,
+                style = MaterialTheme.typography.caption,
+                color = Color.Gray,
+            )
+        }
+        // Last bubble before next author
+        Spacer(modifier = Modifier.preferredHeight(8.dp))
+    } else {
+        // Between bubbles
+        Spacer(modifier = Modifier.preferredHeight(4.dp))
+    }
+
+}
+
+
+private val ChatBubbleShape = RoundedCornerShape(0.dp, 8.dp, 8.dp, 0.dp)
+private val LastChatBubbleShape = RoundedCornerShape(0.dp, 8.dp, 8.dp, 8.dp)
+
+private val ChatBubbleShapeUser = RoundedCornerShape(8.dp, 0.dp, 0.dp, 8.dp)
+private val LastChatBubbleShapeUser = RoundedCornerShape(8.dp, 0.dp, 8.dp, 8.dp)
+
+@Composable
+fun ChatItemBubble(
+    isUserMe: Boolean,
+    message: Message,
+    lastMessageByAuthor: Boolean
+) {
+// chat Padding
+    val modifier = if (isUserMe) Modifier.padding(start = 60.dp, end = 24.dp)
+    else Modifier.padding(end = 60.dp, start = 24.dp)
+
+    val backgroundBubbleColor = Color(0xFFF5F5F5)//todo cambiar
+
+    val bubbleShape = if (isUserMe) {
+        if (lastMessageByAuthor) LastChatBubbleShapeUser else ChatBubbleShapeUser
+    } else if (lastMessageByAuthor) LastChatBubbleShape else ChatBubbleShape
+
+
+    Surface(
+        modifier = modifier,
+        color = backgroundBubbleColor,
+        shape = bubbleShape
+    ) {
+        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
+            Text(
+                text = message.text,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(8.dp),
+            )
+        }
+    }
+/* //todo send photos
+    message.image?.let {
+        Spacer(modifier = Modifier.height(4.dp))
+        Surface(color = backgroundBubbleColor, shape = bubbleShape) {
+            Image(
+                asset = imageResource(it),
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.preferredSize(160.dp)
+            )
+        }
+    }
+
+ */
+}
+
+@Composable
+fun DayHeader(dayString: String) {
+    Row(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp).preferredHeight(16.dp)) {
+        DayHeaderLine()
+        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
+            Text(
+                text = dayString,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                style = MaterialTheme.typography.overline
+            )
+        }
+        DayHeaderLine()
+    }
+}
+
+@Composable
+private fun RowScope.DayHeaderLine() {
+    Divider(
+        modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+    )
+}
+
+
+@Preview("Top bar")
+@Composable
+fun TopBarPreview() {
+    ChatNameBar("Nuria Sotelo Domarco", navigateToProfile = {})
+}
+
+
 
 
 
