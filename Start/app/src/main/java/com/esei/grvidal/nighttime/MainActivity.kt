@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.TopAppBar
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)//Esto estara deprycated pronto
         setContent {
             NightTimeTheme {
                 MainScreen()
@@ -121,7 +123,7 @@ Navigation with their own files ( no dependencies )
             NavigationScreens.ChatConversation.route + "/{ChatId}",
             arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
         ) { backStackEntry ->
-            ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
+                ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
 
             //ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
 

@@ -11,6 +11,7 @@
         android:theme="@style/Theme.NightTime">
         <activity
             android:name=".MainActivity"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/app_name"
             android:theme="@style/Theme.NightTime.NoActionBar">
             <intent-filter>

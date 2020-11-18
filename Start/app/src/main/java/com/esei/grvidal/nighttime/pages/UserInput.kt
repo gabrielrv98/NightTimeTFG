@@ -28,19 +28,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
-import androidx.compose.foundation.layout.preferredSize
-import androidx.compose.foundation.layout.relativePaddingFrom
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.FirstBaseline
 import androidx.compose.material.*
@@ -112,13 +100,7 @@ fun UserInput(
 ) {
     var currentInputSelector by savedInstanceState { InputSelector.NONE }
     val dismissKeyboard = { currentInputSelector = InputSelector.NONE }
-    /*
-    backPressHandler(
-        enabled = currentInputSelector != InputSelector.NONE,
-        onBackPressed = dismissKeyboard
-    )
 
-     */
 
     var textState by remember { mutableStateOf(TextFieldValue()) }
 
@@ -127,36 +109,46 @@ fun UserInput(
 
     Column {
         Divider()
-        UserInputText(
-            textFieldValue = textState,
-            onTextChanged = { textState = it },
-            // Only show the keyboard if there's no input selector and text field has focus
-            keyboardShown = currentInputSelector == InputSelector.NONE && textFieldFocusState,
-            // Close extended selector if text field receives focus
-            onTextFieldFocused = { focused ->
-                if (focused) {
-                    currentInputSelector = InputSelector.NONE
+/*
+       TextField(
+           value = textState,
+           onValueChange = { textState = it },
+           imeAction = ImeAction.Send
+       )
+*/
+        Row{
+            UserInputText(
+                modifier = Modifier.preferredWidth(200.dp).weight(1f),
+                textFieldValue = textState,
+                onTextChanged = { textState = it },
+                // Only show the keyboard if there's no input selector and text field has focus
+                keyboardShown = currentInputSelector == InputSelector.NONE && textFieldFocusState,
+                // Close extended selector if text field receives focus
+                onTextFieldFocused = { focused ->
+                    if (focused) {
+                        currentInputSelector = InputSelector.NONE
+                        scrollState.smoothScrollTo(0f)
+                    }
+                    textFieldFocusState = focused
+                },
+                focusState = textFieldFocusState
+            )
+            UserInputSelector(
+                onSelectorChange = { currentInputSelector = it },
+                sendMessageEnabled = textState.text.isNotBlank(),
+                onMessageSent = {
+                    onMessageSent(textState.text)
+                    // Reset text field and close keyboard
+                    textState = TextFieldValue()
+                    // Move scroll to bottom
                     scrollState.smoothScrollTo(0f)
-                }
-                textFieldFocusState = focused
-            },
-            focusState = textFieldFocusState
-        )
-        UserInputSelector(
-            onSelectorChange = { currentInputSelector = it },
-            sendMessageEnabled = textState.text.isNotBlank(),
-            onMessageSent = {
-                onMessageSent(textState.text)
-                // Reset text field and close keyboard
-                textState = TextFieldValue()
-                // Move scroll to bottom
-                scrollState.smoothScrollTo(0f)
-                dismissKeyboard()
-            },
-            currentInputSelector = currentInputSelector
-        )
+                    dismissKeyboard()
+                },
+                currentInputSelector = currentInputSelector
+            )
+        }
+
         SelectorExpanded(
-            onCloseRequested = dismissKeyboard,
             onTextAdded = { textState = textState.addText(it) },
             currentSelector = currentInputSelector
         )
@@ -181,7 +173,6 @@ private fun TextFieldValue.addText(newString: String): TextFieldValue {
 @Composable
 private fun SelectorExpanded(
     currentSelector: InputSelector,
-    onCloseRequested: () -> Unit,
     onTextAdded: (String) -> Unit
 ) {
     if (currentSelector == InputSelector.NONE) return
@@ -197,48 +188,13 @@ private fun SelectorExpanded(
     val selectorExpandedColor = getSelectorExpandedColor()
 
     Surface(color = selectorExpandedColor, elevation = 3.dp) {
-        when (currentSelector) {
-            InputSelector.EMOJI -> EmojiSelector(onTextAdded, focusRequester)
-            InputSelector.DM -> NotAvailablePopup(onCloseRequested)
-            InputSelector.PICTURE -> FunctionalityNotAvailablePanel()
-            InputSelector.MAP -> FunctionalityNotAvailablePanel()
-            InputSelector.PHONE -> FunctionalityNotAvailablePanel()
-            else -> { throw NotImplementedError() }
-        }
-    }
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun FunctionalityNotAvailablePanel() {
-    AnimatedVisibility(visible = true, initiallyVisible = false, enter = fadeIn()) {
-        Column(
-            modifier = Modifier.preferredHeight(320.dp).fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
-                Text(
-                    text ="no avaliable",//todo hardcoded
-                    //stringResource(id = R.string.not_available),
-                    style = MaterialTheme.typography.subtitle1
-                )
-            }
-            ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
-                Text(
-                    text = "nos avaliable subtitle",//todo hardcoded
-                    //stringResource(id = R.string.not_available_subtitle),
-                    modifier = Modifier.relativePaddingFrom(FirstBaseline, before = 32.dp),
-                    style = MaterialTheme.typography.body2
-                )
-            }
-        }
+        EmojiSelector(onTextAdded, focusRequester)
     }
 }
 
 @Composable
 fun getSelectorExpandedColor(): Color {
-    return  MaterialTheme.colors.compositedOnSurface(alpha = 0.04f)
+    return MaterialTheme.colors.compositedOnSurface(alpha = 0.04f)
 }
 
 @Composable
@@ -249,39 +205,23 @@ private fun UserInputSelector(
     currentInputSelector: InputSelector,
     modifier: Modifier = Modifier
 ) {
+    /*
     Row(
         modifier = modifier
             .preferredHeight(56.dp)
             .wrapContentHeight()
             .padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
     ) {
+
+
+     */
         InputSelectorButton(
             onClick = { onSelectorChange(InputSelector.EMOJI) },
             icon = Icons.Outlined.Mood,
             selected = currentInputSelector == InputSelector.EMOJI
         )
-        InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.DM) },
-            icon = Icons.Outlined.AlternateEmail,
-            selected = currentInputSelector == InputSelector.DM
-        )
-        InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.PICTURE) },
-            icon = Icons.Outlined.InsertPhoto,
-            selected = currentInputSelector == InputSelector.PICTURE
-        )
-        InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.MAP) },
-            icon = Icons.Outlined.Place,
-            selected = currentInputSelector == InputSelector.MAP
-        )
-        InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.PHONE) },
-            icon = Icons.Outlined.Duo,
-            selected = currentInputSelector == InputSelector.PHONE
-        )
-
         val border = if (!sendMessageEnabled) {
             BorderStroke(
                 width = 1.dp,
@@ -290,7 +230,6 @@ private fun UserInputSelector(
         } else {
             null
         }
-        Spacer(modifier = Modifier.weight(1f))
 
         val disabledContentColor =
             AmbientEmphasisLevels.current.disabled.applyEmphasis(MaterialTheme.colors.onSurface)
@@ -304,7 +243,8 @@ private fun UserInputSelector(
         Button(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .preferredHeight(36.dp),
+                .preferredHeight(36.dp)
+                .padding(top = 6.dp),
             enabled = sendMessageEnabled,
             onClick = onMessageSent,
             colors = buttonColors,
@@ -313,12 +253,11 @@ private fun UserInputSelector(
             contentPadding = PaddingValues(0.dp)
         ) {
             Text(
-                "enviar",//todo hardcoded
-                //stringResource(id = R.string.send),
+                stringResource(R.string.send),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
-    }
+    //}
 }
 
 @Composable
@@ -335,7 +274,9 @@ private fun InputSelectorButton(
             Icon(
                 icon,
                 tint = tint,
-                modifier = Modifier.padding(12.dp).preferredSize(20.dp)
+                modifier = Modifier.padding(vertical = 12.dp)
+                    .padding( start = 12.dp, end = 0.dp)
+                    .preferredSize(20.dp)
             )
         }
     }
@@ -343,10 +284,9 @@ private fun InputSelectorButton(
 
 @Composable
 private fun NotAvailablePopup(onDismissed: () -> Unit) {
-    AlertDialog(onDismissRequest = onDismissed, buttons = {}
-    , text = {
-            Text("not avaliable")
-        }
+    AlertDialog(onDismissRequest = onDismissed, buttons = {}, text = {
+        Text("not avaliable")
+    }
     )
 }
 
@@ -357,6 +297,7 @@ var SemanticsPropertyReceiver.keyboardShownProperty by KeyboardShownKey
 @ExperimentalFoundationApi
 @Composable
 private fun UserInputText(
+    modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
     onTextChanged: (TextFieldValue) -> Unit,
     textFieldValue: TextFieldValue,
@@ -375,8 +316,8 @@ private fun UserInputText(
     }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            //.fillMaxWidth()
             .preferredHeight(48.dp),
         horizontalArrangement = Arrangement.End
     ) {
@@ -426,13 +367,11 @@ fun EmojiSelector(
 ) {
     var selected by remember { mutableStateOf(EmojiStickerSelector.EMOJI) }
 
-    val a11yLabel = "eMOJI SELECTOR"//TODO IS HARDCODED
-        //stringResource(id = R.string.emoji_selector_desc)
+    //stringResource(id = R.string.emoji_selector_desc)
     Column(
         modifier = Modifier
             .focusRequester(focusRequester) // Requests focus when the Emoji selector is displayed
             .focus() // Make the emoji selector focusable so it can steal focus from TextField
-            .semantics { accessibilityLabel = a11yLabel }
     ) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
             ExtendedSelectorInnerButton(
@@ -442,13 +381,7 @@ fun EmojiSelector(
                 selected = true,
                 modifier = Modifier.weight(1f)
             )
-            ExtendedSelectorInnerButton(
-                text = "STIKERS",
-                //stringResource(id = R.string.stickers_label),
-                onClick = { selected = EmojiStickerSelector.STICKER },
-                selected = false,
-                modifier = Modifier.weight(1f)
-            )
+
         }
         ScrollableRow {
             EmojiTable(onTextAdded, modifier = Modifier.padding(8.dp))
