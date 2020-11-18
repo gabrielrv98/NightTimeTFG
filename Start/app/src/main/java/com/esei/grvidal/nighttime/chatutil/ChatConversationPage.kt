@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.pages
+package com.esei.grvidal.nighttime.chatutil
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -29,9 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
+import androidx.compose.ui.unit.sp
 //import androidx.compose.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.Message
+import com.esei.grvidal.nighttime.pages.errorComposable
 import java.time.LocalDate
 
 
@@ -326,7 +328,7 @@ fun ChatItemBubble(
     val modifier = if (isUserMe) Modifier.padding(start = 60.dp, end = 24.dp)
     else Modifier.padding(end = 60.dp, start = 24.dp)
 
-    val backgroundBubbleColor = Color(0xFFF5F5F5)//todo cambiar
+    val backgroundBubbleColor = Color(0xFFF5F5F5)
 
     val bubbleShape = if (isUserMe) {
         if (lastMessageByAuthor) LastChatBubbleShapeUser else ChatBubbleShapeUser
@@ -341,7 +343,8 @@ fun ChatItemBubble(
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
             Text(
                 text = message.text,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.body2,
+                fontSize = 16.sp,
                 modifier = Modifier.padding(8.dp),
             )
         }

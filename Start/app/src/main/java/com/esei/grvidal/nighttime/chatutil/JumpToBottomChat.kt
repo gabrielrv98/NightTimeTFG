@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.pages
+package com.esei.grvidal.nighttime.chatutil
 
 
 import androidx.compose.animation.DpPropKey

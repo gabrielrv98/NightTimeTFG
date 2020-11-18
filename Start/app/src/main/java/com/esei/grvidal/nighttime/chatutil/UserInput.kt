@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.esei.grvidal.nighttime.pages
+package com.esei.grvidal.nighttime.chatutil
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
