@@ -16,28 +16,13 @@
 
 package com.esei.grvidal.nighttime.pages
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.AmbientContentColor
-import androidx.compose.foundation.AmbientTextStyle
-import androidx.compose.foundation.BaseTextField
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.ScrollableRow
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.FirstBaseline
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.*
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AlternateEmail
-import androidx.compose.material.icons.outlined.Duo
-import androidx.compose.material.icons.outlined.InsertPhoto
 import androidx.compose.material.icons.outlined.Mood
-import androidx.compose.material.icons.outlined.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,10 +41,6 @@ import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.SemanticsPropertyKey
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.accessibilityLabel
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -74,16 +55,8 @@ import com.esei.grvidal.nighttime.ui.compositedOnSurface
 
 enum class InputSelector {
     NONE,
-    MAP,
-    DM,
-    EMOJI,
-    PHONE,
-    PICTURE
-}
-
-enum class EmojiStickerSelector {
-    EMOJI,
-    STICKER
+    EMOJI//,
+    //PICTURE TODO maybe in a future
 }
 
 @Preview
@@ -109,13 +82,6 @@ fun UserInput(
 
     Column {
         Divider()
-/*
-       TextField(
-           value = textState,
-           onValueChange = { textState = it },
-           imeAction = ImeAction.Send
-       )
-*/
         Row{
             UserInputText(
                 modifier = Modifier.preferredWidth(200.dp).weight(1f),
@@ -203,20 +169,7 @@ private fun UserInputSelector(
     sendMessageEnabled: Boolean,
     onMessageSent: () -> Unit,
     currentInputSelector: InputSelector,
-    modifier: Modifier = Modifier
 ) {
-    /*
-    Row(
-        modifier = modifier
-            .preferredHeight(56.dp)
-            .wrapContentHeight()
-            .padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
-    ) {
-
-
-     */
         InputSelectorButton(
             onClick = { onSelectorChange(InputSelector.EMOJI) },
             icon = Icons.Outlined.Mood,
@@ -249,7 +202,6 @@ private fun UserInputSelector(
             onClick = onMessageSent,
             colors = buttonColors,
             border = border,
-            // TODO: Workaround for https://issuetracker.google.com/158830170
             contentPadding = PaddingValues(0.dp)
         ) {
             Text(
@@ -257,7 +209,6 @@ private fun UserInputSelector(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
-    //}
 }
 
 @Composable
@@ -282,16 +233,6 @@ private fun InputSelectorButton(
     }
 }
 
-@Composable
-private fun NotAvailablePopup(onDismissed: () -> Unit) {
-    AlertDialog(onDismissRequest = onDismissed, buttons = {}, text = {
-        Text("not avaliable")
-    }
-    )
-}
-
-val KeyboardShownKey = SemanticsPropertyKey<Boolean>("KeyboardShownKey")
-var SemanticsPropertyReceiver.keyboardShownProperty by KeyboardShownKey
 
 @OptIn(ExperimentalFocus::class)
 @ExperimentalFoundationApi
@@ -350,8 +291,7 @@ private fun UserInputText(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
                         .padding(start = 16.dp),
-                    text = "textFieldHint",//TODO IS HARDCODED
-                    //stringResource(id = R.string.textfield_hint),
+                    text = stringResource(id = R.string.TextFieldHint),
                     style = MaterialTheme.typography.body1.copy(color = disableContentColor)
                 )
             }
@@ -365,9 +305,6 @@ fun EmojiSelector(
     onTextAdded: (String) -> Unit,
     focusRequester: FocusRequester
 ) {
-    var selected by remember { mutableStateOf(EmojiStickerSelector.EMOJI) }
-
-    //stringResource(id = R.string.emoji_selector_desc)
     Column(
         modifier = Modifier
             .focusRequester(focusRequester) // Requests focus when the Emoji selector is displayed
@@ -377,7 +314,6 @@ fun EmojiSelector(
             ExtendedSelectorInnerButton(
                 text = "EMOJIS",
                 //stringResource(id = R.string.emojis_label),
-                onClick = { selected = EmojiStickerSelector.EMOJI },
                 selected = true,
                 modifier = Modifier.weight(1f)
             )
@@ -387,15 +323,12 @@ fun EmojiSelector(
             EmojiTable(onTextAdded, modifier = Modifier.padding(8.dp))
         }
     }
-    if (selected == EmojiStickerSelector.STICKER) {
-        NotAvailablePopup(onDismissed = { selected = EmojiStickerSelector.EMOJI })
-    }
+
 }
 
 @Composable
 fun ExtendedSelectorInnerButton(
     text: String,
-    onClick: () -> Unit,
     selected: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -406,14 +339,14 @@ fun ExtendedSelectorInnerButton(
         disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.74f)
     )
     TextButton(
-        onClick = onClick,
+        onClick = {},
+
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .preferredHeight(30.dp),
         shape = MaterialTheme.shapes.medium,
         enabled = selected,
         colors = colors,
-        // TODO: Workaround for https://issuetracker.google.com//158830170
         contentPadding = PaddingValues(0.dp)
     ) {
         Text(

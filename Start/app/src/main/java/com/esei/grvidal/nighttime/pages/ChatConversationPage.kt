@@ -110,8 +110,6 @@ fun ConversationContent(
                     },
                     scrollState
                 )
-
-
             }
 
             // Channel name bar floats above the messages
