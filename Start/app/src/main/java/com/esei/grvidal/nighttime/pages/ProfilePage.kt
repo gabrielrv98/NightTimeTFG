@@ -39,33 +39,34 @@ fun ProfilePageView(navController: NavHostController, userId: Int?) {
         errorComposable(errorText = stringResource(id = R.string.errorProfileId))
     } else {
         //Datos del usuario
-        //val user = ProfileViewModel()
-        //val viewModel = remember { mutableStateOf<ProfileViewModel>(user) }
-        //viewModel.component1().setUserId(userId)
-        val userData = if (userId == meUser.id) meUser else userPreview // user = UserDao.getUserbyId(userId)
+        val userData =
+            if (userId == meUser.id) meUser else userPreview // user = UserDao.getUserbyId(userId)
 
         //ProfilePage(user.toProfileScreenState())
         //viewModel.component1().userData.observeAsState().value.let { userData: ProfileScreenState? ->
 
-            if (userData == null) {
-                errorComposable(errorText = stringResource(id = R.string.errorProfileId))
-            } else {
-                val onFavButtonClick = if (userData.toProfileScreenState().isMe()) {
-                    {
-                        navController.navigate( NavigationScreens.ProfileEditor.route )
-                    }
-                } else{
-                    {
-                      navController.navigateWithId( NavigationScreens.ChatConversation.route, userData.id )// or ...route , userId)
-                    }
+        if (userData == null) {
+            errorComposable(errorText = stringResource(id = R.string.errorProfileId))
+        } else {
+            val onFavButtonClick = if (userData.toProfileScreenState().isMe()) {
+                {
+                    navController.navigate(NavigationScreens.ProfileEditor.route)
                 }
-                ProfilePage(
-                    user = userData.toProfileScreenState(),
-                    onClick = onFavButtonClick
-                )
-                //ProfilePage(userData)
+            } else {
+                {
+                    navController.navigateWithId(
+                        NavigationScreens.ChatConversation.route,
+                        userData.id
+                    )// or ...route , userId)
+                }
             }
-       //}
+            ProfilePage(
+                user = userData.toProfileScreenState(),
+                onClick = onFavButtonClick
+            )
+            //ProfilePage(userData)
+        }
+        //}
 
 
     }
@@ -80,7 +81,7 @@ fun ProfilePage(user: ProfileScreenState, onClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         WithConstraints {
             Box(modifier = Modifier.weight(1f)) {
-                Surface (color = MaterialTheme.colors.background){
+                Surface(color = MaterialTheme.colors.background) {
                     ScrollableColumn(
                         modifier = Modifier.fillMaxSize(),
                         scrollState = scrollState
@@ -119,7 +120,7 @@ private fun UserInfoFields(userData: ProfileScreenState, containerHeight: Dp) {
 
         ProfileProperty(stringResource(R.string.status), userData.status)
 
-        userData.nextDate?.let{
+        userData.nextDate?.let {
             ProfileProperty(stringResource(R.string.nextDate), it.toStringFormatted())
         }
 

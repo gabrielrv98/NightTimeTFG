@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.TopAppBar
@@ -29,14 +30,18 @@ import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
 
-    //private val viewModel: ProfileViewModel by ViewModel()<ProfileViewModel>
-    //private val user by viewModels<User> { }
+    //val chat by viewModels<ChatViewModel>()
+    //todo finish
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val user: ProfileViewModel by viewModels()
         setContent {
             NightTimeTheme {
-                MainScreen()
+                MainScreen(
+                    //chat,
+                    //onAddItem = chat::addItem,
+                )
             }
         }
     }
@@ -46,7 +51,10 @@ class MainActivity : AppCompatActivity() {
  * MainScreen with the function that will allow it to manage the navigation system
  */
 @Composable
-private fun MainScreen() {
+private fun MainScreen(
+    //chat : ChatViewModel,
+    //onAddItem: (Message) -> Unit,
+ ) {
 /* Actual Navigation system
         https://proandroiddev.com/implement-bottom-bar-navigation-in-jetpack-compose-b530b1cd9ee2
 
