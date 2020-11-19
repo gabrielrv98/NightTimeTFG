@@ -58,6 +58,8 @@ sealed class NavigationScreens(
         NavigationScreens("BarDetails", R.string.barDetails_route)
     object ChatConversation :
         NavigationScreens("ChatConversation", R.string.ChatConversation)
+    object ProfileEditor :
+        NavigationScreens("ProfileEditor", R.string.ProfileEditor)
 
 }
 

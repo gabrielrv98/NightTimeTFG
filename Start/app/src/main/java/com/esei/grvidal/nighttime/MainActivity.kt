@@ -1,7 +1,6 @@
 package com.esei.grvidal.nighttime
 
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.TopAppBar
@@ -13,11 +12,14 @@ import androidx.ui.tooling.preview.Preview
 
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
 import com.esei.grvidal.nighttime.data.CityDao
+import com.esei.grvidal.nighttime.data.ProfileViewModel
 import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.pages.*
 
@@ -27,11 +29,11 @@ import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
 
+    //private val viewModel: ProfileViewModel by ViewModel()<ProfileViewModel>
     //private val user by viewModels<User> { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)//Esto estara deprycated pronto
         setContent {
             NightTimeTheme {
                 MainScreen()
@@ -153,6 +155,17 @@ Navigation with their own files ( no dependencies )
                 ProfilePageView(navController, backStackEntry.arguments?.getInt("userId"))
             }
         }
+
+        composable(
+            NavigationScreens.ProfileEditor.route ) {
+
+            ScreenScaffolded(
+                topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
+                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                ProfileEditorPage(navController)
+            }
+        }
     }
 }
 
@@ -196,7 +209,7 @@ fun bottomBarNavConstructor(
 @Composable
 fun PreviewScreen() {
     NightTimeTheme {
-        ScreenScaffolded() {}
+        ScreenScaffolded{}
 
 
     }

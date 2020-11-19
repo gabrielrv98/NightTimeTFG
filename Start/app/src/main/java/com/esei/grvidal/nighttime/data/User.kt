@@ -18,7 +18,8 @@ class ProfileViewModel : ViewModel() {
         if (newUserId != userId) {
             userId = newUserId ?: meUser.id
         }
-        _userData.value = if (userId == meUser.id) meUser.toProfileScreenState() else userPreview.toProfileScreenState()
+        _userData.value =
+            if (userId == meUser.id) meUser.toProfileScreenState() else userPreview.toProfileScreenState()
     }
 
     private val _userData = MutableLiveData<ProfileScreenState>()
@@ -30,16 +31,18 @@ data class ProfileScreenState(
     val id: Int,
     @DrawableRes val photo: Int?,
     val name: String,
+    val nickname: String,
     val status: String,
     var nextDate: MyDate? = null
 ) {
     fun isMe() = id == meUser.id
 }
 
-fun User.toProfileScreenState() : ProfileScreenState{
+fun User.toProfileScreenState(): ProfileScreenState {
     return ProfileScreenState(
         id = this.id,
         name = this.name,
+        nickname = this.nickname,
         status = this.status,
         nextDate = this.nextDate,
         photo = this.photo
@@ -51,109 +54,141 @@ fun User.toProfileScreenState() : ProfileScreenState{
 class User(val name: String) : ViewModel() {
     var id = 0//user ID
     var nextDate: MyDate? = null
-    lateinit var status : String
+    var nickname: String = ""
+    lateinit var status: String
     var photo: Int? = null
 
 
-    var city: City = City(0,"Ourense")
+    var city: City = City(0, "Ourense")
 
-    fun getChats() : List<ChatData>{
+    fun getChats(): List<ChatData> {
         return listOf(
-            ChatData(0,userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
-            ChatData(1,userName = "Maria Jose", "Ya he hecho lentejas"),
-            ChatData(2,userName = "Pablo Pablito", "Hoy he clavado un clavo"),
-            ChatData(3,userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
-            ChatData(0,userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
-            ChatData(1,userName = "Maria Jose", "Ya he hecho lentejas"),
-            ChatData(2,userName = "Pablo Pablito", "Hoy he clavado un clavo"),
-            ChatData(3,userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
-            ChatData(0,userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
-            ChatData(1,userName = "Maria Jose", "Ya he hecho lentejas"),
-            ChatData(2,userName = "Pablo Pablito", "Hoy he clavado un clavo"),
-            ChatData(3,userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
-            ChatData(0,userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
-            ChatData(1,userName = "Maria Jose", "Ya he hecho lentejas"),
-            ChatData(2,userName = "Pablo Pablito", "Hoy he clavado un clavo"),
-            ChatData(3,userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?"),
+            ChatData(0, userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
+            ChatData(1, userName = "Maria Jose", "Ya he hecho lentejas"),
+            ChatData(2, userName = "Pablo Pablito", "Hoy he clavado un clavo"),
+            ChatData(
+                3, userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
+                        " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                        "Fue increible pero ojala no repetirlo nunca entiendes?"
+            ),
+            ChatData(0, userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
+            ChatData(1, userName = "Maria Jose", "Ya he hecho lentejas"),
+            ChatData(2, userName = "Pablo Pablito", "Hoy he clavado un clavo"),
+            ChatData(
+                3, userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
+                        " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                        "Fue increible pero ojala no repetirlo nunca entiendes?"
+            ),
+            ChatData(0, userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
+            ChatData(1, userName = "Maria Jose", "Ya he hecho lentejas"),
+            ChatData(2, userName = "Pablo Pablito", "Hoy he clavado un clavo"),
+            ChatData(
+                3, userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
+                        " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                        "Fue increible pero ojala no repetirlo nunca entiendes?"
+            ),
+            ChatData(0, userName = "Nuria Sotelo Domarco", "Dicen que hoy abre el Lokal"),
+            ChatData(1, userName = "Maria Jose", "Ya he hecho lentejas"),
+            ChatData(2, userName = "Pablo Pablito", "Hoy he clavado un clavo"),
+            ChatData(
+                3, userName = "Elma RockStar", "Concierto en aquel sitio!!, cuento contigo" +
+                        " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                        "Fue increible pero ojala no repetirlo nunca entiendes?"
+            ),
         )
     }
-    fun getChatConversation(idChat : Int): FullChat{
+
+    fun getChatConversation(idChat: Int): FullChat {
         return allChats[idChat]
     }
 
-    private var allChats : List<FullChat> = listOf(
-        FullChat(0, "Nuria Sotelo Domarco", 1,listOf(
-            Message(0,"hey que tal?","8:04 PM"),
-            Message(1,"Bien, llegando a casa y tu?","8:04 PM"),
-            Message(0,"Acabando de trabjar","8:04 PM"),
-            Message(0,"Te apetece hacer algo hoy?","8:04 PM"),
-            Message(1,"Dicen que hoy abre el Lokal","8:04 PM")
-        )),
-        FullChat(1, "Maria Jose", 2, listOf(
-            Message(3,"Hola hijo","8:04 PM"),
-            Message(3,"Estas bien?","8:04 PM"),
-            Message(0,"Con algo de hambre","8:04 PM"),
-            Message(3,"Yo me encargo","8:04 PM"),
-            Message(3,"Ya he hecho lentejas","8:04 PM")
-        )),
-                FullChat(2, "Pablo Pablito", 3, listOf(
-            Message(3,"Hola hijo","8:04 PM"),
-            Message(3,"Estas bien?","8:04 PM"),
-            Message(0,"Con algo de hambre","8:04 PM"),
-            Message(3,"Yo me encargo","8:04 PM"),
-            Message(3,"Hoy he clavado un clavo","8:04 PM")
-        )),
-        FullChat(3, "Elma RockStar", 4,listOf(
-            Message(3,"Hola hijo","8:04 PM"),
-            Message(3,"Estas bien?","8:04 PM"),
-            Message(0,"Con algo de hambre","8:04 PM"),
-            Message(3,"Yo me encargo","8:04 PM"),
-            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
-                     " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
-            Message(3,"Hola hijo","8:04 PM"),
-            Message(3,"Estas bien?","8:04 PM"),
-            Message(0,"Con algo de hambre","8:04 PM"),
-            Message(3,"Yo me encargo","8:04 PM"),
-            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
-            Message(3,"Hola hijo","8:04 PM"),
-            Message(3,"Estas bien?","8:04 PM"),
-            Message(0,"Con algo de hambre","8:04 PM"),
-            Message(3,"Yo me encargo","8:04 PM"),
-            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
-            Message(3,"Hola hijo","8:04 PM"),
-            Message(3,"Estas bien?","8:04 PM"),
-            Message(0,"Con algo de hambre","8:04 PM"),
-            Message(3,"Yo me encargo","8:04 PM"),
-            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
-            Message(3,"Hola hijo","8:04 PM"),
-            Message(3,"Estas bien?","8:04 PM"),
-            Message(0,"Con algo de hambre","8:04 PM"),
-            Message(0,"Pero poca","8:04 PM"),
-            Message(0,"Con algo de hambreeeeeeeeeeeeeeeeeeeee","8:04 PM"),
-            Message(0,"Con algo de hambreeeeeeeeeeeeeeeee","8:04 PM"),
-            Message(0,"Con algo de hambreeeeeee","8:04 PM"),
-            Message(0,"Pero no tanta como la del concierto del ourenrock esa vez fue increible\nUf\n cuantos recuerdos parece mentira eh","8:04 PM"),
-            Message(3,"Yo me encargo","8:04 PM"),
-            Message(3,"Concierto en aquel sitio!!, cuento contigo" +
-                    " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
-                    "Fue increible pero ojala no repetirlo nunca entiendes?","8:04 PM"),
-            Message(0,"Ok","8:14 PM"),
-        ))
+    private var allChats: List<FullChat> = listOf(
+        FullChat(
+            0, "Nuria Sotelo Domarco", 1, listOf(
+                Message(0, "hey que tal?", "8:04 PM"),
+                Message(1, "Bien, llegando a casa y tu?", "8:04 PM"),
+                Message(0, "Acabando de trabjar", "8:04 PM"),
+                Message(0, "Te apetece hacer algo hoy?", "8:04 PM"),
+                Message(1, "Dicen que hoy abre el Lokal", "8:04 PM")
+            )
+        ),
+        FullChat(
+            1, "Maria Jose", 2, listOf(
+                Message(3, "Hola hijo", "8:04 PM"),
+                Message(3, "Estas bien?", "8:04 PM"),
+                Message(0, "Con algo de hambre", "8:04 PM"),
+                Message(3, "Yo me encargo", "8:04 PM"),
+                Message(3, "Ya he hecho lentejas", "8:04 PM")
+            )
+        ),
+        FullChat(
+            2, "Pablo Pablito", 3, listOf(
+                Message(3, "Hola hijo", "8:04 PM"),
+                Message(3, "Estas bien?", "8:04 PM"),
+                Message(0, "Con algo de hambre", "8:04 PM"),
+                Message(3, "Yo me encargo", "8:04 PM"),
+                Message(3, "Hoy he clavado un clavo", "8:04 PM")
+            )
+        ),
+        FullChat(
+            3, "Elma RockStar", 4, listOf(
+                Message(3, "Hola hijo", "8:04 PM"),
+                Message(3, "Estas bien?", "8:04 PM"),
+                Message(0, "Con algo de hambre", "8:04 PM"),
+                Message(3, "Yo me encargo", "8:04 PM"),
+                Message(
+                    3, "Concierto en aquel sitio!!, cuento contigo" +
+                            " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                            "Fue increible pero ojala no repetirlo nunca entiendes?", "8:04 PM"
+                ),
+                Message(3, "Hola hijo", "8:04 PM"),
+                Message(3, "Estas bien?", "8:04 PM"),
+                Message(0, "Con algo de hambre", "8:04 PM"),
+                Message(3, "Yo me encargo", "8:04 PM"),
+                Message(
+                    3, "Concierto en aquel sitio!!, cuento contigo" +
+                            " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                            "Fue increible pero ojala no repetirlo nunca entiendes?", "8:04 PM"
+                ),
+                Message(3, "Hola hijo", "8:04 PM"),
+                Message(3, "Estas bien?", "8:04 PM"),
+                Message(0, "Con algo de hambre", "8:04 PM"),
+                Message(3, "Yo me encargo", "8:04 PM"),
+                Message(
+                    3, "Concierto en aquel sitio!!, cuento contigo" +
+                            " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                            "Fue increible pero ojala no repetirlo nunca entiendes?", "8:04 PM"
+                ),
+                Message(3, "Hola hijo", "8:04 PM"),
+                Message(3, "Estas bien?", "8:04 PM"),
+                Message(0, "Con algo de hambre", "8:04 PM"),
+                Message(3, "Yo me encargo", "8:04 PM"),
+                Message(
+                    3, "Concierto en aquel sitio!!, cuento contigo" +
+                            " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                            "Fue increible pero ojala no repetirlo nunca entiendes?", "8:04 PM"
+                ),
+                Message(3, "Hola hijo", "8:04 PM"),
+                Message(3, "Estas bien?", "8:04 PM"),
+                Message(0, "Con algo de hambre", "8:04 PM"),
+                Message(0, "Pero poca", "8:04 PM"),
+                Message(0, "Con algo de hambreeeeeeeeeeeeeeeeeeeee", "8:04 PM"),
+                Message(0, "Con algo de hambreeeeeeeeeeeeeeeee", "8:04 PM"),
+                Message(0, "Con algo de hambreeeeeee", "8:04 PM"),
+                Message(
+                    0,
+                    "Pero no tanta como la del concierto del ourenrock esa vez fue increible\nUf\n cuantos recuerdos parece mentira eh",
+                    "8:04 PM"
+                ),
+                Message(3, "Yo me encargo", "8:04 PM"),
+                Message(
+                    3, "Concierto en aquel sitio!!, cuento contigo" +
+                            " espero que no te pongas enfermo ocmo la ultima vez en aquel lugar, te acuerdas?\n" +
+                            "Fue increible pero ojala no repetirlo nunca entiendes?", "8:04 PM"
+                ),
+                Message(0, "Ok", "8:14 PM"),
+            )
+        )
     )
 
 
@@ -161,14 +196,16 @@ class User(val name: String) : ViewModel() {
 
 val userPreview = User("Manuel").apply {
     this.id = 1//user ID
-    this.nextDate = MyDate(20,11,2020)
+    this.nickname = "Manu_23f"
+    this.nextDate = MyDate(20, 11, 2020)
     this.status = "Hey there I'm using NightTime"
     this.photo = R.drawable.someone_else
 }
 
 val meUser = User("Gabriel").apply {
     this.id = 0//user ID
-    this.nextDate = MyDate(25,11,2020)
+    this.nickname = "grvidal"
+    this.nextDate = MyDate(25, 11, 2020)
     this.status = "Hey there I'm using NightTime"
     this.photo = R.drawable.arcangel
 }

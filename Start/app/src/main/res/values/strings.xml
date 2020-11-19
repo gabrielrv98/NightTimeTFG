@@ -59,4 +59,6 @@
     <string name="status">Estado</string>
     <string name="edit_profile">Editar perfil</string>
     <string name="sed_message">Enviar mensaje</string>
+    <string name="nextDate">Proxima fecha marcada</string>
+    <string name="ProfileEditor">ProfileEditor</string>
 </resources>

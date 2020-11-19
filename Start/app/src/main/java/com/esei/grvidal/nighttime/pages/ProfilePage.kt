@@ -8,7 +8,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Create
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -21,40 +20,67 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import androidx.ui.tooling.preview.Preview
-import com.esei.grvidal.nighttime.BottomNavigationScreens
+import com.esei.grvidal.nighttime.NavigationScreens
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.chatutil.ConversationContent
 import com.esei.grvidal.nighttime.components.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.navigateWithId
+
 
 @Composable
-fun ProfilePageView(navController: NavController, userId : Int?){
-
+fun ProfilePageView(navController: NavHostController, userId: Int?) {
 
 
     //Nullable check
     if (userId == null) {
         errorComposable(errorText = stringResource(id = R.string.errorProfileId))
     } else {
-        val user =  if(userId == meUser.id)  meUser else userPreview // user = UserDao.getUserbyId(userId)
+        //Datos del usuario
+        //val user = ProfileViewModel()
+        //val viewModel = remember { mutableStateOf<ProfileViewModel>(user) }
+        //viewModel.component1().setUserId(userId)
+        val userData = if (userId == meUser.id) meUser else userPreview // user = UserDao.getUserbyId(userId)
 
-        ProfilePage(user.toProfileScreenState())
+        //ProfilePage(user.toProfileScreenState())
+        //viewModel.component1().userData.observeAsState().value.let { userData: ProfileScreenState? ->
+
+            if (userData == null) {
+                errorComposable(errorText = stringResource(id = R.string.errorProfileId))
+            } else {
+                val onFavButtonClick = if (userData.toProfileScreenState().isMe()) {
+                    {
+                        navController.navigate( NavigationScreens.ProfileEditor.route )
+                    }
+                } else{
+                    {
+                      navController.navigateWithId( NavigationScreens.ChatConversation.route, userData.id )// or ...route , userId)
+                    }
+                }
+                ProfilePage(
+                    user = userData.toProfileScreenState(),
+                    onClick = onFavButtonClick
+                )
+                //ProfilePage(userData)
+            }
+       //}
+
 
     }
 }
 
+
 @Composable
-fun ProfilePage( user : ProfileScreenState ){
+fun ProfilePage(user: ProfileScreenState, onClick: () -> Unit) {
 
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         WithConstraints {
             Box(modifier = Modifier.weight(1f)) {
-                Surface {
+                Surface (color = MaterialTheme.colors.background){
                     ScrollableColumn(
                         modifier = Modifier.fillMaxSize(),
                         scrollState = scrollState
@@ -68,8 +94,9 @@ fun ProfilePage( user : ProfileScreenState ){
                 }
                 ProfileFab(
                     extended = scrollState.value == 0f,
-                    userIsMe = user.id == meUser.id,
-                    modifier = Modifier.align(Alignment.BottomEnd)
+                    userIsMe = user.isMe(),
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    onClick = onClick
                 )
             }
         }
@@ -81,11 +108,21 @@ private fun UserInfoFields(userData: ProfileScreenState, containerHeight: Dp) {
     Column {
         Spacer(modifier = Modifier.preferredHeight(8.dp))
 
-        NameAndPosition(userData)
+        nickName(
+            userData = userData,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 4.dp)
+        )
 
         ProfileProperty(stringResource(R.string.display_name), userData.name)
 
         ProfileProperty(stringResource(R.string.status), userData.status)
+
+        userData.nextDate?.let{
+            ProfileProperty(stringResource(R.string.nextDate), it.toStringFormatted())
+        }
+
 
         // Add a spacer that always shows part (320.dp) of the fields list regardless of the device,
         // in order to always leave some content at the top.
@@ -93,25 +130,11 @@ private fun UserInfoFields(userData: ProfileScreenState, containerHeight: Dp) {
     }
 }
 
-
 @Composable
-private fun NameAndPosition(
-    userData: ProfileScreenState
-) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Name(
-            userData,
-            modifier = Modifier//.baselineHeight(32.dp)//todo eliminado esto
-        )
-    }
-}
-
-
-@Composable
-private fun Name(userData: ProfileScreenState, modifier: Modifier = Modifier) {
+private fun nickName(userData: ProfileScreenState, modifier: Modifier = Modifier) {
     ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
         Text(
-            text = userData.name,
+            text = userData.nickname,
             modifier = modifier,
             style = MaterialTheme.typography.h5
         )
@@ -151,12 +174,12 @@ private fun ProfileHeader(
 
 @Composable
 fun ProfileProperty(label: String, value: String, isLink: Boolean = false) {
-    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 2.dp)) {
         Divider()
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
             Text(
                 text = label,
-                modifier = Modifier,//.baselineHeight(24.dp),//Todo eliminado esto
+                modifier = Modifier.padding(top = 4.dp),
                 style = MaterialTheme.typography.caption
             )
         }
@@ -168,7 +191,7 @@ fun ProfileProperty(label: String, value: String, isLink: Boolean = false) {
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
             Text(
                 text = value,
-                modifier = Modifier,//.baselineHeight(24.dp),//Todo eliminado esto
+                modifier = Modifier,
                 style = style
             )
         }
@@ -176,10 +199,15 @@ fun ProfileProperty(label: String, value: String, isLink: Boolean = false) {
 }
 
 @Composable
-fun ProfileFab(extended: Boolean, userIsMe: Boolean, modifier: Modifier = Modifier) {
+fun ProfileFab(
+    extended: Boolean,
+    userIsMe: Boolean,
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     key(userIsMe) { // Prevent multiple invocations to execute during composition
         FloatingActionButton(
-            onClick = { /* TODO */ },
+            onClick = onClick,
             modifier = modifier
                 .padding(16.dp)
                 .preferredHeight(48.dp)
@@ -210,11 +238,11 @@ fun ProfileFab(extended: Boolean, userIsMe: Boolean, modifier: Modifier = Modifi
 @Preview
 @Composable
 fun ConvPreview480MeDefault() {
-    ProfilePage(userPreview.toProfileScreenState())
+    ProfilePage(userPreview.toProfileScreenState()) {}
 }
 
 @Preview
 @Composable
 fun ProfileFabPreview() {
-        ProfileFab(extended = true, userIsMe = false)
+    ProfileFab(extended = true, userIsMe = false)
 }

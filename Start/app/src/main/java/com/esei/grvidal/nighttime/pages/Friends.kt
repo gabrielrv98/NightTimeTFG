@@ -36,8 +36,8 @@ fun FriendsPageView(navController: NavHostController) {
         LazyColumnFor(items = user.getChats()) {
 
             ChatEntry(userName = it.userName, lastMessage = it.lastMessage,
-                onEntryClick = { navController.navigateWithId( NavigationScreens.ChatConversation.route, it.id )
-                } )
+                onEntryClick = { navController.navigateWithId( NavigationScreens.ChatConversation.route, it.id ) }
+            )
         }
     }
 }
