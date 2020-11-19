@@ -1,11 +1,59 @@
 package com.esei.grvidal.nighttime.data
 
+import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Immutable
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.esei.grvidal.nighttime.R
+
+
+//Todo try to use them in the future
+
+class ProfileViewModel : ViewModel() {
+
+    private var userId: Int = 99
+
+    fun setUserId(newUserId: Int?) {
+        if (newUserId != userId) {
+            userId = newUserId ?: meUser.id
+        }
+        _userData.value = if (userId == meUser.id) meUser.toProfileScreenState() else userPreview.toProfileScreenState()
+    }
+
+    private val _userData = MutableLiveData<ProfileScreenState>()
+    val userData: LiveData<ProfileScreenState> = _userData
+}
+
+@Immutable
+data class ProfileScreenState(
+    val id: Int,
+    @DrawableRes val photo: Int?,
+    val name: String,
+    val status: String,
+    var nextDate: MyDate? = null
+) {
+    fun isMe() = id == meUser.id
+}
+
+fun User.toProfileScreenState() : ProfileScreenState{
+    return ProfileScreenState(
+        id = this.id,
+        name = this.name,
+        status = this.status,
+        nextDate = this.nextDate,
+        photo = this.photo
+    )
+}
+
+//here ends the copied code
 
 class User(val name: String) : ViewModel() {
-    val id = 0//user ID
-
+    var id = 0//user ID
     var nextDate: MyDate? = null
+    lateinit var status : String
+    var photo: Int? = null
+
 
     var city: City = City(0,"Ourense")
 
@@ -109,6 +157,20 @@ class User(val name: String) : ViewModel() {
     )
 
 
+}
+
+val userPreview = User("Manuel").apply {
+    this.id = 1//user ID
+    this.nextDate = MyDate(20,11,2020)
+    this.status = "Hey there I'm using NightTime"
+    this.photo = R.drawable.someone_else
+}
+
+val meUser = User("Gabriel").apply {
+    this.id = 0//user ID
+    this.nextDate = MyDate(25,11,2020)
+    this.status = "Hey there I'm using NightTime"
+    this.photo = R.drawable.arcangel
 }
 
 data class DatePeople(val amigos: Int, val total: Int)

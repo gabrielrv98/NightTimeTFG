@@ -49,9 +49,14 @@
     <string name="errorBarId">Ha habido un error con el bar seleccionado</string>
     <string name="ChatConversation">ChatConversation</string>
     <string name="errorChatId">Ha habido un error con el chat seleccionado</string>
+    <string name="errorProfileId">Ha habido un error con el usuario seleccionado</string>
     <string name="nextEvents">Proximos eventos:</string>
     <string name="bajarRapido">Ir al final</string>
     <string name="hoy">Hoy</string>
     <string name="send">Enviar</string>
     <string name="TextFieldHint">Escribe aqui</string>
+    <string name="display_name">Nombre</string>
+    <string name="status">Estado</string>
+    <string name="edit_profile">Editar perfil</string>
+    <string name="sed_message">Enviar mensaje</string>
 </resources>
