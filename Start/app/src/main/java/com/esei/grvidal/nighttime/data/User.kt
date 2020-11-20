@@ -51,7 +51,7 @@ fun User.toProfileScreenState(): ProfileScreenState {
 
 //here ends the copied code
 
-class User(val name: String) : ViewModel() {
+class User(var name: String) : ViewModel() {
     var id = 0//user ID
     var nextDate: MyDate? = null
     var nickname: String = ""

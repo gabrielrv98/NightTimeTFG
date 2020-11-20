@@ -169,7 +169,7 @@ Navigation with their own files ( no dependencies )
 
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
-                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+                bottomBar = {},
             ) {
                 ProfileEditorPage(navController)
             }
