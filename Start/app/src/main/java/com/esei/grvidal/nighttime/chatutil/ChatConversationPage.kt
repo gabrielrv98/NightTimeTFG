@@ -107,7 +107,7 @@ fun ConversationContent(
                 UserInput(
                     onMessageSent = { content ->
                         actualChat.addMessage(
-                            Message(user.id, content, LocalDate.now().toString())
+                            Message(user.id, content.trim(), LocalDate.now().toString())
                         )
                     },
                     scrollState
