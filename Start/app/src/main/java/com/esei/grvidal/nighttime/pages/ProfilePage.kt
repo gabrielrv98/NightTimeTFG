@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.pages
 
+import androidx.activity.viewModels
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Create
+import androidx.compose.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -30,9 +32,12 @@ import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.navigateWithId
 
 
-@Composable
-fun ProfilePageView(navController: NavHostController, userId: Int?) {
+import androidx.compose.ui.viewinterop.viewModel
 
+@Composable
+fun ProfilePageView(navController: NavHostController, userId: Int?, user : UserViewModel) {
+
+    ProfileProperty("token", user.token )
 
     //Nullable check
     if (userId == null) {

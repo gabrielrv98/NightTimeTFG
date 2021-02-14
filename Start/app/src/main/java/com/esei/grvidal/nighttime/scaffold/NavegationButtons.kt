@@ -45,7 +45,7 @@ sealed class BottomNavigationScreens(
 }
 
 /**
- * Screens of the App
+ * Sub screens of the App
  *
  * @param route String that represents the route of the View
  * @param resourceId String from resources used to backtrack the users view

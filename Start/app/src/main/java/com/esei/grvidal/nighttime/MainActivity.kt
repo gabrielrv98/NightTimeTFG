@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
@@ -13,35 +14,49 @@ import androidx.ui.tooling.preview.Preview
 
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
+import com.esei.grvidal.nighttime.data.CalendarViewModel
 import com.esei.grvidal.nighttime.data.CityDao
-import com.esei.grvidal.nighttime.data.ProfileViewModel
 import com.esei.grvidal.nighttime.data.User
+import com.esei.grvidal.nighttime.data.UserViewModel
 import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.lang.StringBuilder
 
+private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
 
     //val chat by viewModels<ChatViewModel>()
-    //todo finish
+
+    private val userToken  by viewModels<UserViewModel>()
+    public val calendarData by viewModels<CalendarViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val user: ProfileViewModel by viewModels()
+
         setContent {
             NightTimeTheme {
-                MainScreen(
+
+                if(userToken.loggedUser.value?.id == -1L){
+                    LoginPage(
+
+                    )
+
+                }else{
+                    MainScreen(
+                    userToken,
+                    calendarData
                     //chat,
                     //onAddItem = chat::addItem,
                 )
+
+                }
+
             }
         }
     }
@@ -52,6 +67,8 @@ class MainActivity : AppCompatActivity() {
  */
 @Composable
 private fun MainScreen(
+    user : UserViewModel,
+    calendar : CalendarViewModel
     //chat : ChatViewModel,
     //onAddItem: (Message) -> Unit,
  ) {
@@ -88,7 +105,7 @@ Navigation with their own files ( no dependencies )
                 bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 CityDialogConstructor(cityDialog, setCityDialog, setCityId)
-                CalendarPage(cityId = cityId)
+                CalendarPage(cityId = cityId,calendar)
             }
         }
 
@@ -147,7 +164,7 @@ Navigation with their own files ( no dependencies )
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
                 bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                ProfilePageView(navController, User("me").id)//todo is hardcoded
+                ProfilePageView(navController, User("me").id, user)//todo is hardcoded
             }
         }
 
@@ -160,7 +177,7 @@ Navigation with their own files ( no dependencies )
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
                 bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                ProfilePageView(navController, backStackEntry.arguments?.getInt("userId"))
+                ProfilePageView(navController, backStackEntry.arguments?.getInt("userId"), user)
             }
         }
 

@@ -39,7 +39,8 @@ import java.util.*
  * @param cityId selected City
  */
 @Composable
-fun CalendarPage(cityId: City) {
+fun CalendarPage(cityId: City, calendarData: CalendarViewModel) {
+
     val user = User("Me")//todo cambiar a user como era en la app donde aprendi
     val userNextDateMutable = remember { mutableStateOf(user.nextDate) }
 
@@ -127,7 +128,6 @@ fun CalendarPage(cityId: City) {
                 friends = datePeople.amigos.toString(),
                 showFriends = { setShowDialog(true) },
                 OnChooseDateClick = {
-                    //if (!date.isBefore())
                     if (date != userNextDateMutable.value)
                         userNextDateMutable.value = date
                     else userNextDateMutable.value = null

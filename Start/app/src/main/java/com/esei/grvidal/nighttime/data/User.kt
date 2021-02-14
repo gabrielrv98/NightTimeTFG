@@ -8,6 +8,11 @@ import androidx.lifecycle.ViewModel
 import com.esei.grvidal.nighttime.R
 
 
+data class UserToken(
+    val id: Long,
+    val token: String
+)
+
 //Todo try to use them in the future
 
 class ProfileViewModel : ViewModel() {

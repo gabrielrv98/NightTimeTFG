@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-android-extensions'
+    //id 'kotlin-android-extensions'
 }
 
 android {
@@ -15,6 +15,11 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding true
+        compose true
     }
 
     buildTypes {
@@ -35,35 +40,63 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerExtensionVersion version_compose
         kotlinCompilerVersion '1.4.10'
     }
 }
 
 dependencies {
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.2'
-    //implementation 'androidx.core:core-ktx:1.3.0-alpha04'
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
+
+    // Core with Ktx
+    implementation "androidx.core:core-ktx:$version_core"
+
+    // Material Design
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
+
+    // Fragments //TODO delete
     implementation "androidx.fragment:fragment-ktx:1.2.5"
 
-    implementation "androidx.compose.animation:animation:$compose_version"
-    implementation "androidx.compose.foundation:foundation:$compose_version"
-    implementation "androidx.compose.foundation:foundation-layout:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.material:material-icons-extended:$compose_version"
-    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
-    implementation "androidx.compose.runtime:runtime:$compose_version"
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.ui:ui-tooling:$compose_version"
 
-    def nav_compose_version = "1.0.0-alpha01"
-    implementation "androidx.navigation:navigation-compose:$nav_compose_version"
+    // Compose runtime
+    implementation "androidx.compose:compose-runtime:$version_compose_runtime"
 
-    implementation 'androidx.compose:compose-runtime:0.1.0-dev14'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-beta01'
+    // Compose Apis
+    implementation "androidx.compose.animation:animation:$version_compose"
+    implementation "androidx.compose.foundation:foundation:$version_compose"
+    implementation "androidx.compose.foundation:foundation-layout:$version_compose"
+    implementation "androidx.compose.material:material:$version_compose"
+    implementation "androidx.compose.material:material-icons-extended:$version_compose"
+    implementation "androidx.compose.runtime:runtime-livedata:$version_compose"
+    implementation "androidx.compose.runtime:runtime:$version_compose"
+    implementation "androidx.compose.ui:ui:$version_compose"
+    implementation "androidx.ui:ui-tooling:$version_compose"
+
+     // Navigation
+    implementation "androidx.navigation:navigation-compose:$version_nav_compose"
+
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_lifecycle"
+
+    // DataStore
+    implementation "androidx.datastore:datastore-preferences:$version_datastore"
+
+    // Security MasterKey //todo delete
+    implementation "androidx.security:security-crypto:$versio_security_crypto"
+
+    // For Identity Credential APIs //todo delete
+    implementation "androidx.security:security-identity-credential:$version_identity_credential"
+
+    // Moshi
+    implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:converter-moshi:$version_retrofit"
+
+    // Tests //TODO delete
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
