@@ -20,12 +20,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import com.esei.grvidal.nighttime.NavigationScreens
+import com.esei.grvidal.nighttime.data.BarViewModel
 import com.esei.grvidal.nighttime.data.MyDate
 import com.esei.grvidal.nighttime.navigateWithId
 
@@ -94,7 +96,12 @@ data class Bar(val id: Int, val name: String, val description: String) {
  * @param navController navigator with the queue of destinies and it will be used to navigate or go back
  */
 @Composable
-fun BarPage(cityId: City, navController: NavHostController) {
+fun BarPage(cityId: City, navController: NavHostController, barData : BarViewModel) {
+
+    if (barData.loggedUser.value == null)
+        Text(
+            text="es null"
+        )
     val barList = BarDAO().bares
     //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
 
