@@ -41,6 +41,7 @@ class CalendarViewModel : ViewModel() {
      * Call login() on init so we can display get the token for future calls.
      */
     init {
+        Log.d(TAG, "init: iniciando Calendar")
         getDateInfo(LocalDate.now().toMyDate())
     }
 
