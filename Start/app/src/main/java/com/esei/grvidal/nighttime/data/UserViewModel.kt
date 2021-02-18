@@ -1,33 +1,42 @@
 package com.esei.grvidal.nighttime.data
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.esei.grvidal.nighttime.network.MarsProperty
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
 
 private const val TAG = "UserViewModel"
 
-class UserViewModel : ViewModel() {
+enum class NetworkState {
+    WORKING,
+    ERROR,
+    LOADING
+}
 
-    // The internal MutableLiveData String that stores the most recent response
-    private val _loggedUser = MutableLiveData<UserToken>()
+class UserViewModel() : ViewModel() {
+    //Live data can interact with fragments too, but mutable State cant and its optimized for Compose
 
-    // The external immutable LiveData for the response String
-    val loggedUser: LiveData<UserToken>
-        get() = _loggedUser
+    var loggedUser by mutableStateOf(UserToken(-1, ""))
 
-    val token: String
-        get()  = _loggedUser.value?.token ?: ""
+    var networkState by mutableStateOf(NetworkState.LOADING)
+        // Returns a State<> allowing compose to recompose when it changes
+        private set
+
+    val isNetworkDown: Boolean
+        get() = networkState == NetworkState.ERROR
+
     /**
      * Call login() on init so we can display get the token for future calls.
      */
     init {
+        Log.d(TAG, "init: iniciando User")
         login()
     }
 
@@ -37,37 +46,44 @@ class UserViewModel : ViewModel() {
     private fun login() {
         viewModelScope.launch {
             try {
-
                 Log.e(TAG, "login: creating client")
 
+                val webResponse =
+                    NightTimeApi.retrofitService.loginAsync("grvidal", "1234")//.await()
 
-                val webResponse = NightTimeApi.retrofitService.loginAsync("grvidal", "1234")//.await()
+                networkState = NetworkState.WORKING
 
                 if (webResponse.isSuccessful) {
                     val id = webResponse.headers()["id"]!!.toLong()
                     val token = webResponse.headers()["token"]!!
 
-                    _loggedUser.value = UserToken(id, token)
+                    loggedUser = UserToken(id, token)
 
                     Log.d(TAG, "login: login successfully id-> $id  token -> $token")
+
                 }
 
 
             } catch (e: IOException) {
                 Log.e(TAG, "login: network exception ${e.message}  --//-- $e")
 
+
             } catch (e: Exception) {
                 Log.e(TAG, "login: general exception ${e.message}  --//-- $e")
-            
-            }finally {
-                if ( _loggedUser.value == null ) {
-                    _loggedUser.value = UserToken(-1L, "Empty")
-                    Log.e(TAG, "login: value was empty")
-                }else
+
+            } finally {
+                if (loggedUser.id == -1L) {
+                    networkState = NetworkState.ERROR
+                    Log.e(TAG, "login: id = -1")
+
+                } else {
                     Log.d(TAG, "login: Everything correct")
+                }
+
+                Log.d(TAG, "login: networkState: ${networkState.name}")
             }
-            
 
         }
+
     }
 }
