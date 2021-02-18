@@ -1,7 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
@@ -18,10 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
-import com.esei.grvidal.nighttime.data.CalendarViewModel
-import com.esei.grvidal.nighttime.data.CityDao
-import com.esei.grvidal.nighttime.data.User
-import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -33,27 +30,55 @@ class MainActivity : AppCompatActivity() {
 
     //val chat by viewModels<ChatViewModel>()
 
-    private val userToken  by viewModels<UserViewModel>()
+    private val userToken by viewModels<UserViewModel>()
     public val calendarData by viewModels<CalendarViewModel>()
+    public val barData by viewModels<BarViewModel>()//How to avoid the init until the page is called
+    //public val barData :BarViewModel by navGraphViewModels(R.id.nav_controller_view_tag)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+/*
+        if (userToken.networkState.value == NetworkState.ERROR)
+            Toast.makeText(this, R.string.no_internet, Toast.LENGTH_LONG).show() // network-State is null so its not ERROR
+        else Toast.makeText(this, "All cool ${userToken.networkState.value?.name}", Toast.LENGTH_SHORT).show()
+
+https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
+ */
+
+
+        Toast.makeText(
+            this,
+            "All cool2 ${userToken.networkState.name}    ${userToken.loggedUser.value?.id}",
+            Toast.LENGTH_SHORT
+        ).show()
+
         setContent {
+
             NightTimeTheme {
 
-                if(userToken.loggedUser.value?.id == -1L){
+
+                if (userToken.networkState == NetworkState.LOADING) {
+
+                    LoadingScreen()
+
+                } else if (
+                //If network works but loggedUser Id is -1 ( user couldn't get a token) go to login
+                    userToken.networkState != NetworkState.ERROR &&
+                    userToken.loggedUser.value?.id == -1L
+                ) {
                     LoginPage(
 
                     )
 
-                }else{
+                } else {
                     MainScreen(
-                    userToken,
-                    calendarData
-                    //chat,
-                    //onAddItem = chat::addItem,
-                )
+                        userToken,
+                        calendarData,
+                        barData
+                        //chat,
+                        //onAddItem = chat::addItem,
+                    )
 
                 }
 
@@ -62,16 +87,28 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+@Composable
+private fun LoadingScreen(
+    userToken: UserViewModel,
+    networkState: NetworkState,
+    calendarData: CalendarViewModel,
+    barData: BarViewModel
+) {
+
+}
+
+
 /**
  * MainScreen with the function that will allow it to manage the navigation system
  */
 @Composable
 private fun MainScreen(
-    user : UserViewModel,
-    calendar : CalendarViewModel
+    user: UserViewModel,
+    calendar: CalendarViewModel,
+    bar: BarViewModel
     //chat : ChatViewModel,
     //onAddItem: (Message) -> Unit,
- ) {
+) {
 /* Actual Navigation system
         https://proandroiddev.com/implement-bottom-bar-navigation-in-jetpack-compose-b530b1cd9ee2
 
@@ -105,7 +142,7 @@ Navigation with their own files ( no dependencies )
                 bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 CityDialogConstructor(cityDialog, setCityDialog, setCityId)
-                CalendarPage(cityId = cityId,calendar)
+                CalendarPage(cityId = cityId, calendar)
             }
         }
 
@@ -120,7 +157,7 @@ Navigation with their own files ( no dependencies )
                 bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 CityDialogConstructor(cityDialog, setCityDialog, setCityId)
-                BarPage(cityId = cityId, navController)
+                BarPage(cityId = cityId, navController, bar)
             }
 
         }
@@ -151,7 +188,7 @@ Navigation with their own files ( no dependencies )
             NavigationScreens.ChatConversation.route + "/{ChatId}",
             arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
         ) { backStackEntry ->
-                ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
+            ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
 
             //ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
 
@@ -171,7 +208,7 @@ Navigation with their own files ( no dependencies )
         composable(
             BottomNavigationScreens.Profile.route + "/{userId}",
             arguments = listOf(navArgument("userId") { type = NavType.IntType })
-        ) {backStackEntry ->
+        ) { backStackEntry ->
 
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
@@ -182,7 +219,8 @@ Navigation with their own files ( no dependencies )
         }
 
         composable(
-            NavigationScreens.ProfileEditor.route ) {
+            NavigationScreens.ProfileEditor.route
+        ) {
 
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
@@ -203,6 +241,7 @@ fun NavHostController.navigateWithId(route: String, id: Int) {
         .toString()
     this.navigate(navString)
 }
+
 @Composable
 fun bottomBarNavConstructor(
     navController: NavHostController,
@@ -234,7 +273,7 @@ fun bottomBarNavConstructor(
 @Composable
 fun PreviewScreen() {
     NightTimeTheme {
-        ScreenScaffolded{}
+        ScreenScaffolded {}
 
 
     }
@@ -257,3 +296,13 @@ Row() {
     }
 }
 */
+
+/*
+Concepto principal: cuando agregues un estado interno a un elemento que admite composición,
+evalúa si debe conservarse luego de los cambios de configuración o las interrupciones como las llamadas telefónicas.
+
+De ser así, usa savedInstanceState para almacenar el estado.
+
+var expanded by savedInstanceState { false }
+
+ */
