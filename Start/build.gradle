@@ -9,6 +9,7 @@ buildscript {
         version_compose_runtime = "0.1.0-dev14"
         version_lifecycle = "2.3.0"
         version_datastore = "1.0.0-alpha06"
+        version_data_store = "1.0.0-alpha06"
         version_identity_credential = "1.0.0-alpha01"
         versio_security_crypto = "1.1.0-alpha03"
         version_moshi = "1.8.0"

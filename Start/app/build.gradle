@@ -90,6 +90,9 @@ dependencies {
     // For Identity Credential APIs //todo delete
     implementation "androidx.security:security-identity-credential:$version_identity_credential"
 
+    // DataStore, new SharedPreferences
+    implementation "androidx.datastore:datastore:$version_data_store"
+
     // Moshi
     implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
 
