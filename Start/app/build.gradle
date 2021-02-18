@@ -40,69 +40,16 @@ android {
         compose true
     }
     composeOptions {
+        kotlinCompilerVersion version_kotlin
         kotlinCompilerExtensionVersion version_compose
-        kotlinCompilerVersion '1.4.10'
     }
 }
 
-dependencies {
-
-    // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
-
-    // Core with Ktx
-    implementation "androidx.core:core-ktx:$version_core"
-
-    // Material Design
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-
-    // Fragments //TODO delete
-    implementation "androidx.fragment:fragment-ktx:1.2.5"
-
-
-    // Compose runtime
-    implementation "androidx.compose:compose-runtime:$version_compose_runtime"
-
-    // Compose Apis
-    implementation "androidx.compose.animation:animation:$version_compose"
-    implementation "androidx.compose.foundation:foundation:$version_compose"
-    implementation "androidx.compose.foundation:foundation-layout:$version_compose"
-    implementation "androidx.compose.material:material:$version_compose"
-    implementation "androidx.compose.material:material-icons-extended:$version_compose"
-    implementation "androidx.compose.runtime:runtime-livedata:$version_compose"
-    implementation "androidx.compose.runtime:runtime:$version_compose"
-    implementation "androidx.compose.ui:ui:$version_compose"
-    implementation "androidx.ui:ui-tooling:$version_compose"
-
-     // Navigation
-    implementation "androidx.navigation:navigation-compose:$version_nav_compose"
-
-    // ViewModel
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_lifecycle"
-
-    // DataStore
-    implementation "androidx.datastore:datastore-preferences:$version_datastore"
-
-    // Security MasterKey //todo delete
-    implementation "androidx.security:security-crypto:$versio_security_crypto"
-
-    // For Identity Credential APIs //todo delete
-    implementation "androidx.security:security-identity-credential:$version_identity_credential"
-
-    // DataStore, new SharedPreferences
-    implementation "androidx.datastore:datastore:$version_data_store"
-
-    // Moshi
-    implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
-
-    // Retrofit
-    implementation "com.squareup.retrofit2:converter-moshi:$version_retrofit"
-
-    // Tests //TODO delete
-    testImplementation 'junit:junit:4.13.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+        freeCompilerArgs += ["-Xallow-jvm-ir-dependencies"]
+    }
 }
 
 
@@ -115,3 +62,65 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
         ]
     }
 }
+
+dependencies {
+
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
+
+    // Core with Ktx
+    implementation "androidx.core:core-ktx:$version_core"
+
+    // Navigation
+    implementation "androidx.navigation:navigation-compose:$version_nav_compose"
+
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_lifecycle"
+
+    // DataStore
+    implementation "androidx.datastore:datastore-preferences:$version_datastore"
+
+    // Security MasterKey //todo delete
+    implementation "androidx.security:security-crypto:$version_security_crypto"
+
+    // For Identity Credential APIs //todo delete
+    implementation "androidx.security:security-identity-credential:$version_identity_credential"
+
+    // DataStore, new version of SharedPreferences
+    implementation "androidx.datastore:datastore:$version_data_store"
+
+    // Moshi
+    implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:converter-moshi:$version_retrofit"
+
+    // Material Design
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation "com.google.android.material:material:$version_material"
+
+    // Fragments //TODO delete
+    implementation "androidx.fragment:fragment-ktx:1.2.5"
+
+    // Compose runtime
+    implementation "androidx.compose:compose-runtime:$version_compose_runtime"
+
+    // Compose
+    implementation "androidx.compose.animation:animation:$version_compose"
+    implementation "androidx.compose.foundation:foundation:$version_compose"
+    implementation "androidx.compose.foundation:foundation-layout:$version_compose"
+    implementation "androidx.compose.material:material:$version_compose"
+    implementation "androidx.compose.material:material-icons-extended:$version_compose"
+    implementation "androidx.compose.runtime:runtime-livedata:$version_compose"
+    implementation "androidx.compose.runtime:runtime:$version_compose"
+    implementation "androidx.compose.ui:ui:$version_compose"
+
+    implementation "androidx.ui:ui-tooling:$version_ui_tooling"
+
+
+    // Tests //TODO delete
+    testImplementation 'junit:junit:4.13.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+
