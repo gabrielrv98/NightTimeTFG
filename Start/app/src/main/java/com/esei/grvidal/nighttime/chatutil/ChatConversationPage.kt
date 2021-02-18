@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 //import androidx.compose.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.Message
-import com.esei.grvidal.nighttime.pages.errorComposable
+import com.esei.grvidal.nighttime.pages.ErrorComposable
 import java.time.LocalDate
 
 
@@ -49,7 +49,7 @@ fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
 
     //Nullable check
     if (chatId == null) {
-        errorComposable(errorText = stringResource(id = R.string.errorChatId))
+        ErrorComposable(errorText = stringResource(id = R.string.errorChatId))
     } else {
 
         ConversationContent(
@@ -127,9 +127,9 @@ fun ConversationContent(
 
 @Composable
 fun ChatNameBar(
+    modifier: Modifier = Modifier,
     channelName: String,
     image: VectorAsset = Icons.Default.Person,
-    modifier: Modifier = Modifier,
     onBackIconPressed: () -> Unit = { },
     navigateToProfile: () -> Unit,
 ) {
@@ -391,7 +391,7 @@ private fun RowScope.DayHeaderLine() {
 @Preview("Top bar")
 @Composable
 fun TopBarPreview() {
-    ChatNameBar("Nuria Sotelo Domarco", navigateToProfile = {})
+    ChatNameBar(channelName ="Nuria Sotelo Domarco", navigateToProfile = {})
 }
 
 
