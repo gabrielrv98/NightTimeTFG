@@ -2,12 +2,9 @@ package com.esei.grvidal.nighttime.network
 
 import android.util.Log
 import com.esei.grvidal.nighttime.data.CalendarData
-import com.esei.grvidal.nighttime.data.User
 import retrofit2.Retrofit
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.Deferred
-import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.converter.moshi.MoshiConverterFactory
