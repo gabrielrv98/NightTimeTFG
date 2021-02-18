@@ -65,6 +65,7 @@
     <string name="cancelar">Cancelar</string>
     <string name="cant_be_empty">No puede estar vacio</string>
     <string name="loading">Cargando</string>
+    <string name="volver">Volver</string>
 
 
     <string name="no_internet">No hay conexion con internet</string>

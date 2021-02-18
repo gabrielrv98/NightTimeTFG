@@ -1,6 +1,5 @@
 package com.esei.grvidal.nighttime.pages
 
-import androidx.activity.viewModels
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
@@ -9,7 +8,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Create
-import androidx.compose.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -31,17 +29,21 @@ import com.esei.grvidal.nighttime.components.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.navigateWithId
 
-
-import androidx.compose.ui.viewinterop.viewModel
-
 @Composable
-fun ProfilePageView(navController: NavHostController, userId: Int?, user : UserViewModel) {
+fun ProfilePageView(navController: NavHostController, userId: Int?, user: UserViewModel) {
 
-    ProfileProperty("token", user.token )
+    ProfileProperty(
+        "token: ",
+        if (user.loggedUser.token.isNotEmpty())
+            user.loggedUser.token
+
+         else
+             "Vacio"
+    )
 
     //Nullable check
     if (userId == null) {
-        errorComposable(errorText = stringResource(id = R.string.errorProfileId))
+        ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
     } else {
         //Datos del usuario
         val userData =
@@ -50,8 +52,8 @@ fun ProfilePageView(navController: NavHostController, userId: Int?, user : UserV
         //ProfilePage(user.toProfileScreenState())
         //viewModel.component1().userData.observeAsState().value.let { userData: ProfileScreenState? ->
 
-        if (userData == null) {
-            errorComposable(errorText = stringResource(id = R.string.errorProfileId))
+        if (userData.id == -1) {
+            ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
         } else {
             val onFavButtonClick = if (userData.toProfileScreenState().isMe()) {
                 {

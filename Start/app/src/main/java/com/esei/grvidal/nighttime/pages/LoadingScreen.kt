@@ -1,28 +1,16 @@
 package com.esei.grvidal.nighttime.pages
 
-import android.view.animation.Animation
-import android.widget.LinearLayout
-import androidx.compose.animation.Transition
-import androidx.compose.animation.transition
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
 
 /**
@@ -75,29 +63,4 @@ fun LoadingScreen() {
         }
     }
 
-}
-/*
-original Loading circle
-            Card(
-                modifier = Modifier
-                    .preferredSize(48.dp),
-                shape = CircleShape,
-                elevation = 2.dp
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colors.primary
-                )
-            }
-
- */
-
-@Composable
-fun animation() {
-    val children: @Composable() () -> Unit = {
-        Image(
-            imageResource(id = R.drawable.loading_img),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
 }

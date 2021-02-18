@@ -49,7 +49,7 @@ https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
 
         Toast.makeText(
             this,
-            "All cool2 ${userToken.networkState.name}    ${userToken.loggedUser.value?.id}",
+            "All cool2 ${userToken.networkState.name}    ${userToken.loggedUser.id}",
             Toast.LENGTH_SHORT
         ).show()
 
@@ -65,7 +65,7 @@ https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
                 } else if (
                 //If network works but loggedUser Id is -1 ( user couldn't get a token) go to login
                     userToken.networkState != NetworkState.ERROR &&
-                    userToken.loggedUser.value?.id == -1L
+                    userToken.loggedUser.id == -1L
                 ) {
                     LoginPage(
 
@@ -139,7 +139,7 @@ Navigation with their own files ( no dependencies )
                         nameCity = cityId.name
                     )
                 },
-                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 CityDialogConstructor(cityDialog, setCityDialog, setCityId)
                 CalendarPage(cityId = cityId, calendar)
@@ -154,7 +154,7 @@ Navigation with their own files ( no dependencies )
                         nameCity = cityId.name
                     )
                 },
-                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 CityDialogConstructor(cityDialog, setCityDialog, setCityId)
                 BarPage(cityId = cityId, navController, bar)
@@ -178,7 +178,7 @@ Navigation with their own files ( no dependencies )
 
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
-                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 FriendsPageView(navController)
             }
@@ -199,7 +199,7 @@ Navigation with their own files ( no dependencies )
         ) {
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
-                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 ProfilePageView(navController, User("me").id, user)//todo is hardcoded
             }
@@ -212,7 +212,7 @@ Navigation with their own files ( no dependencies )
 
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
-                bottomBar = { bottomBarNavConstructor(navController, bottomNavigationItems) },
+                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 ProfilePageView(navController, backStackEntry.arguments?.getInt("userId"), user)
             }
@@ -243,7 +243,7 @@ fun NavHostController.navigateWithId(route: String, id: Int) {
 }
 
 @Composable
-fun bottomBarNavConstructor(
+fun BottomBarNavConstructor(
     navController: NavHostController,
     bottomNavigationItems: List<BottomNavigationScreens>
 ) {

@@ -37,7 +37,7 @@ import com.esei.grvidal.nighttime.R
 fun BarDetails(barId: Int?, navController: NavHostController) {
     //Null Check
     if (barId == null) {
-        errorComposable(errorText = stringResource(id = R.string.errorBarId))
+        ErrorComposable(errorText = stringResource(id = R.string.errorBarId))
     } else {
         //Accesses to the database to get the information of the bar through its ID
         ShowDetails(bar = BarDAO().bares[barId],
@@ -55,7 +55,7 @@ fun BarDetails(barId: Int?, navController: NavHostController) {
  * @param errorText String with the error description to show on screen
  */
 @Composable
-fun errorComposable(errorText: String) {
+fun ErrorComposable(errorText: String) {
     Text(
         text = errorText,
         color = MaterialTheme.colors.error
@@ -319,6 +319,7 @@ fun MultimediaView(
             }
 
         }
+
 
     }
 }
