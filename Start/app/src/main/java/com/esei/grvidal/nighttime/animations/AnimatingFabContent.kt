@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.esei.grvidal.nighttime.components
+package com.esei.grvidal.nighttime.animations
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FloatPropKey
