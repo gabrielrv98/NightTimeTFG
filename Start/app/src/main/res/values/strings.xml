@@ -67,9 +67,11 @@
 
     <!-- Login form -->
     <string name="volver">Volver</string>
-    <string name="acceptar">Aceptar</string>
+    <string name="log_in">log in</string>
 
 
     <string name="loading">Cargando</string>
     <string name="no_internet">No hay conexion con internet</string>
+    <string name="username">Nombre de usuario</string>
+    <string name="password">Contraseña</string>
 </resources>
