@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.pages
 
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.gesture.DragObserver
+import androidx.compose.ui.gesture.dragGestureFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -31,6 +35,9 @@ import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
 import java.util.*
+
+
+private const val TAG = "CaldendarPage"
 
 /**
  * Show the Calendar page, with the calendar on the top and the information of the selected date  and
@@ -291,6 +298,7 @@ fun CalendarWindow(
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 6.dp)
+            //.animateContentSize() // automatically animate size when it changes//todo check this
         ) {
 
             //Header of the Calendar
@@ -326,6 +334,7 @@ fun CalendarWindow(
                 Surface(
                     color = AmbientContentColor.current.copy(alpha = 0.15f),
                     modifier = Modifier.padding(top = 0.dp, bottom = 6.dp, start = 6.dp, end = 6.dp)
+                        .clip(RoundedCornerShape(15))
                 ) {
                     val myModifier = Modifier.padding(horizontal = 15.dp)
                         .weight(1f)
@@ -382,15 +391,69 @@ LazyColumnFor(
         .padding(bottom = 0.dp)
 ) {
 */
+
+            //val swipeableState  by rememberSwipeableState(initialValue = )
+/*
+            var chagedMonth2 : MutableState<Boolean> = remember{ mutableStateOf(false) }
+
+ */
+            val (value, setValue) = remember { mutableStateOf(false) }
+            val sensibility = 35 // old 25
+
             //Calendar indeed
-            ScrollableColumn(
-                modifier = Modifier.padding(top = 0.dp, start = 6.dp, end = 6.dp)
-                    .padding(bottom = 0.dp)
+            Box(
+                modifier = Modifier
+
+                    .dragGestureFilter(
+                        dragObserver = object : DragObserver {
+
+                            override fun onStart(downPosition: Offset) {
+                                setValue(true)
+                                Log.d(
+                                    TAG,
+                                    "gesture onStart: offset { x = ${downPosition.x} , y = ${downPosition.y}}"
+                                )
+                            }
+
+                            override fun onDrag(dragDistance: Offset): Offset {
+                                Log.d( TAG,
+                                    "gesture onDrag: offset { x = ${dragDistance.x} , y = ${dragDistance.y}}"
+                                )
+
+                                var (x, _) = dragDistance
+                                if(value) {
+                                    when {
+                                        x > sensibility -> {
+                                            Log.d(TAG, "gesture previous month")
+                                            x = 0f
+                                            previousMonthClick()
+                                            setValue(false)
+                                        }
+                                        x < -sensibility -> {
+                                            x = 0f
+                                            Log.d(TAG, "gesture next month")
+                                            nextMonthClick()
+                                            setValue(false)
+                                        }
+                                    }
+                                }
+                                return Offset(x, 0f)
+                            }
+                        }
+
+                    )
             ) {
 
-                contentDay()
+                ScrollableColumn(
+                    modifier = Modifier.padding(top = 0.dp, start = 6.dp, end = 6.dp)
+                        .padding(bottom = 0.dp)
+                ) {
 
+                    contentDay()
+
+                }
             }
+
         }
     }
 }
@@ -464,12 +527,15 @@ private fun DayChip(
         shape = RoundedCornerShape(50),
         border = when {
             date == chipDate -> BorderStroke(2.dp, MaterialTheme.colors.primary)
-            isNextUserDate -> BorderStroke( 2.dp, MaterialTheme.colors.secondary) //opcion A // todo mirar
+            isNextUserDate -> BorderStroke(
+                2.dp,
+                MaterialTheme.colors.secondary
+            )
             else -> null
         },
         elevation = 0.dp,
-        //color = colorBackground//opcion A
-        color = if (isNextUserDate) MaterialTheme.colors.secondary else colorBackground//opcion B
+
+        color = if (isNextUserDate) MaterialTheme.colors.secondary else colorBackground
 
     ) {
 
@@ -481,8 +547,7 @@ private fun DayChip(
             fontSize = fontSize,
             color = when {
                 chipDate == date -> colorSelected
-                //isNextUserDate -> MaterialTheme.colors.secondary //opcion A
-                isNextUserDate -> MaterialTheme.colors.onSecondary //opcion B
+                isNextUserDate -> MaterialTheme.colors.onSecondary
                 chipDate.month != date.month -> colorNotMonth
                 else -> colorNotSelected
             }
