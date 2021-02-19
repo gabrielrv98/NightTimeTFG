@@ -40,7 +40,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerVersion version_kotlin
+        kotlinCompilerVersion version_kotlin_compiler
         kotlinCompilerExtensionVersion version_compose
     }
 }
@@ -87,7 +87,7 @@ dependencies {
     implementation "androidx.security:security-identity-credential:$version_identity_credential"
 
     // DataStore, new version of SharedPreferences
-    implementation "androidx.datastore:datastore:$version_data_store"
+    implementation "androidx.datastore:datastore:$version_datastore"
 
     // Moshi
     implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
