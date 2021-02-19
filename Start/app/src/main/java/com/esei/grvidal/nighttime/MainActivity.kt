@@ -58,18 +58,14 @@ https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
             NightTimeTheme {
 
 
-                if (userToken.networkState == NetworkState.LOADING) {
-
+                if (userToken.isNetworkLoading) {
                     LoadingScreen()
 
-                } else if (
-                //If network works but loggedUser Id is -1 ( user couldn't get a token) go to login
-                    userToken.networkState != NetworkState.ERROR &&
+                } else if ( //If network works but loggedUser Id is -1 ( user couldn't get a token) go to login
+                    userToken.isNetworkWorking &&
                     userToken.loggedUser.id == -1L
                 ) {
-                    LoginPage(
-
-                    )
+                    LoginPage()
 
                 } else {
                     MainScreen(
