@@ -39,20 +39,6 @@ class UserViewModel(
     val auth
         get() = loggedUser.token
 
-    var networkState by mutableStateOf(NetworkState.LOADING)
-        // Returns a State<> allowing compose to recompose when it changes
-        private set
-
-    val isNetworkDown: Boolean
-        get() = networkState == NetworkState.ERROR
-
-    val isNetworkWorking: Boolean
-        get() = networkState == NetworkState.WORKING
-
-
-    val isNetworkLoading: Boolean
-        get() = networkState == NetworkState.LOADING
-
     var loggingState by mutableStateOf(LoginState.LOADING)
 
 
@@ -62,13 +48,13 @@ class UserViewModel(
 
     }
 
-    fun logOff(){
+    fun logOff() {
         viewModelScope.launch {
-            setLoggingData("","")
+            setLoggingData("", "")
         }
     }
 
-    public fun doLoginRefreshed(username: String, password: String) {
+    fun doLoginRefreshed(username: String, password: String) {
         viewModelScope.launch {
             setLoggingData(username, password)
             login()
@@ -76,17 +62,16 @@ class UserViewModel(
     }
 
 
-
     /**
      * Call login() on init so we can display get the token for future calls.
      */
     init {
         Log.d(TAG, "{tags: AssistLoggin} init: iniciando User")
-        //login()
+        //doLogin()
 
     }
 
-    public fun doLogin(){
+    fun doLogin() {
         viewModelScope.launch {
             login()
         }
@@ -98,107 +83,86 @@ class UserViewModel(
     private suspend fun login() {
 
 
-            Log.e(TAG, "{tags: AssistLoggin} login: creating client thread name = ${Thread.currentThread().name}")
-            loggingState = LoginState.LOADING
+        Log.e(TAG, "{tags: AssistLoggin} login: creating client")
+        loggingState = LoginState.LOADING
 
-            var loginData = LoginData("", "")
+        var loginData = LoginData("", "")
 
-            try {
-                loginData = dataStoreManager.userPreferences.first()
+        try {
+            loginData = dataStoreManager.userPreferences.first()
 
+            Log.e(
+                TAG,
+                "{tags: AssistLoggin} login: getting LoginData = ${loginData.username} : ${loginData.password} loggingState : ${loggingState.name}"
+            )
+
+            if (loginData.username == "" || loginData.password == "") {
+                loggingState = LoginState.NO_DATA_STORED
                 Log.e(
                     TAG,
-                    "{tags: AssistLoggin} login: getting LoginData = ${loginData.username} : ${loginData.password} loggingState : ${loggingState.name}"
+                    "{tags: AssistLoggin} login data was empty"
+                )
+            }
+
+
+        } catch (e: NoSuchElementException) {
+            loggingState = LoginState.NO_DATA_STORED
+
+        }
+
+        //delay(2000)
+
+        if (loggingState == LoginState.LOADING) {
+
+
+            try {
+
+                val webResponse = NightTimeApi.retrofitService.loginAsync(
+                    loginData.username,
+                    loginData.password
+                )
+                Log.e(
+                    TAG,
+                    "{tags: AssistLoggin} call to retrifit done"
                 )
 
-                if (loginData.username == "" || loginData.password == ""){
-                    loggingState = LoginState.NO_DATA_STORED
-                    Log.e(
+                if (webResponse.isSuccessful) {
+                    val id = webResponse.headers()["id"]!!.toLong()
+                    val token = webResponse.headers()["token"]!!
+
+                    loggedUser = UserToken(id, token)
+
+                    Log.d(
                         TAG,
-                        "{tags: AssistLoggin} login data was empty"
+                        "{tags: AssistLoggin} login: login successfully id-> $id  token -> $token"
                     )
+
                 }
 
 
-            } catch (e: NoSuchElementException) {
-                loggingState = LoginState.NO_DATA_STORED
+            } catch (e: IOException) {
+                Log.e(TAG, "login: network exception ${e.message}  --//-- $e")
+
+
+            } catch (e: Exception) {
+                Log.e(TAG, "login: general exception ${e.message}  --//-- $e")
+
+            } finally {
+                if (loggedUser.id == -1L) {
+                    Log.e(TAG, "login: id = -1")
+                    loggingState = LoginState.REFUSED
+
+                } else {
+                    Log.d(TAG, "login: Everything correct")
+                    loggingState = LoginState.ACCEPTED
+                }
 
             }
 
-            //delay(2000)
-
-            //loggingState = LoginState.NO_DATA_STORED
-            if(loggingState == LoginState.LOADING ) {
-
-
-                    try {
-                        Log.e(
-                            TAG,
-                            "{tags: AssistLoggin} loggingState was loading"
-                        )
-
-                        Log.e(TAG, "{tags: AssistLoggin} login: creating client thread name = ${Thread.currentThread().name}")
-
-                        val webResponse = NightTimeApi.retrofitService.loginAsync(
-                            loginData.username,
-                                loginData.password
-                            )
-                        Log.e(
-                            TAG,
-                            "{tags: AssistLoggin} call to retrifit done"
-                        )
-
-                        networkState = NetworkState.WORKING
-
-                        if (webResponse.isSuccessful) {
-                            val id = webResponse.headers()["id"]!!.toLong()
-                            val token = webResponse.headers()["token"]!!
-
-                            loggedUser = UserToken(id, token)
-
-                            Log.d(
-                                TAG,
-                                "{tags: AssistLoggin} login: login successfully id-> $id  token -> $token"
-                            )
-
-                        }else{
-                            Log.e(
-                                TAG,
-                                "{tags: AssistLoggin} response was failure"
-                            )
-                        }
-
-
-                    } catch (e: IOException) {
-                        Log.e(TAG, "login: network exception ${e.message}  --//-- $e")
-
-
-                    } catch (e: Exception) {
-                        Log.e(TAG, "login: general exception ${e.message}  --//-- $e")
-
-                    } finally {
-                        if (loggedUser.id == -1L) {
-                            networkState = NetworkState.ERROR
-                            Log.e(TAG, "login: id = -1")
-                            loggingState = LoginState.REFUSED
-
-                        } else {
-                            Log.d(TAG, "login: Everything correct")
-                            loggingState = LoginState.ACCEPTED
-                        }
-
-                        Log.d(TAG, "login: networkState: ${networkState.name}")
-                    }
-
-
-            }else{
-                Log.e(
-                    TAG,
-                    "{tags: AssistLoggin} loggingState was different from loading"
-                )
-            }
 
         }
+
+    }
 
 
 }

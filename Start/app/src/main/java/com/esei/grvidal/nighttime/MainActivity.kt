@@ -49,9 +49,6 @@ class MainActivity : AppCompatActivity() {
             UserViewModelFactory(DataStoreManager.getInstance(this))
         ).get(UserViewModel::class.java)
 
-
-        //userToken = UserViewModel(DataStoreManager.getInstance(this))
-
         userToken.doLogin()
 
 /*
@@ -62,22 +59,9 @@ class MainActivity : AppCompatActivity() {
 https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
  */
 
-
-        Toast.makeText(
-            this,
-            "All cool2 ${userToken.networkState.name}    ${userToken.loggedUser.id}",
-            Toast.LENGTH_SHORT
-        ).show()
-
-        Log.d(TAG, "{tags: AssistLoggin} onCreate: setting view ${userToken.loggingState.name}")
         setContent {
 
             NightTimeTheme {
-                Toast.makeText(
-                    this,
-                    "{tags: AssistLoggin} loggingstate : ${userToken.loggingState}",
-                    Toast.LENGTH_SHORT
-                ).show()
 
                 when (userToken.loggingState) {
                     LoginState.LOADING -> {
@@ -86,9 +70,7 @@ https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
                         LoadingScreen()
 
                     }
-                    //If network works but loggedUser Id is -1 ( user couldn't get a token) go to login
-                    //userToken.isNetworkWorking &&
-                    //userToken.loggedUser.id == -1L
+
                     LoginState.NO_DATA_STORED -> {
 
                         Log.d(TAG, "{tags: AssistLoggin} onCreate: pulling LoggingPage")
