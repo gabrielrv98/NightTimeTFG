@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,11 +15,13 @@ import androidx.ui.tooling.preview.Preview
 
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
 import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.pages.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -30,13 +33,26 @@ class MainActivity : AppCompatActivity() {
 
     //val chat by viewModels<ChatViewModel>()
 
-    private val userToken by viewModels<UserViewModel>()
+    private lateinit var userToken: UserViewModel
+
     public val calendarData by viewModels<CalendarViewModel>()
     public val barData by viewModels<BarViewModel>()//How to avoid the init until the page is called
     //public val barData :BarViewModel by navGraphViewModels(R.id.nav_controller_view_tag)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d(TAG, "{tags: AssistLoggin} onCreate: userToken is going to be created")
+/*
+        userToken = ViewModelProvider(
+            this,
+            UserViewModelFactory(DataStoreManager.getInstance(this))
+        ).get(UserViewModel::class.java)
+
+ */
+        userToken = UserViewModel(DataStoreManager.getInstance(this))
+
+        userToken.doLogin()
 
 /*
         if (userToken.networkState.value == NetworkState.ERROR)
@@ -53,46 +69,49 @@ https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
             Toast.LENGTH_SHORT
         ).show()
 
+        Log.d(TAG, "{tags: AssistLoggin} onCreate: setting view ${userToken.loggingState.name}")
         setContent {
 
             NightTimeTheme {
+                Toast.makeText(
+                    this,
+                    "{tags: AssistLoggin} loggingstate : ${userToken.loggingState}",
+                    Toast.LENGTH_SHORT
+                ).show()
 
+                when (userToken.loggingState) {
+                    LoginState.LOADING -> {
 
-                if (userToken.isNetworkLoading) {
-                    LoadingScreen()
+                        Log.d(TAG, "{tags: AssistLoggin} onCreate: pulling LoadingPage")
+                        LoadingScreen()
 
-                } else if ( //If network works but loggedUser Id is -1 ( user couldn't get a token) go to login
-                    userToken.isNetworkWorking &&
-                    userToken.loggedUser.id == -1L
-                ) {
-                    LoginPage()
+                    }
+                    //If network works but loggedUser Id is -1 ( user couldn't get a token) go to login
+                    //userToken.isNetworkWorking &&
+                    //userToken.loggedUser.id == -1L
+                    LoginState.NO_DATA_STORED -> {
 
-                } else {
-                    MainScreen(
-                        userToken,
-                        calendarData,
-                        barData
-                        //chat,
-                        //onAddItem = chat::addItem,
-                    )
+                        Log.d(TAG, "{tags: AssistLoggin} onCreate: pulling LoggingPage")
+                        LoginPage(userToken)
 
+                    }
+                    else -> {
+                        Log.d(TAG, "{tags: AssistLoggin} onCreate: pulling MianScreen")
+                        MainScreen(
+                            userToken,
+                            calendarData,
+                            barData
+                            //chat,
+                            //onAddItem = chat::addItem,
+                        )
+
+                    }
                 }
 
             }
         }
     }
 }
-
-@Composable
-private fun LoadingScreen(
-    userToken: UserViewModel,
-    networkState: NetworkState,
-    calendarData: CalendarViewModel,
-    barData: BarViewModel
-) {
-
-}
-
 
 /**
  * MainScreen with the function that will allow it to manage the navigation system
