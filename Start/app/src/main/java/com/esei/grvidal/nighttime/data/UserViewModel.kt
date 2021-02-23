@@ -56,10 +56,16 @@ class UserViewModel(
     var loggingState by mutableStateOf(LoginState.LOADING)
 
 
-    suspend fun setLoggingData(username: String, password: String) {
+    private suspend fun setLoggingData(username: String, password: String) {
 
         dataStoreManager.updateLoginCredentials(username, password)
 
+    }
+
+    fun logOff(){
+        viewModelScope.launch {
+            setLoggingData("","")
+        }
     }
 
     public fun doLoginRefreshed(username: String, password: String) {
