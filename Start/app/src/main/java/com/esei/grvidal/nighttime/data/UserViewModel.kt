@@ -9,10 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.datastore.LoginData
-import com.esei.grvidal.nighttime.exceptions.NoLoggingDataStoredException
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
