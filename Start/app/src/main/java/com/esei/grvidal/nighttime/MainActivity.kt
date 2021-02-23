@@ -43,14 +43,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         Log.d(TAG, "{tags: AssistLoggin} onCreate: userToken is going to be created")
-/*
+
         userToken = ViewModelProvider(
             this,
             UserViewModelFactory(DataStoreManager.getInstance(this))
         ).get(UserViewModel::class.java)
 
- */
-        userToken = UserViewModel(DataStoreManager.getInstance(this))
+
+        //userToken = UserViewModel(DataStoreManager.getInstance(this))
 
         userToken.doLogin()
 
