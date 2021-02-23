@@ -45,14 +45,6 @@ android {
     }
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
-        freeCompilerArgs += ["-Xallow-jvm-ir-dependencies"]
-    }
-}
-
-
 // Compiler flag to use experimental Compose APIs
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
@@ -63,10 +55,28 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     }
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+        freeCompilerArgs += ["-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check"]
+    }
+}
+
+/*
+[androidx.compose:compose-runtime:0.1.0-dev14] C:\Users\reyga\.gradle\caches\transforms-2\files-2.1\f64fce614ebf292531cfca20fac3bb68\compose-runtime-0.1.0-dev14\AndroidManifest.xml Warning:
+	Package name 'androidx.compose.runtime' used in: androidx.compose:compose-runtime:0.1.0-dev14, androidx.compose.runtime:runtime:1.0.0-alpha06.
+[androidx.compose.material:material-icons-extended:1.0.0-alpha06] C:\Users\reyga\.gradle\caches\transforms-2\files-2.1\5ec73266ff959bb7aaaf24fb9ad6fe05\material-icons-extended-1.0.0-alpha06\AndroidManifest.xml Warning:
+	Package name 'androidx.compose.material.icons' used in: androidx.compose.material:material-icons-extended:1.0.0-alpha06, androidx.compose.material:material-icons-core:1.0.0-alpha06.
+
+ */
+
 dependencies {
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_lifecycle"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
 
     // Core with Ktx
     implementation "androidx.core:core-ktx:$version_core"
@@ -74,8 +84,6 @@ dependencies {
     // Navigation
     implementation "androidx.navigation:navigation-compose:$version_nav_compose"
 
-    // ViewModel
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_lifecycle"
 
     // DataStore
     implementation "androidx.datastore:datastore-preferences:$version_datastore"
@@ -87,7 +95,7 @@ dependencies {
     implementation "androidx.security:security-identity-credential:$version_identity_credential"
 
     // DataStore, new version of SharedPreferences
-    implementation "androidx.datastore:datastore:$version_datastore"
+    implementation "androidx.datastore:datastore-preferences:$version_datastore"
 
     // Moshi
     implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
@@ -103,7 +111,7 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:1.2.5"
 
     // Compose runtime
-    implementation "androidx.compose:compose-runtime:$version_compose_runtime"
+    implementation "androidx.compose:compose-runtime:$version_compose_runtime" // A
 
     // Compose
     implementation "androidx.compose.animation:animation:$version_compose"
@@ -112,7 +120,7 @@ dependencies {
     implementation "androidx.compose.material:material:$version_compose"
     implementation "androidx.compose.material:material-icons-extended:$version_compose"
     implementation "androidx.compose.runtime:runtime-livedata:$version_compose"
-    implementation "androidx.compose.runtime:runtime:$version_compose"
+    implementation "androidx.compose.runtime:runtime:$version_compose"// A
     implementation "androidx.compose.ui:ui:$version_compose"
 
     implementation "androidx.ui:ui-tooling:$version_ui_tooling"
