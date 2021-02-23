@@ -32,14 +32,23 @@ import com.esei.grvidal.nighttime.navigateWithId
 @Composable
 fun ProfilePageView(navController: NavHostController, userId: Int?, user: UserViewModel) {
 
-    ProfileProperty(
-        "token: ",
-        if (user.loggedUser.token.isNotEmpty())
-            user.loggedUser.token
+    Column{
+        ProfileProperty(
+            "token: ",
+            if (user.loggedUser.token.isNotEmpty())
+                user.loggedUser.token
 
-         else
-             "Vacio"
-    )
+            else
+                "Vacio"
+        )
+
+        Button(modifier = Modifier,onClick = {
+            user.logOff()
+        }){
+            Text("Log off")
+        }
+    }
+
 
     //Nullable check
     if (userId == null) {
