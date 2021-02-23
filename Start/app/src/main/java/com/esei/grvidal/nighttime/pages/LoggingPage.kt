@@ -25,12 +25,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.data.UserViewModel
 
 
 private const val TAG = "LoginPage"
 
 @Composable
-fun LoginPage() {
+fun LoginPage(userToken: UserViewModel) {
 
     val (username, setUsername) = remember { mutableStateOf(TextFieldValue()) }
     val (password, setPassword) = remember { mutableStateOf(TextFieldValue()) }
@@ -43,6 +44,8 @@ fun LoginPage() {
             Toast.LENGTH_LONG
         )
             .show()
+
+        userToken.doLoginRefreshed(username.text,password.text)
     }
 
     LoginScreen(
@@ -89,7 +92,11 @@ fun LoginScreen(
             setUsername = setUsername,
             password = password,
             setPassword = setPassword,
-            onClick = onClick
+            onClick = {
+                if(username.text.isNotEmpty() &&
+                    password.text.isNotEmpty()
+                ) onClick()
+            }
         )
 
         Footer(
@@ -181,6 +188,7 @@ private fun LoginFields(
         }
     ) {
         Text(text = stringResource(id = R.string.username))
+
     }
 
     Spacer(modifier = Modifier.size(15.dp))
@@ -263,6 +271,8 @@ fun UserInput(
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit
 ) {
+
+///    Text("borrar esto")//todo borrar esta linea
 
     // Used to decide if the keyboard should be shown
     var textFieldFocusState by remember { mutableStateOf(false) }
