@@ -1,17 +1,17 @@
 package com.esei.grvidal.nighttime.data
 
-data class City(val id:Int, val name:String)
+data class City(val id:Long, val name:String)
 
 class CityDao {
 
     private val defaultCities = listOf(
-        City(0,"Ourense"),
-        City(1,"Pontevedra"),
-        City(2,"Vigo"),
-        City(3,"Coruña"),
-        City(4,"Allariz"),
-        City(5,"Lugo"),
-        City(6,"Rivadavia"),
+        City(0L,"Ourense"),
+        City(1L,"Pontevedra"),
+        City(2L,"Vigo"),
+        City(3L,"Coruña"),
+        City(4L,"Allariz"),
+        City(5L,"Lugo"),
+        City(6L,"Rivadavia"),
     )
 
     fun getAllCities() : List<City> {

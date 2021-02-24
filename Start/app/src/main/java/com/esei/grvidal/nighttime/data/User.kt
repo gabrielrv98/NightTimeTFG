@@ -218,7 +218,7 @@ val meUser = User("Gabriel").apply {
 data class DatePeople(val amigos: Int, val total: Int)
 object CalendarDao {
 
-    fun getPeopleOnDate(cityId: Int, date: MyDate): DatePeople {
+    fun getPeopleOnDate(cityId: Long, date: MyDate): DatePeople {
 
         return when {
             date.day % 5 == 0 -> {
@@ -231,7 +231,7 @@ object CalendarDao {
         }
     }
 
-    fun getFriends(cityId: Int, date: MyDate): List<User?> {
+    fun getFriends(cityId: Long, date: MyDate): List<User?> {
         //todo this is hardcoded
         return if (date.day == 1) {
             listOf()

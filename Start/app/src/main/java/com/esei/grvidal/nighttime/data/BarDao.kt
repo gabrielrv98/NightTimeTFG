@@ -6,7 +6,7 @@ data class EventData(val barName: String, val eventDescription: String)
 
 object BarDao {
 
-    fun getEvents(cityId: Int, date: MyDate): List<EventData?> {
+    fun getEvents(cityId: Long, date: MyDate): List<EventData?> {
         //Conexion, consulta y ordenado
         return if ((date.day %5) == 0){
             listOf(
