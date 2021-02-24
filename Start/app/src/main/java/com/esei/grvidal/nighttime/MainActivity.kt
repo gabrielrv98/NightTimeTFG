@@ -2,7 +2,6 @@ package com.esei.grvidal.nighttime
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
@@ -34,14 +33,14 @@ class MainActivity : AppCompatActivity() {
     //val chat by viewModels<ChatViewModel>()
 
     private lateinit var userToken: UserViewModel
+    private lateinit var city: CityViewModel
 
-    /** Using kotlin delegate by viewModels returns an instance of [ViewModelLazy]
+    /** Using kotlin delegate by viewModels returns an instance of ViewModel by lazy
      * so the object don't initialize until needed and if the Activity is destroyed and recreated afterwards
-     * it will recive the same intance of [ViewModels] as it had previously
+     * it will receive the same instance of ViewModel as it had previously
      * */
     private val calendarData by viewModels<CalendarViewModel>()
     private val barData by viewModels<BarViewModel>()
-    //public val barData :BarViewModel by navGraphViewModels(R.id.nav_controller_view_tag)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,12 +49,17 @@ class MainActivity : AppCompatActivity() {
 
         /**
          * [UserViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
-         * Factory [UserViewModelFactory]to return a [ViewModelLazy]
+         * Factory [UserViewModelFactory]to return a ViewModel by lazy
          */
         userToken = ViewModelProvider(
             this,
             UserViewModelFactory(DataStoreManager.getInstance(this))
         ).get(UserViewModel::class.java)
+
+        city = ViewModelProvider(
+            this,
+            CityViewModelFactory(DataStoreManager.getInstance(this))
+        ).get(CityViewModel::class.java)
 
         //userToken.doLogin()
 
@@ -82,6 +86,7 @@ class MainActivity : AppCompatActivity() {
                         Log.d(TAG, "onCreate: pulling MainScreen")
                         MainScreen(
                             userToken,
+                            city,
                             calendarData,
                             barData
                             //chat,
@@ -102,6 +107,7 @@ class MainActivity : AppCompatActivity() {
 @Composable
 private fun MainScreen(
     user: UserViewModel,
+    cityVM: CityViewModel,
     calendar: CalendarViewModel,
     bar: BarViewModel
     //chat : ChatViewModel,
@@ -123,15 +129,8 @@ Navigation with their own files ( no dependencies )
     )
 
     val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
-/*
-    val (cityId, setCityId) = remember {
-        mutableStateOf(CityDao().getAllCities()[0])
-    }//todo cambiar, inicia siempre en ourense, deberia ser con sharedPreferences o algo asi
-
-
- */
     val setCity = { id: Long, name: String ->
-        user.setCity(id,name)
+        cityVM.setCity(id,name)
     }
 
     NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
@@ -140,13 +139,13 @@ Navigation with their own files ( no dependencies )
                 topBar = {
                     TopBarConstructor(
                         setCityDialog = setCityDialog,
-                        nameCity = user.city.name
+                        nameCity = cityVM.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                CityDialogConstructor(cityDialog, CityDao().getAllCities(), setCityDialog, setCity)
-                CalendarPage(cityId = user.city, calendar)
+                CityDialogConstructor(cityDialog, cityVM.allCities, setCityDialog, setCity)
+                CalendarPage(cityId = cityVM.city, calendar)
             }
         }
 
@@ -155,13 +154,13 @@ Navigation with their own files ( no dependencies )
                 topBar = {
                     TopBarConstructor(
                         setCityDialog = setCityDialog,
-                        nameCity = user.city.name
+                        nameCity = cityVM.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                CityDialogConstructor(cityDialog,CityDao().getAllCities(), setCityDialog, setCity)
-                BarPage(cityId = user.city, navController, bar)
+                CityDialogConstructor(cityDialog,cityVM.allCities, setCityDialog, setCity)
+                BarPage(cityId = cityVM.city, navController, bar)
             }
 
         }

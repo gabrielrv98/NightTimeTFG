@@ -38,8 +38,6 @@ class UserViewModel(
     var loggingState by mutableStateOf(LoginState.LOADING)
         private set
 
-    lateinit var city: City
-
 
     private suspend fun setLoggingData(username: String, password: String) {
         dataStoreManager.updateLoginCredentials(username, password)
@@ -58,23 +56,6 @@ class UserViewModel(
         }
     }
 
-    private fun getCityFromPreferences() {
-        viewModelScope.launch {
-            city = try {
-                dataStoreManager.cityPreferences.first()
-            } catch (e: NoSuchElementException) {
-                City(1, "Ourense")
-
-            }
-        }
-    }
-
-    fun setCity(id: Long, name: String){
-        viewModelScope.launch {
-            dataStoreManager.updateCityData(id, name)
-            city = City(id,name)
-        }
-    }
 
 
     /**
@@ -83,7 +64,6 @@ class UserViewModel(
     init {
         Log.d(TAG, "{tags: AssistLogging} init: starting User")
         doLogin()
-        getCityFromPreferences()
 
     }
 

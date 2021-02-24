@@ -1,7 +1,7 @@
 package com.esei.grvidal.nighttime.network
 
-import android.util.Log
 import com.esei.grvidal.nighttime.data.CalendarData
+import com.esei.grvidal.nighttime.data.City
 import retrofit2.Retrofit
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -28,7 +28,6 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .build()
 
-
 interface NightTimeService {
 
     // Singleton object to make the calls to the api
@@ -45,12 +44,10 @@ interface NightTimeService {
     @POST(USER_URL + "login/")
     suspend fun loginAsync(@Header("username") username: String, @Header("password") password: String) : Response<Any>//Deferred<Response<Any>>
 
-    @POST(USER_URL + "login/")
-    fun login(@Header("username") username: String, @Header("password") password: String) : Response<Any>
+    @GET(USER_URL + "cities/")
+    suspend fun getAllCitiesAsync() : Response<List<City>>
 
-
-
-    @GET(USER_URL+"{idUser}/{day}-{month}-{year}/{idCity}")
+    @GET("$USER_URL{idUser}/{day}-{month}-{year}/{idCity}")
     suspend fun getPeopleOnDateAsync(
         @Path("idUser") id: Long,
         @Path("day") day: Int,
