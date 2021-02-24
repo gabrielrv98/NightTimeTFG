@@ -36,15 +36,8 @@ fun LoginPage(userToken: UserViewModel) {
     val (username, setUsername) = remember { mutableStateOf(TextFieldValue()) }
     val (password, setPassword) = remember { mutableStateOf(TextFieldValue()) }
 
-    val context = ContextAmbient.current
-    val validateOnClick = {
-        Toast.makeText(
-            context,
-            "intentando loggear ${username.text} : ${password.text}",
-            Toast.LENGTH_LONG
-        )
-            .show()
 
+    val validateOnClick = {
         userToken.doLoginRefreshed(username.text,password.text)
     }
 
