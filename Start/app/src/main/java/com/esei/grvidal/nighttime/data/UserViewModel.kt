@@ -10,24 +10,20 @@ import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.datastore.LoginData
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
 
 private const val TAG = "UserViewModel"
 
-enum class NetworkState {
-    WORKING,
-    ERROR,
-    LOADING
-}
 
 enum class LoginState {
-    LOADING,
-    NO_DATA_STORED,
-    REFUSED, //TODO  by the api or by the network?? does it matter??
-    ACCEPTED
+    LOADING, //Operation started
+    NO_DATA_STORED, // No data stored to call login
+    REFUSED, // Credentials don't match
+    NO_NETWORK, // Network error
+    ACCEPTED, // Credentials accepted
+    EXCEPTION // Unexpected exception
 }
 
 class UserViewModel(
@@ -40,12 +36,13 @@ class UserViewModel(
         get() = loggedUser.token
 
     var loggingState by mutableStateOf(LoginState.LOADING)
+        private set
+
+    lateinit var city: City
 
 
     private suspend fun setLoggingData(username: String, password: String) {
-
         dataStoreManager.updateLoginCredentials(username, password)
-
     }
 
     fun logOff() {
@@ -61,13 +58,32 @@ class UserViewModel(
         }
     }
 
+    private fun getCityFromPreferences() {
+        viewModelScope.launch {
+            city = try {
+                dataStoreManager.cityPreferences.first()
+            } catch (e: NoSuchElementException) {
+                City(1, "Ourense")
+
+            }
+        }
+    }
+
+    fun setCity(id: Long, name: String){
+        viewModelScope.launch {
+            dataStoreManager.updateCityData(id, name)
+            city = City(id,name)
+        }
+    }
+
 
     /**
      * Call login() on init so we can display get the token for future calls.
      */
     init {
-        Log.d(TAG, "{tags: AssistLoggin} init: iniciando User")
-        //doLogin()
+        Log.d(TAG, "{tags: AssistLogging} init: starting User")
+        doLogin()
+        getCityFromPreferences()
 
     }
 
@@ -83,7 +99,7 @@ class UserViewModel(
     private suspend fun login() {
 
 
-        Log.e(TAG, "{tags: AssistLoggin} login: creating client")
+        Log.e(TAG, "{tags: AssistLogging} login: creating client")
         loggingState = LoginState.LOADING
 
         var loginData = LoginData("", "")
@@ -93,14 +109,14 @@ class UserViewModel(
 
             Log.e(
                 TAG,
-                "{tags: AssistLoggin} login: getting LoginData = ${loginData.username} : ${loginData.password} loggingState : ${loggingState.name}"
+                "{tags: AssistLogging} login: getting LoginData = ${loginData.username} : ${loginData.password} loggingState : ${loggingState.name}"
             )
 
             if (loginData.username == "" || loginData.password == "") {
                 loggingState = LoginState.NO_DATA_STORED
                 Log.e(
                     TAG,
-                    "{tags: AssistLoggin} login data was empty"
+                    "{tags: AssistLogging} login data was empty"
                 )
             }
 
@@ -123,7 +139,7 @@ class UserViewModel(
                 )
                 Log.e(
                     TAG,
-                    "{tags: AssistLoggin} call to retrifit done"
+                    "{tags: AssistLogging} call to retrofit done"
                 )
 
                 if (webResponse.isSuccessful) {
@@ -131,31 +147,35 @@ class UserViewModel(
                     val token = webResponse.headers()["token"]!!
 
                     loggedUser = UserToken(id, token)
+                    loggingState = LoginState.ACCEPTED
 
                     Log.d(
                         TAG,
-                        "{tags: AssistLoggin} login: login successfully id-> $id  token -> $token"
+                        "{tags: AssistLogging} login: login successfully id-> $id  token -> $token"
                     )
 
+                }else{
+                    Log.d(
+                        TAG,
+                        "{tags: AssistLogging} login: login unsuccessfully  ${loginData.username} : ${loginData.password}"
+                    )
+                    loggingState = LoginState.REFUSED
                 }
 
-
             } catch (e: IOException) {
-                Log.e(TAG, "login: network exception ${e.message}  --//-- $e")
-
+                loggingState = LoginState.NO_NETWORK
+                Log.e(TAG, "login: network exception (no network) ${e.message}  --//-- $e")
 
             } catch (e: Exception) {
                 Log.e(TAG, "login: general exception ${e.message}  --//-- $e")
 
             } finally {
-                if (loggedUser.id == -1L) {
-                    Log.e(TAG, "login: id = -1")
-                    loggingState = LoginState.REFUSED
+                if (loggingState == LoginState.LOADING) {
+                    Log.e(TAG, "Something unexpected happended")
+                    loggingState = LoginState.EXCEPTION
 
-                } else {
-                    Log.d(TAG, "login: Everything correct")
-                    loggingState = LoginState.ACCEPTED
                 }
+                Log.d(TAG, "login: LoggingState = ${loggingState.name}")
 
             }
 

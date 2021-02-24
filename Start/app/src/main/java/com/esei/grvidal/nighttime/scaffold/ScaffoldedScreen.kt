@@ -46,15 +46,16 @@ fun ScreenScaffolded(
 @Composable
 fun CityDialogConstructor(
     cityDialog: Boolean,
+    items: List<City> ,
     setCityDialog: (Boolean) -> Unit,
-    setCityId: (City) -> Unit
+    setCityId: (Long,String) -> Unit
 ) {
     if (cityDialog) {
         CustomDialog(onClose = { setCityDialog(false) }) {
             CityDialog(
-                items = CityDao().getAllCities(),
+                items = items,
                 editCity = { city ->
-                    setCityId(city)
+                    setCityId(city.id,city.name)
                     setCityDialog(false)
                 }
             )

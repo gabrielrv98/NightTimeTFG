@@ -35,29 +35,30 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var userToken: UserViewModel
 
-    public val calendarData by viewModels<CalendarViewModel>()
-    public val barData by viewModels<BarViewModel>()//How to avoid the init until the page is called
+    /** Using kotlin delegate by viewModels returns an instance of [ViewModelLazy]
+     * so the object don't initialize until needed and if the Activity is destroyed and recreated afterwards
+     * it will recive the same intance of [ViewModels] as it had previously
+     * */
+    private val calendarData by viewModels<CalendarViewModel>()
+    private val barData by viewModels<BarViewModel>()
     //public val barData :BarViewModel by navGraphViewModels(R.id.nav_controller_view_tag)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d(TAG, "{tags: AssistLoggin} onCreate: userToken is going to be created")
+        Log.d(TAG, "{tags: AssistLogging} onCreate: userToken is going to be created")
 
+        /**
+         * [UserViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
+         * Factory [UserViewModelFactory]to return a [ViewModelLazy]
+         */
         userToken = ViewModelProvider(
             this,
             UserViewModelFactory(DataStoreManager.getInstance(this))
         ).get(UserViewModel::class.java)
 
-        userToken.doLogin()
+        //userToken.doLogin()
 
-/*
-        if (userToken.networkState.value == NetworkState.ERROR)
-            Toast.makeText(this, R.string.no_internet, Toast.LENGTH_LONG).show() // network-State is null so its not ERROR
-        else Toast.makeText(this, "All cool ${userToken.networkState.value?.name}", Toast.LENGTH_SHORT).show()
-
-https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
- */
 
         setContent {
 
@@ -66,19 +67,19 @@ https://developer.android.com/codelabs/android-room-with-a-view-kotlin?hl=es#6
                 when (userToken.loggingState) {
                     LoginState.LOADING -> {
 
-                        Log.d(TAG, "{tags: AssistLoggin} onCreate: pulling LoadingPage")
+                        Log.d(TAG, "onCreate: pulling LoadingPage")
                         LoadingScreen()
 
                     }
 
                     LoginState.NO_DATA_STORED -> {
 
-                        Log.d(TAG, "{tags: AssistLoggin} onCreate: pulling LoggingPage")
+                        Log.d(TAG, "onCreate: pulling LoggingPage")
                         LoginPage(userToken)
 
-                    }
+                    }//todo check on error if user has logged previously
                     else -> {
-                        Log.d(TAG, "{tags: AssistLoggin} onCreate: pulling MianScreen")
+                        Log.d(TAG, "onCreate: pulling MainScreen")
                         MainScreen(
                             userToken,
                             calendarData,
@@ -122,10 +123,16 @@ Navigation with their own files ( no dependencies )
     )
 
     val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
+/*
     val (cityId, setCityId) = remember {
         mutableStateOf(CityDao().getAllCities()[0])
     }//todo cambiar, inicia siempre en ourense, deberia ser con sharedPreferences o algo asi
 
+
+ */
+    val setCity = { id: Long, name: String ->
+        user.setCity(id,name)
+    }
 
     NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
         composable(BottomNavigationScreens.Calendar.route) {
@@ -133,13 +140,13 @@ Navigation with their own files ( no dependencies )
                 topBar = {
                     TopBarConstructor(
                         setCityDialog = setCityDialog,
-                        nameCity = cityId.name
+                        nameCity = user.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                CityDialogConstructor(cityDialog, setCityDialog, setCityId)
-                CalendarPage(cityId = cityId, calendar)
+                CityDialogConstructor(cityDialog, CityDao().getAllCities(), setCityDialog, setCity)
+                CalendarPage(cityId = user.city, calendar)
             }
         }
 
@@ -148,13 +155,13 @@ Navigation with their own files ( no dependencies )
                 topBar = {
                     TopBarConstructor(
                         setCityDialog = setCityDialog,
-                        nameCity = cityId.name
+                        nameCity = user.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                CityDialogConstructor(cityDialog, setCityDialog, setCityId)
-                BarPage(cityId = cityId, navController, bar)
+                CityDialogConstructor(cityDialog,CityDao().getAllCities(), setCityDialog, setCity)
+                BarPage(cityId = user.city, navController, bar)
             }
 
         }
