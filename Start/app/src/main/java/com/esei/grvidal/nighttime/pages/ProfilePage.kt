@@ -28,23 +28,27 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.navigateWithId
+import kotlin.system.exitProcess
+
 
 @Composable
 fun ProfilePageView(navController: NavHostController, userId: Int?, user: UserViewModel) {
 
-    Column{
+    Column {
         ProfileProperty(
             "token: ",
             if (user.loggedUser.token.isNotEmpty())
                 user.loggedUser.token
-
             else
                 "Vacio"
         )
 
-        Button(modifier = Modifier,onClick = {
+        Button(modifier = Modifier, onClick = {
             user.logOff()
-        }){
+            exitProcess(0)
+
+
+        }) {
             Text("Log off")
         }
     }
