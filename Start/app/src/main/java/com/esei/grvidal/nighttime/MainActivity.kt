@@ -82,21 +82,39 @@ class MainActivity : AppCompatActivity() {
 
                     LoginState.NO_DATA_STORED -> {
 
-                        Log.d(TAG, "onCreate: pulling LoggingPage")
-                        LoginPage(userToken)
+                        Log.d(TAG, "onCreate: pulling LoginPage")
+                        LoginPage(userToken)//todo add register
 
-                    }//todo check on error if user has logged previously
+                    }
+                    LoginState.REFUSED -> {
+                        Log.d(TAG, "onCreate: pulling LoginPage with message")
+                        LoginPage(userToken,stringResource(id = R.string.loginError))
+
+                    }
+
+
+
+                    LoginState.ACCEPTED , LoginState.NO_NETWORK -> {
+
+                        if(userToken.credentialsChecked) {
+                            Log.d(TAG, "onCreate: pulling MainScreen")
+                            MainScreen(
+                                userToken,
+                                city,
+                                calendarData,
+                                barData
+                                //chat,
+                                //onAddItem = chat::addItem,
+                            )
+                        }else{
+                            Log.d(TAG, "onCreate: pulling LoginPage")
+                            LoginPage(userToken, stringResource(id = R.string.serverIsDown))
+                        }
+
+                    }
+
                     else -> {
-                        Log.d(TAG, "onCreate: pulling MainScreen")
-                        MainScreen(
-                            userToken,
-                            city,
-                            calendarData,
-                            barData
-                            //chat,
-                            //onAddItem = chat::addItem,
-                        )
-
+                        ErrorPage("Unexpected error")
                     }
                 }
 

@@ -68,10 +68,10 @@
     <!-- Login form -->
     <string name="volver">Volver</string>
     <string name="log_in">log in</string>
-
-
     <string name="loading">Cargando</string>
     <string name="no_internet">No hay conexion con internet</string>
     <string name="username">Nombre de usuario</string>
     <string name="password">Contraseña</string>
+    <string name="loginError">Error, usuario o contraseña no son validos</string>
+    <string name="serverIsDown">El servidor esta apagado, intentalo más tarde.</string>
 </resources>

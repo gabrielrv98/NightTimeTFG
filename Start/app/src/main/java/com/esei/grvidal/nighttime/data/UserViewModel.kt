@@ -38,6 +38,8 @@ class UserViewModel(
     var loggingState by mutableStateOf(LoginState.LOADING)
         private set
 
+    var credentialsChecked by mutableStateOf(false) // todo creo que puede ser una variable normal
+        private set
 
     private suspend fun setLoggingData(username: String, password: String) {
         dataStoreManager.updateLoginCredentials(username, password)
@@ -82,14 +84,15 @@ class UserViewModel(
         Log.e(TAG, "{tags: AssistLogging} login: creating client")
         loggingState = LoginState.LOADING
 
-        var loginData = LoginData("", "")
+        var loginData = LoginData("", "",false)
 
         try {
             loginData = dataStoreManager.userPreferences.first()
+            credentialsChecked = loginData.accepted
 
             Log.e(
                 TAG,
-                "{tags: AssistLogging} login: getting LoginData = ${loginData.username} : ${loginData.password} loggingState : ${loggingState.name}"
+                "{tags: AssistLogging} login: getting LoginData = ${loginData.username} : ${loginData.password} [ ${loginData.accepted} ] loggingState : ${loggingState.name}"
             )
 
             if (loginData.username == "" || loginData.password == "") {
@@ -123,6 +126,13 @@ class UserViewModel(
                 )
 
                 if (webResponse.isSuccessful) {
+
+                    //If the credentials weren't accepted until now
+                    if (!loginData.accepted) {
+                        dataStoreManager.credentialsChecked()
+                        credentialsChecked = true
+                    }
+
                     val id = webResponse.headers()["id"]!!.toLong()
                     val token = webResponse.headers()["token"]!!
 
@@ -139,6 +149,7 @@ class UserViewModel(
                         TAG,
                         "{tags: AssistLogging} login: login unsuccessfully  ${loginData.username} : ${loginData.password}"
                     )
+                    dataStoreManager.credentialsFailed()
                     loggingState = LoginState.REFUSED
                 }
 

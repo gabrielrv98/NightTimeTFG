@@ -31,43 +31,30 @@ import com.esei.grvidal.nighttime.data.UserViewModel
 private const val TAG = "LoginPage"
 
 @Composable
-fun LoginPage(userToken: UserViewModel) {
+fun LoginPage(userToken: UserViewModel, messageError: String = "") {
 
     val (username, setUsername) = remember { mutableStateOf(TextFieldValue()) }
     val (password, setPassword) = remember { mutableStateOf(TextFieldValue()) }
 
-
-    val validateOnClick = {
-        userToken.doLoginRefreshed(username.text,password.text)
-    }
-
     LoginScreen(
+        showMessageError = messageError,
         username = username,
         setUsername = setUsername,
         password = password,
         setPassword = setPassword,
-        onClick = validateOnClick
+        onClick = {
+            userToken.doLoginRefreshed(username.text,password.text)
+        }
     )
-
-/*
-    LoginScreen(
-        username = username,
-        setUsername = setUsername,
-        password = password,
-        setPassword = setPassword,
-        onClick = validateOnClick
-    )
-*/
-
 }
 
 @Composable
 fun LoginScreen(
+    showMessageError: String,
     username: TextFieldValue,
     setUsername: (TextFieldValue) -> Unit,
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit,
-
     onClick: () -> Unit
 ) {
     Column(
@@ -85,6 +72,7 @@ fun LoginScreen(
             setUsername = setUsername,
             password = password,
             setPassword = setPassword,
+            showMessageError = showMessageError,
             onClick = {
                 if(username.text.isNotEmpty() &&
                     password.text.isNotEmpty()
@@ -108,6 +96,7 @@ private fun LoggingForm(
     setUsername: (TextFieldValue) -> Unit,
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit,
+    showMessageError: String,
     onClick: () -> Unit
 ) {
     Box(modifier = modifier) {
@@ -118,6 +107,15 @@ private fun LoggingForm(
                 password = password,
                 setPassword = setPassword
             )
+
+            if(showMessageError.isNotEmpty()) {
+                Text(
+                    text = showMessageError,
+                    style = MaterialTheme.typography.body2,
+                    color = Color.Red
+                )
+            }
+
             Spacer(modifier = Modifier.size(15.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
@@ -251,7 +249,7 @@ fun TextWithInput(
 
 ///-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-//                                                    Pro way
+//                                                    Pro way //todo delete
 
 ///-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
