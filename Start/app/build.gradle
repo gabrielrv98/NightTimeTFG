@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    //id 'org.jetbrains.kotlin.android' version '1.4.0'
     //id 'kotlin-android-extensions'
 }
 
@@ -63,6 +64,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 }
 
 /*
+Check this to avoid repited dependencies
 [androidx.compose:compose-runtime:0.1.0-dev14] C:\Users\reyga\.gradle\caches\transforms-2\files-2.1\f64fce614ebf292531cfca20fac3bb68\compose-runtime-0.1.0-dev14\AndroidManifest.xml Warning:
 	Package name 'androidx.compose.runtime' used in: androidx.compose:compose-runtime:0.1.0-dev14, androidx.compose.runtime:runtime:1.0.0-alpha06.
 [androidx.compose.material:material-icons-extended:1.0.0-alpha06] C:\Users\reyga\.gradle\caches\transforms-2\files-2.1\5ec73266ff959bb7aaaf24fb9ad6fe05\material-icons-extended-1.0.0-alpha06\AndroidManifest.xml Warning:
