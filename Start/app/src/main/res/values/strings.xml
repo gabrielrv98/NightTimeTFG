@@ -74,4 +74,5 @@
     <string name="password">Contraseña</string>
     <string name="loginError">Error, usuario o contraseña no son validos</string>
     <string name="serverIsDown">El servidor esta apagado, intentalo más tarde.</string>
+    <string name="logoff">Log off</string>
 </resources>

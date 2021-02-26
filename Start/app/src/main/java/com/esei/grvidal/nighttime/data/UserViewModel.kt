@@ -13,6 +13,7 @@ import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
+import kotlin.system.exitProcess
 
 private const val TAG = "UserViewModel"
 
@@ -45,9 +46,10 @@ class UserViewModel(
         dataStoreManager.updateLoginCredentials(username, password)
     }
 
-    fun logOff() {
+    fun logOffAndExit() {
         viewModelScope.launch {
             setLoggingData("", "")
+            exitProcess(0)
         }
     }
 

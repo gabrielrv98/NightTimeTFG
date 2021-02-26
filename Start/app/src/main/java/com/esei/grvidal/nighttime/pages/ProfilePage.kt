@@ -28,7 +28,6 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.navigateWithId
-import kotlin.system.exitProcess
 
 
 @Composable
@@ -44,12 +43,9 @@ fun ProfilePageView(navController: NavHostController, userId: Int?, user: UserVi
         )
 
         Button(modifier = Modifier, onClick = {
-            user.logOff()
-            exitProcess(0)
-
-
+            user.logOffAndExit()
         }) {
-            Text("Log off")
+            Text(stringResource(id = R.string.logoff))
         }
     }
 
