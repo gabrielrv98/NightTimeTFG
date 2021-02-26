@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
-import com.esei.grvidal.nighttime.BottomNavigationScreens
+import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.FullChat
 import com.esei.grvidal.nighttime.data.User

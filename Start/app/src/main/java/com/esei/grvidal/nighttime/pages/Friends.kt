@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.esei.grvidal.nighttime.NavigationScreens
+import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.data.User
 import androidx.navigation.NavHostController
 import com.esei.grvidal.nighttime.navigateWithId

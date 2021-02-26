@@ -1,19 +1,11 @@
 package com.esei.grvidal.nighttime.pages
 
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.rounded.Cancel
-import androidx.compose.material.icons.sharp.Cancel
-import androidx.compose.material.icons.twotone.Cancel
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,18 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
-import com.esei.grvidal.nighttime.BottomNavigationScreens
-import com.esei.grvidal.nighttime.NavigationScreens
+import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.ProfileViewModel
 import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.data.meUser
-import androidx.lifecycle.ViewModel
-import java.util.stream.Stream
 
 @Composable
 fun ProfileEditorPage(navController: NavHostController) {

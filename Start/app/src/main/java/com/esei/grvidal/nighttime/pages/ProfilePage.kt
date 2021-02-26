@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import androidx.ui.tooling.preview.Preview
-import com.esei.grvidal.nighttime.NavigationScreens
+import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*

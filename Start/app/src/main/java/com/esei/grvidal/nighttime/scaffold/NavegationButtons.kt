@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime
+package com.esei.grvidal.nighttime.scaffold
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -18,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.KEY_ROUTE
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.ui.tooling.preview.Preview
+import com.esei.grvidal.nighttime.R
 
 /**
  * Bottom navigation icons with their route to the view

@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
-import com.esei.grvidal.nighttime.BottomNavigationScreens
+import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
 
 /**

@@ -22,6 +22,7 @@ import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.pages.*
+import com.esei.grvidal.nighttime.scaffold.*
 
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.lang.StringBuilder
@@ -32,15 +33,18 @@ class MainActivity : AppCompatActivity() {
 
     //val chat by viewModels<ChatViewModel>()
 
-    private lateinit var userToken: UserViewModel
-    private lateinit var city: CityViewModel
-
     /** Using kotlin delegate by viewModels returns an instance of ViewModel by lazy
      * so the object don't initialize until needed and if the Activity is destroyed and recreated afterwards
      * it will receive the same instance of ViewModel as it had previously
      * */
     private val calendarData by viewModels<CalendarViewModel>()
     private val barData by viewModels<BarViewModel>()
+
+    /** This ViewModels need arguments in their constructors so we need to
+     * use a Fabric to return a lazy initialization of the ViewModel
+     */
+    private lateinit var userToken: UserViewModel
+    private lateinit var city: CityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

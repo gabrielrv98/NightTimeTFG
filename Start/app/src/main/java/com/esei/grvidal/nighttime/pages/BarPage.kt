@@ -26,7 +26,7 @@ import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
-import com.esei.grvidal.nighttime.NavigationScreens
+import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.data.BarViewModel
 import com.esei.grvidal.nighttime.data.MyDate
 import com.esei.grvidal.nighttime.navigateWithId
