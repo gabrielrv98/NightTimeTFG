@@ -44,7 +44,9 @@ fun LoginPage(userToken: UserViewModel, messageError: String = "") {
         setPassword = setPassword,
         onClick = {
             userToken.doLoginRefreshed(username.text,password.text)
-        }
+        },
+        jumpHack = { userToken.jumpHack()
+            Log.d(TAG, "LoginPage: jumphack called")} //todo Limpiar
     )
 }
 
@@ -55,7 +57,8 @@ fun LoginScreen(
     setUsername: (TextFieldValue) -> Unit,
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    jumpHack: () -> Unit
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 24.dp),
@@ -82,7 +85,8 @@ fun LoginScreen(
 
         Footer(
             modifier = Modifier.weight(1f),
-            text = "¿No tienes cuenta?\nRegistrate ya!"
+            text = "¿No tienes cuenta?\nRegistrate ya!",
+            jumpHack = jumpHack
         )
 
     }
@@ -146,16 +150,25 @@ fun Header(modifier: Modifier = Modifier, title: String) {
 }
 
 @Composable
-fun Footer(modifier: Modifier = Modifier, text: String) {
+fun Footer(modifier: Modifier = Modifier, text: String, jumpHack : () -> Unit) {
 
     Box(
         modifier = modifier.fillMaxSize(),
         alignment = Alignment.TopStart
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.body1
-        )
+        Row {
+            Text(
+                modifier = Modifier,
+                text = text,
+                style = MaterialTheme.typography.body1
+            )
+            Button(
+                onClick = { jumpHack() }
+            ){
+                Text("Developer Skip")
+            }
+        }
+
     }
 }
 

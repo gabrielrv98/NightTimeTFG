@@ -33,9 +33,6 @@ class UserViewModel(
 
     var loggedUser by mutableStateOf(UserToken(-1, ""))
 
-    val auth
-        get() = loggedUser.token
-
     var loggingState by mutableStateOf(LoginState.LOADING)
         private set
 
@@ -56,10 +53,11 @@ class UserViewModel(
     fun doLoginRefreshed(username: String, password: String) {
         viewModelScope.launch {
             setLoggingData(username, password)
-            login()
+            login(
+                LoginData(username, password, false)
+            )
         }
     }
-
 
 
     /**
@@ -73,20 +71,24 @@ class UserViewModel(
 
     fun doLogin() {
         viewModelScope.launch {
-            login()
+            val loginData = fetchData()
+
+            if (loggingState == LoginState.LOADING) {
+                login(loginData)
+            }
         }
     }
 
     /**
-     * Sets the value of the loggedUser with the respond of NightTime Api.
+     * Sets the value of the loggedUser with the respond of NightTime Api.//todo remake
      */
-    private suspend fun login() {
+    private suspend fun fetchData(): LoginData {
 
 
         Log.e(TAG, "{tags: AssistLogging} login: creating client")
         loggingState = LoginState.LOADING
 
-        var loginData = LoginData("", "",false)
+        var loginData = LoginData("", "", false)
 
         try {
             loginData = dataStoreManager.userPreferences.first()
@@ -111,70 +113,72 @@ class UserViewModel(
 
         }
 
-        //delay(2000)
+        return loginData
+    }
 
-        if (loggingState == LoginState.LOADING) {
+    private suspend fun login(loginData: LoginData) {
+        try {
 
+            val webResponse = NightTimeApi.retrofitService.loginAsync(
+                loginData.username,
+                loginData.password
+            )
+            Log.e(
+                TAG,
+                "{tags: AssistLogging} call to retrofit done"
+            )
 
-            try {
+            if (webResponse.isSuccessful) {
 
-                val webResponse = NightTimeApi.retrofitService.loginAsync(
-                    loginData.username,
-                    loginData.password
-                )
-                Log.e(
+                //If the credentials weren't accepted until now
+                if (!loginData.accepted) {
+                    dataStoreManager.credentialsChecked()
+                    credentialsChecked = true
+                }
+
+                val id = webResponse.headers()["id"]!!.toLong()
+                val token = webResponse.headers()["token"]!!
+
+                loggedUser = UserToken(id, token)
+                loggingState = LoginState.ACCEPTED
+
+                Log.d(
                     TAG,
-                    "{tags: AssistLogging} call to retrofit done"
+                    "{tags: AssistLogging} login: login successfully id-> $id  token -> $token"
                 )
 
-                if (webResponse.isSuccessful) {
-
-                    //If the credentials weren't accepted until now
-                    if (!loginData.accepted) {
-                        dataStoreManager.credentialsChecked()
-                        credentialsChecked = true
-                    }
-
-                    val id = webResponse.headers()["id"]!!.toLong()
-                    val token = webResponse.headers()["token"]!!
-
-                    loggedUser = UserToken(id, token)
-                    loggingState = LoginState.ACCEPTED
-
-                    Log.d(
-                        TAG,
-                        "{tags: AssistLogging} login: login successfully id-> $id  token -> $token"
-                    )
-
-                }else{
-                    Log.d(
-                        TAG,
-                        "{tags: AssistLogging} login: login unsuccessfully  ${loginData.username} : ${loginData.password}"
-                    )
-                    dataStoreManager.credentialsFailed()
-                    loggingState = LoginState.REFUSED
-                }
-
-            } catch (e: IOException) {
-                loggingState = LoginState.NO_NETWORK
-                Log.e(TAG, "login: network exception (no network) ${e.message}  --//-- $e")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "login: general exception ${e.message}  --//-- $e")
-
-            } finally {
-                if (loggingState == LoginState.LOADING) {
-                    Log.e(TAG, "Something unexpected happended")
-                    loggingState = LoginState.EXCEPTION
-
-                }
-                Log.d(TAG, "login: LoggingState = ${loggingState.name}")
-
+            } else {
+                Log.d(
+                    TAG,
+                    "{tags: AssistLogging} login: login unsuccessfully  ${loginData.username} : ${loginData.password}"
+                )
+                dataStoreManager.credentialsFailed()
+                loggingState = LoginState.REFUSED
             }
 
+        } catch (e: IOException) {
+            loggingState = LoginState.NO_NETWORK
+            Log.e(TAG, "login: network exception (no network) ${e.message}  --//-- $e")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "login: general exception ${e.message}  --//-- $e")
+
+        } finally {
+            if (loggingState == LoginState.LOADING) {
+                Log.e(TAG, "Something unexpected happended")
+                loggingState = LoginState.EXCEPTION
+
+            }
+            Log.d(TAG, "login: LoggingState = ${loggingState.name}")
 
         }
+    }
 
+    fun jumpHack() {
+        viewModelScope.launch {
+            loggingState = LoginState.ACCEPTED
+            credentialsChecked = true
+        }
     }
 
 
