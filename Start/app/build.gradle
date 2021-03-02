@@ -99,11 +99,11 @@ dependencies {
     // DataStore, new version of SharedPreferences
     implementation "androidx.datastore:datastore-preferences:$version_datastore"
 
-    // Moshi
-    implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
-
     // Retrofit
     implementation "com.squareup.retrofit2:converter-moshi:$version_retrofit"
+
+    // Moshi
+    implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
 
     // Material Design
     implementation 'androidx.appcompat:appcompat:1.2.0'

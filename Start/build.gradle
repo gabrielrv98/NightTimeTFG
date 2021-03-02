@@ -13,12 +13,11 @@ buildscript {
         // Navigation
         version_nav_compose = "1.0.0-alpha01"
 
-
         // Data store
         version_datastore = "1.0.0-alpha06"
 
         // Retrofit
-        version_moshi = "1.8.0"
+        version_moshi = "1.9.3"
         version_retrofit = "2.9.0"
 
         // Credentials
