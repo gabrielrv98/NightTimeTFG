@@ -1,11 +1,14 @@
 package com.esei.grvidal.nighttime.data
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.esei.grvidal.nighttime.network.DateCityDTO
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
+import com.squareup.moshi.Json
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.LocalDate
@@ -14,78 +17,357 @@ private const val TAG = "CalendarViewModel"
 
 
 data class CalendarData(
-    val data: MyDate,
-    val event: List<EventData>,
+    val total: Int,
     val friends: Int,
-    val total: Int
+    val events: List<EventData>
 )
+
+data class EventData(val id: Long, val date: String, val description: String, val barName: String)
 
 class CalendarViewModel : ViewModel() {
 
-    // The internal MutableLiveData String that stores the most recent response
-    private val _calendarData = MutableLiveData<CalendarData>()
-
-    // The external immutable LiveData for the response String
-    val calendarData: LiveData<CalendarData>
-        get() = _calendarData
+    private var userToken = UserToken(-1, "")
+    private var cityId: Long = -1
 
 
+    //remember date, it's used to show the selected date and move the calendar to the specified month
+    var selectedDate by mutableStateOf(LocalDate.now()!!.toMyDate())
+        private set
 
-    private val _date = MutableLiveData<MyDate>()
+    var dateInformation by mutableStateOf(
+        CalendarData(
+            -1,
+            -1,
+            listOf()
+        )
+    )
 
-    val date: LiveData<MyDate>
-        get() = _date
+    //Remembered state of the days that must be shown on the calendar
+    var calendar by mutableStateOf(ChipDayFactory.datesCreator())
+        private set
 
+    //List with all the selected days by the users
+    var userDays by mutableStateOf(listOf<MyDate>())
+        private set
 
-    /**
-     * Call login() on init so we can display get the token for future calls.
-     */
-    init {
-        Log.d(TAG, "init: iniciando Calendar")
-        getDateInfo(LocalDate.now().toMyDate())
-    }
+    var userFriends by mutableStateOf(listOf<UserSnap>())
+        private set
 
-    /**
-     * Sets the value of the loggedUser LiveData token to the given by NightTime Api.
-     */
-    private fun getDateInfo(date: MyDate) {
+    fun loadSelectedDate() {
+        //call api
+        Log.d(TAG, "load: $selectedDate userToken $userToken")
+
         viewModelScope.launch {
-            /*
             try {
 
-
-                Log.e(TAG, "login: creating client")
-
-
-                val webResponse = NightTimeApi.retrofitService.getPeopleOnDateAsync(userToken.id,date.day,date.month, date.year, cityId)
+                val webResponse = NightTimeApi.retrofitService.getPeopleAndEventsOnDateAsync(
+                    auth = userToken.token,
+                    id = userToken.id,
+                    day = selectedDate.day,
+                    month = selectedDate.month,
+                    year = selectedDate.year,
+                    idCity = cityId
+                )
+                Log.d(
+                    TAG,
+                    "call to retrofit done"
+                )
 
                 if (webResponse.isSuccessful) {
-                    val id = webResponse.headers()["id"]!!.toLong()
-                    val token = webResponse.headers()["token"]!!
+                    var eventList: List<EventData> = listOf()
 
-                    _calendarData.value =
-                        CalendarData(date, listOf(), -1, -1)//todo finish
+                    webResponse.body()?.let { data ->
+                        eventList = data
 
-                    Log.e(TAG, "login: login successfully id-> $id  token -> $token")
+                    }
+                    val total = webResponse.headers()["total"]?.toInt() ?: -1
+                    val friends = webResponse.headers()["friends"]?.toInt() ?: -1
+
+                    dateInformation = CalendarData(total, friends, eventList)
+
+                    Log.d(
+                        TAG,
+                        "data fetched $dateInformation"
+                    )
+                } else {
+                    Log.e(
+                        TAG,
+                        "error fetching data from CalendarViewModel load"
+                    )
                 }
 
-
             } catch (e: IOException) {
-                Log.e(TAG, "getDateInfo: network exception ${e.message}  --//-- $e")
+                Log.e(TAG, "loadSelectedDate: network exception (no network) ${e.message}  --//-- $e")
+                dateInformation = CalendarData(-1, -1, listOf())
 
             } catch (e: Exception) {
-                Log.e(TAG, "getDateInfo: general exception ${e.message}  --//-- $e")
+                Log.e(TAG, "loadSelectedDate: general exception ${e.message}  --//-- $e")
 
-            } finally {
-                if (_calendarData.value == null) {
-                    _calendarData.value = CalendarData(LocalDate.now().toMyDate(), listOf(), -1, -1)
-                    Log.d(TAG, "getDateInfo: value was empty")
-                } else
-                    Log.d(TAG, "getDateInfo: Everything correct")
             }
 
-             */
         }
     }
 
+
+    fun getUserDateList() {
+
+        Log.d(TAG, "getUserDateList: $userToken, cityId = $cityId")
+
+        viewModelScope.launch {
+
+            try {
+
+                val webResponse = NightTimeApi.retrofitService.getFutureUsersDateList(
+                    auth = userToken.token,
+                    id = userToken.id,
+                    idCity = cityId
+                )
+                Log.d(
+                    TAG,
+                    "call to retrofit done"
+                )
+
+                if (webResponse.isSuccessful) {
+
+                    webResponse.body()?.let { data ->
+
+                        userDays = data.map { futureDates ->
+                           // val fields = futureDates.nextDate.split("-")
+
+                            val fields = futureDates.nextDate.split("-")
+                            try {
+                                MyDate(fields[2].toInt(), fields[1].toInt(), fields[0].toInt())
+                            } catch (e: NumberFormatException) {
+                                Log.e(
+                                    TAG,
+                                    "getUserDateList: userList parse from String to MyDate",
+                                    e
+                                )
+                                MyDate(-1, -1, -1)
+                            }
+
+                        }
+
+                    }
+                    Log.d(
+                        TAG,
+                        "data fetched $userDays"
+                    )
+                } else {
+                    Log.e(
+                        TAG,
+                        "error fetching data from CalendarViewModel getFriends ${webResponse.errorBody()}"
+                    )
+                }
+
+            } catch (e: IOException) {
+                Log.e(TAG, "getUserDateList: network exception (no network) ${e.message}  --//-- $e")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "getUserDateList: general exception ${e.message}  --//-- $e")
+
+            }
+
+        }
+    }
+
+    fun getFriends() {
+
+        Log.d(TAG, "getFriends: $selectedDate userToken $userToken")
+
+        viewModelScope.launch {
+
+            try {
+
+                val webResponse = NightTimeApi.retrofitService.getUsersOnDateAsync(
+                    auth = userToken.token,
+                    id = userToken.id,
+                    day = selectedDate.day,
+                    month = selectedDate.month,
+                    year = selectedDate.year,
+                    idCity = cityId
+                )
+                Log.d(
+                    TAG,
+                    "call to retrofit done"
+                )
+
+                if (webResponse.isSuccessful) {
+
+                    webResponse.body()?.let { data ->
+                        userFriends = data
+
+                    }
+                    Log.d(
+                        TAG,
+                        "data fetched $userFriends"
+                    )
+                } else {
+                    Log.e(
+                        TAG,
+                        "error fetching data from CalendarViewModel getFriends ${webResponse.errorBody()}"
+                    )
+                }
+
+            } catch (e: IOException) {
+                Log.e(TAG, "getFriends: network exception (no network) ${e.message}  --//-- $e")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "getFriends: general exception ${e.message}  --//-- $e")
+
+            }
+        }
+    }
+
+    fun setCityId(id: Long) {
+        Log.d(TAG, "setCityId: old id = $cityId, new $id")
+        cityId = id
+    }
+
+    /**
+     * Creates the calendar layout ( days of the week) from a day of a month
+     *
+     * @param myDate selected date that will be used to select the month
+     */
+    fun setCalendar(myDate: MyDate) {
+        calendar = ChipDayFactory.datesCreator(myDate)
+    }
+
+
+    /**
+     * Set the selected day to show relative information like people and events,
+     *  besides checks if its needed to different a new month
+     */
+    fun setDate(myDate: MyDate) {
+
+        if (selectedDate.month != myDate.month)
+            setCalendar(myDate)
+
+        selectedDate = myDate
+        loadSelectedDate()
+    }
+
+    // event: addItem
+    fun addDateToUserList(date: MyDate) {
+
+        userDays = userDays + listOf(date)
+
+        viewModelScope.launch {
+
+            try {
+
+                val webResponse = NightTimeApi.retrofitService.addDateAsync(
+                    auth = userToken.token,
+                    id = userToken.id,
+                    dateCity = DateCityDTO(date.toLocalDate().toString(), cityId)
+                )
+
+                Log.d(
+                    TAG,
+                    "call to retrofit done"
+                )
+
+                if (webResponse.isSuccessful) {
+
+                    Log.d(
+                        TAG,
+                        "data sent ${webResponse.body()}, id = ${webResponse.headers()["id"]}"
+                    )
+
+                } else {
+
+                    removeDate(date)
+
+                    Log.e(
+                        TAG,
+                        "error sending data from CalendarViewModel addDate ${webResponse.errorBody()}"
+                    )
+                }
+
+
+
+            } catch (e: IOException) {
+                removeDate(date)
+                Log.e(TAG, "addDateToUserList: network exception (no network)  --//-- $e")
+
+            } catch (e: Exception) {
+                removeDate(date)
+                Log.e(TAG, "addDateToUserList: general exception  --//-- $e --//--${e.stackTrace}")
+
+
+            }
+        }
+
+    }
+
+    // event: removeItem
+    fun removeDateFromUserList(date: MyDate) {
+        removeDate(date)
+
+        viewModelScope.launch {
+
+            try {
+
+                val webResponse = NightTimeApi.retrofitService.removeDateAsync(
+                    auth = userToken.token,
+                    id = userToken.id,
+                    dateCity = DateCityDTO(date.toLocalDate().toString(), cityId)
+                )
+
+                Log.d(
+                    TAG,
+                    "call to retrofit done"
+                )
+
+                if (webResponse.isSuccessful) {
+
+                    Log.d(
+                        TAG,
+                        "data deleted ${webResponse.body()}"
+                    )
+
+                } else {
+
+                    userDays = userDays + listOf(date)
+
+                    Log.e(
+                        TAG,
+                        "error deleting data from CalendarViewModel removeDate body = ${webResponse.toString()} "
+                    )
+                }
+
+
+
+            } catch (e: IOException) {
+                Log.e(TAG, "addDateToUserList: network exception (no network)  --//-- $e")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "addDateToUserList: general exception  --//-- $e --//--${e.stackTrace}")
+
+
+            }
+        }
+    }
+
+
+    private fun removeDate(date: MyDate) {
+        // toMutableList makes a mutable copy of the list we can edit, then
+        // assign the new list to todoItems (which is still an immutable list)
+        userDays = userDays.toMutableList().also {
+            it.remove(date)
+        }
+    }
+
+    fun setUserToken(loggedUser: UserToken) {
+
+        Log.d(TAG, "setCityId: old id = $userToken, new $loggedUser")
+        userToken = loggedUser
+    }
 }
+
+private fun MyDate.toLocalDate(): LocalDate {
+    return LocalDate.of(this.year, this.month, this.day)
+}
+
+
+

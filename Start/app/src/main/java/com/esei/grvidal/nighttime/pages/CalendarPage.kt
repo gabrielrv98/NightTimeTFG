@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime.pages
 
 import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
@@ -37,63 +38,70 @@ import java.time.LocalDate
 import java.util.*
 
 
-private const val TAG = "CaldendarPage"
+private const val TAG = "CalendarPage"
 
 /**
- * Show the Calendar page, with the calendar on the top and the information of the selected date  and
- * selected city [cityId] below it
+ * Show the Calendar page. A calendar with selectable dates, information of the selected date
+ * and the list of the dates selected by the user
  *
- * @param cityId selected City
  */
 @Composable
-fun CalendarPage(cityId: City, calendarData: CalendarViewModel) {
+fun CalendarPage(calendarVM: CalendarViewModel) {
 
-    val user = User("Me")//todo cambiar a user como era en la app donde aprendi
-    val userNextDateMutable = remember { mutableStateOf(user.nextDate) }
-
-    //remember date, it's used to show the selected date and move the calendar to the specified month
-    val (date, setDate) = remember {
-        mutableStateOf(
-            MyDate(
-                LocalDate.now().dayOfMonth,
-                LocalDate.now().month.value,
-                LocalDate.now().year
-            )
-        )
-    }
-    //Remembered state of the days that must be shown on the calendar
-    val (calendar, setCalendar) = remember { mutableStateOf(ChipDayFactory.datesCreator()) }
     //Remembered state of a boolean that express if the dialog with the friendly users must be shown
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
-
-    // Edited set that if the month changes, the calendar will update
-    val mySetDay = { myDate: MyDate ->
-        if (date.month != myDate.month)
-            setCalendar(ChipDayFactory.datesCreator(myDate))
-        setDate(myDate)
-    }
-
 
     //If Friendly users Card is touched a dialog with their names should be shown
     if (showDialog)
 
         CustomDialog(onClose = { setShowDialog(false) }) {
             FriendlyUsersDialog(
-                itemsUser = CalendarDao.getFriends(cityId.id, date),
+                itemsUser = calendarVM.userFriends,
                 modifier = Modifier.preferredHeight(600.dp)
             )
         }
 
+    CalendarScreen(
+        total = calendarVM.dateInformation.total,
+        friends = calendarVM.dateInformation.friends,
+        events = calendarVM.dateInformation.events,
+        selectedDate = calendarVM.selectedDate,
+        setDate = calendarVM::setDate,
+        calendar = calendarVM.calendar,
+        userSelectedDates = calendarVM.userDays,
+        addUserSelectedDate = calendarVM::addDateToUserList,
+        removeUserSelectedDate = calendarVM::removeDateFromUserList
+    ) {
+        calendarVM.getFriends()
+        setShowDialog(true)
+    }
+
+}
+
+@Composable
+private fun CalendarScreen(
+    total: Int,
+    friends: Int,
+    events: List<EventData>,
+    selectedDate: MyDate,
+    setDate: (MyDate) -> Unit,
+    calendar: List<List<MyDate>>,
+    userSelectedDates: List<MyDate>,
+    addUserSelectedDate: (MyDate) -> Unit,
+    removeUserSelectedDate: (MyDate) -> Unit,
+    setShowDialog: () -> Unit
+) {
     val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
     CalendarPageView(
         calendar = {
             CalendarWindow(
                 //Name of the month shown on the top
-                monthName = monthName(date.month),
+                monthName = monthName(selectedDate.month),
                 colorBackground = colorBackground,
-                previousMonthClick = { mySetDay(date.previousMonth) },
-                nextMonthClick = { mySetDay(date.nextMonth) }
+                previousMonthClick = { setDate(selectedDate.previousMonth) },
+                nextMonthClick = { setDate(selectedDate.nextMonth) }
             ) {
+
                 for (week in calendar) {
                     //Week Row
                     Row(
@@ -109,9 +117,9 @@ fun CalendarPage(cityId: City, calendarData: CalendarViewModel) {
                             ) {
 
                                 DayChip(
-                                    isNextUserDate = userNextDateMutable.value == days,
-                                    date = date,
-                                    setDate = mySetDay,
+                                    isNextUserDate = userSelectedDates.contains(days),
+                                    date = selectedDate,
+                                    setDate = setDate,
                                     chipDate = days,
                                     colorBackground = colorBackground
                                 )
@@ -122,41 +130,32 @@ fun CalendarPage(cityId: City, calendarData: CalendarViewModel) {
             }
         },
         bottomInfo = {
-            val datePeople = CalendarDao.getPeopleOnDate(cityId.id, date)
+
             DayInformation(
-                formattedDay = StringBuilder(8)
-                    .append(date.day)
-                    .append("/")
-                    .append(date.month)
-                    .append("/")
-                    .append(date.year)
-                    .toString(),
-                totalPeople = datePeople.total.toString(),
-                friends = datePeople.amigos.toString(),
-                showFriends = { setShowDialog(true) },
+                formattedDay = selectedDate.toStringFormatted(),
+                totalPeople = total.toString(),
+                friends = friends.toString(),
+                showFriends = setShowDialog,
                 OnChooseDateClick = {
-                    if (date != userNextDateMutable.value)
-                        userNextDateMutable.value = date
-                    else userNextDateMutable.value = null
+                    if(!userSelectedDates.contains(selectedDate))
+                        addUserSelectedDate(selectedDate)
+                    else removeUserSelectedDate(selectedDate)
                 },
-                selectDateEnable = !date.isBefore(),
-                buttonText = if (!date.isBefore()) {
-                    if (date == userNextDateMutable.value)
+                selectDateEnable = !selectedDate.isBefore(),
+                buttonText = if (!selectedDate.isBefore()) {
+                    if (userSelectedDates.contains(selectedDate))
                         stringResource(id = R.string.deseleccionar)
                     else stringResource(id = R.string.elegirDia)
                 } else stringResource(id = R.string.diaPasado),
                 events = {
-                    BarDao.getEvents(cityId.id, date).forEach {
-                        it?.let {
-                            Event(it.barName, it.eventDescription)
-                        }
-                    }
 
+                    events.forEach { event ->
+                        Event(event.barName,event.description)
+                    }
                 }
             )
         }
     )
-
 }
 
 /**
@@ -235,7 +234,7 @@ fun CalendarPageView(
  */
 @Composable
 fun FriendlyUsersDialog(
-    itemsUser: List<User?>,
+    itemsUser: List<UserSnap>,
     modifier: Modifier = Modifier
 ) {
     //List with the users
@@ -262,9 +261,7 @@ fun FriendlyUsersDialog(
                     .padding(start = 8.dp)
                     .align(Alignment.CenterVertically)
             ) {
-                if (it != null) {
-                    Text(text = (it.name + " - Apellidos"))
-                }
+                Text(text ="${it.username} - ${it.realname}")
             }
         }
 
@@ -298,7 +295,7 @@ fun CalendarWindow(
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 6.dp)
-            //.animateContentSize() // automatically animate size when it changes//todo check this
+            .animateContentSize() // automatically animate size when it changes//todo check this
         ) {
 
             //Header of the Calendar
@@ -381,22 +378,6 @@ fun CalendarWindow(
 
             Divider(thickness = 1.dp, color = AmbientContentColor.current.copy(alpha = 0.15f))
 
-
-            /*
-            If you swipe up when it's not needed (or "possible") you will get
-            IlegalStateException entered drag with non-zero pending scroll: -101.1
-LazyColumnFor(
-    items = calendar,
-    modifier = Modifier.padding(top = 0.dp, start = 6.dp, end = 6.dp)
-        .padding(bottom = 0.dp)
-) {
-*/
-
-            //val swipeableState  by rememberSwipeableState(initialValue = )
-/*
-            var chagedMonth2 : MutableState<Boolean> = remember{ mutableStateOf(false) }
-
- */
             val (value, setValue) = remember { mutableStateOf(false) }
             val sensibility = 35 // old 25
 
@@ -706,13 +687,13 @@ fun DayInformation(
 /**
  * Formatted Event
  *
- * @param barName name that will be shown as bold text
- * @param eventDescription description of the event
+ * @param title name that will be shown as bold text
+ * @param description description of the event
  */
 @Composable
 fun Event(
-    barName: String,
-    eventDescription: String
+    title: String,
+    description: String
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth()
@@ -726,12 +707,12 @@ fun Event(
                 .padding(vertical = 6.dp)
         ) {
             Text(
-                text = barName,
+                text = title,
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = eventDescription, modifier = Modifier.padding(top = 1.dp, start = 6.dp),
+                text = description, modifier = Modifier.padding(top = 1.dp, start = 6.dp),
                 style = MaterialTheme.typography.body2
             )
         }
@@ -762,7 +743,8 @@ private fun InfoChip(
     ) {
 
         Text(
-            text = numberOfPeople,
+            text = if (numberOfPeople == "-1") "?"
+            else numberOfPeople,
             style = styleTitle,
             fontWeight = FontWeight.Bold
         )
@@ -817,7 +799,7 @@ fun CalendarWindowPreview() {
             }
         },
         bottomInfo = {
-            val datePeople = CalendarDao.getPeopleOnDate(0, date)
+
             DayInformation(
                 formattedDay = StringBuilder(8)
                     .append(date.day)
@@ -826,17 +808,17 @@ fun CalendarWindowPreview() {
                     .append("/")
                     .append(date.year)
                     .toString(),
-                totalPeople = datePeople.total.toString(),
-                friends = datePeople.amigos.toString(),
+                totalPeople = "150",
+                friends = "20",
                 showFriends = { },
                 OnChooseDateClick = { },
                 buttonText = stringResource(id = R.string.elegirDia),
                 events = {
-                    BarDao.getEvents(0, date).forEach {
-                        it?.let {
-                            Event(it.barName, it.eventDescription)
-                        }
-                    }
+
+                            Event("bar1", "description 1")
+                            Event("bar2", "description 2")
+                            Event("bar3", "description 3")
+                            Event("bar4", "description 4")
 
                 },
                 selectDateEnable = true,
@@ -860,36 +842,32 @@ fun CalendarPreview() {
 fun DialogPreview() {
     val userList =
         listOf(
-            User(name = "Nuria"),
-            User(name = "Miguel"),
-            User(name = "Maria"),
-            User(name = "Marcos"),
-            User(name = "Laura"),
-            User(name = "Sara"),
-            User(name = "Julio"),
-            User(name = "Juan"),
-            User(name = "Pedro"),
-            User(name = "Salva"),
-            User(name = "Gabriel"),
-            User(name = "Jose"),
-            User(name = "Emma"),
-            User(name = "Santi"),
-            User(name = "Filo"),
-            User(name = "Nuria"),
-            User(name = "Miguel"),
-            User(name = "Maria"),
-            User(name = "Marcos"),
-            User(name = "Laura"),
-            User(name = "Sara"),
-            User(name = "Julio"),
-            User(name = "Juan"),
-            User(name = "Pedro"),
-            User(name = "Salva"),
-            User(name = "Gabriel"),
-            User(name = "Jose"),
-            User(name = "Emma"),
-            User(name = "Santi"),
-            User(name = "Filo")
+            UserSnap( 1,"Nuria","pinknut"),
+            UserSnap( 1,"Miguel","emikepick"),
+            UserSnap(1,"Maria","dulceFlor"),
+            UserSnap( 1,"Marcos","Tigre"),
+            UserSnap( 1,"Laura","laux21"),
+            UserSnap( 1,"Sara","saraaldo"),
+            UserSnap( 1,"Julio","itsme"),
+            UserSnap( 1,"Juan","john32"),
+            UserSnap( 1,"Pedro","pcsantiago"),
+            UserSnap( 1,"Salva","Salvador"),
+            UserSnap( 1,"Gabriel","grvidal"),
+            UserSnap( 1,"Jose","JS"),
+            UserSnap( 1,"Emma","EmmaSant"),
+            UserSnap( 1,"Santi","santii810"),
+            UserSnap( 1,"Filo","erfilo"),
+            UserSnap( 1,"Nuria","pinknut"),
+            UserSnap( 1,"Miguel","emikepick"),
+            UserSnap(1,"Maria","dulceFlor"),
+            UserSnap( 1,"Marcos","Tigre"),
+            UserSnap( 1,"Laura","laux21"),
+            UserSnap( 1,"Sara","saraaldo"),
+            UserSnap( 1,"Julio","itsme"),
+            UserSnap( 1,"Juan","john32"),
+            UserSnap( 1,"Pedro","pcsantiago"),
+            UserSnap( 1,"Salva","Salvador"),
+            UserSnap( 1,"Gabriel","grvidal"),
         )
     NightTimeTheme {
 

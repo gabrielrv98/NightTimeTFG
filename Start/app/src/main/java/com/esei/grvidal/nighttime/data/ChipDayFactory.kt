@@ -26,9 +26,9 @@ data class MyDate(val day: Int, val month: Int, val year: Int){
 
     fun toStringFormatted() : String{
         return StringBuilder().append(day)
-            .append("-")
+            .append("/")
             .append(month)
-            .append("-")
+            .append("/")
             .append(year)
             .toString()
     }

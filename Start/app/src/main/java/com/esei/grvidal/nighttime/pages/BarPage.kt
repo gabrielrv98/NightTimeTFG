@@ -42,6 +42,7 @@ class BarDAO {
         },
         Bar(2, "Urbe", "Las mejores aspiradoras").apply {
             schedule = listOf(false, true, false, false, false, true, false)
+            /*
             events = listOf(
                 EventData(MyDate(26, 11, 2020), "Copas gratis"),
                 EventData(MyDate(6, 12, 2020), "Todo a mitad de precio"),
@@ -49,6 +50,8 @@ class BarDAO {
                 EventData(MyDate(14, 12, 2020), "Mas caro de lo normal"),
                 EventData(MyDate(21, 12, 2020), "Dj personalizado")
             )
+
+             */
         },
         Bar(
             3,
@@ -59,6 +62,7 @@ class BarDAO {
         },
         Bar(4, "Mil petalos", "Chicas siempre listas para darlo todo").apply {
             schedule = listOf(true, true, true, true, true, true, true)
+            /*
             events = listOf(
                 EventData(MyDate(26, 11, 2020), "Copas gratis"),
                 EventData(MyDate(6, 12, 2020), "Todo a mitad de precio"),
@@ -66,14 +70,14 @@ class BarDAO {
                 EventData(MyDate(14, 12, 2020), "Mas caro de lo normal"),
                 EventData(MyDate(21, 12, 2020), "Dj personalizado")
             )
+
+             */
         }
     )
 }
 
-data class EventData(val date: MyDate, val description: String)
 
 data class Bar(val id: Int, val name: String, val description: String) {
-    var events: List<EventData>? = null
     var multimedia: List<Any>? = listOf(
         Icons.Outlined.PartyMode,
         Icons.Outlined.LocalDining,

@@ -184,6 +184,11 @@ fun ShowDetails(bar: Bar, onBackPressed: () -> Unit = {}) {
             title = stringResource(id = R.string.nextEvents),
             icon = Icons.Outlined.LocalDrink
         ) {
+            Event(
+                title = "date",
+                description = "eventData.description"
+            )
+            /*
             bar.events?.let {
 
                 LazyColumnFor(items = it) { eventData ->
@@ -193,6 +198,8 @@ fun ShowDetails(bar: Bar, onBackPressed: () -> Unit = {}) {
                     )
                 }
             }
+
+             */
         }
 
 

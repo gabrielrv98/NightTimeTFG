@@ -13,6 +13,12 @@ data class UserToken(
     val token: String
 )
 
+data class UserSnap(
+    val userId: Long,
+    val username: String,
+    val realname: String
+)
+
 //Todo try to use them in the future
 
 class ProfileViewModel : ViewModel() {
@@ -213,59 +219,4 @@ val meUser = User("Gabriel").apply {
     this.nextDate = MyDate(25, 11, 2020)
     this.status = "Hey there I'm using NightTime"
     this.photo = R.drawable.arcangel
-}
-
-data class DatePeople(val amigos: Int, val total: Int)
-object CalendarDao {
-
-    fun getPeopleOnDate(cityId: Long, date: MyDate): DatePeople {
-
-        return when {
-            date.day % 5 == 0 -> {
-                DatePeople(35, 144)
-            }
-            date.day % 2 == 0 -> {
-                DatePeople(14, 20)
-            }
-            else -> DatePeople(0, 5)
-        }
-    }
-
-    fun getFriends(cityId: Long, date: MyDate): List<User?> {
-        //todo this is hardcoded
-        return if (date.day == 1) {
-            listOf()
-        } else listOf(
-            User(name = "Nuria"),
-            User(name = "Miguel"),
-            User(name = "Maria"),
-            User(name = "Marcos"),
-            User(name = "Laura"),
-            User(name = "Sara"),
-            User(name = "Julio"),
-            User(name = "Juan"),
-            User(name = "Pedro"),
-            User(name = "Salva"),
-            User(name = "Gabriel"),
-            User(name = "Jose"),
-            User(name = "Emma"),
-            User(name = "Santi"),
-            User(name = "Filo"),
-            User(name = "Nuria"),
-            User(name = "Miguel"),
-            User(name = "Maria"),
-            User(name = "Marcos"),
-            User(name = "Laura"),
-            User(name = "Sara"),
-            User(name = "Julio"),
-            User(name = "Juan"),
-            User(name = "Pedro"),
-            User(name = "Salva"),
-            User(name = "Gabriel"),
-            User(name = "Jose"),
-            User(name = "Emma"),
-            User(name = "Santi"),
-            User(name = "Filo")
-        )
-    }
 }

@@ -37,13 +37,13 @@ class MainActivity : AppCompatActivity() {
      * so the object don't initialize until needed and if the Activity is destroyed and recreated afterwards
      * it will receive the same instance of ViewModel as it had previously
      * */
-    private val calendarData by viewModels<CalendarViewModel>()
     private val barData by viewModels<BarViewModel>()
+    private val calendarData by viewModels<CalendarViewModel>()
 
     /** This ViewModels need arguments in their constructors so we need to
      * use a Fabric to return a lazy initialization of the ViewModel
      */
-    private lateinit var userToken: UserViewModel
+    private lateinit var userVM: UserViewModel
     private lateinit var city: CityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
          * [UserViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
          * Factory [UserViewModelFactory]to return a ViewModel by lazy
          */
-        userToken = ViewModelProvider(
+        userVM = ViewModelProvider(
             this,
             UserViewModelFactory(DataStoreManager.getInstance(this))
         ).get(UserViewModel::class.java)
@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
             CityViewModelFactory(DataStoreManager.getInstance(this))
         ).get(CityViewModel::class.java)
 
+
         //userToken.doLogin()
 
 
@@ -72,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
             NightTimeTheme {
 
-                when (userToken.loggingState) {
+                when (userVM.loggingState) {
                     LoginState.LOADING -> {
 
                         Log.d(TAG, "onCreate: pulling LoadingPage")
@@ -83,37 +84,43 @@ class MainActivity : AppCompatActivity() {
                     LoginState.NO_DATA_STORED -> {
 
                         Log.d(TAG, "onCreate: pulling LoginPage")
-                        LoginPage(userToken)//todo add register
+                        LoginPage(userVM)//todo add register
 
                     }
                     LoginState.REFUSED -> {
                         Log.d(TAG, "onCreate: pulling LoginPage with message")
-                        LoginPage(userToken,stringResource(id = R.string.loginError))
+                        LoginPage(userVM, stringResource(id = R.string.loginError))
 
                     }
 
 
+                    LoginState.ACCEPTED, LoginState.NO_NETWORK -> {
 
-                    LoginState.ACCEPTED , LoginState.NO_NETWORK -> {
+                        //Presetting CalendarVM to make calls to api
+                        calendarData.setCityId(city.city.id)
+                        calendarData.setUserToken(userVM.loggedUser)
 
-                        if(userToken.credentialsChecked) {
+                        if (userVM.credentialsChecked) {
                             Log.d(TAG, "onCreate: pulling MainScreen")
                             MainScreen(
-                                userToken,
+                                userVM,
                                 city,
                                 calendarData,
                                 barData
                                 //chat,
                                 //onAddItem = chat::addItem,
                             )
-                        }else{
-                            Log.d(TAG, "onCreate: pulling LoginPage")
-                            LoginPage(userToken, stringResource(id = R.string.serverIsDown))
+                        } else {
+                            Log.d(
+                                TAG,
+                                "onCreate: pulling LoginPage, credentials ${userVM.credentialsChecked}"
+                            )
+                            LoginPage(userVM, stringResource(id = R.string.serverIsDown))
                         }
 
                     }
 
-                    else -> {
+                    LoginState.EXCEPTION -> {
                         ErrorPage("Unexpected error")
                     }
                 }
@@ -130,8 +137,8 @@ class MainActivity : AppCompatActivity() {
 private fun MainScreen(
     user: UserViewModel,
     cityVM: CityViewModel,
-    calendar: CalendarViewModel,
-    bar: BarViewModel
+    calendarVM: CalendarViewModel,
+    barVM: BarViewModel
     //chat : ChatViewModel,
     //onAddItem: (Message) -> Unit,
 ) {
@@ -150,24 +157,33 @@ Navigation with their own files ( no dependencies )
         BottomNavigationScreens.Profile
     )
 
-    val (cityDialog, setCityDialog) = remember { mutableStateOf(false) }
-    val setCity = { id: Long, name: String ->
-        cityVM.setCity(id,name)
-    }
+    val (showCityDialog, setShowCityDialog) = remember { mutableStateOf(false) }
+
 
     NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
         composable(BottomNavigationScreens.Calendar.route) {
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
-                        setCityDialog = setCityDialog,
+                        setCityDialog = setShowCityDialog,
                         nameCity = cityVM.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                CityDialogConstructor(cityDialog, cityVM.allCities, setCityDialog, setCity)
-                CalendarPage(cityId = cityVM.city, calendar)
+                CityDialogConstructor(
+                    cityDialog = showCityDialog,
+                    items = cityVM.allCities,
+                    setCityDialog = setShowCityDialog,
+                    setCityId = { id: Long, name: String ->
+                        cityVM.setCity(id, name)
+                        calendarVM.setCityId(id)
+                    }
+                )
+
+                calendarVM.loadSelectedDate()//Loading the actual day
+                calendarVM.getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+                CalendarPage(calendarVM = calendarVM)
             }
         }
 
@@ -175,14 +191,19 @@ Navigation with their own files ( no dependencies )
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
-                        setCityDialog = setCityDialog,
+                        setCityDialog = setShowCityDialog,
                         nameCity = cityVM.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                CityDialogConstructor(cityDialog,cityVM.allCities, setCityDialog, setCity)
-                BarPage(cityId = cityVM.city, navController, bar)
+                CityDialogConstructor(
+                    showCityDialog,
+                    cityVM.allCities,
+                    setShowCityDialog,
+                    cityVM::setCity
+                )
+                BarPage(cityId = cityVM.city, navController, barVM)
             }
 
         }
