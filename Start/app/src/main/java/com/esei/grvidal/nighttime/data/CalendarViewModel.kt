@@ -27,7 +27,25 @@ data class EventData(val id: Long, val date: String, val description: String, va
 class CalendarViewModel : ViewModel() {
 
     private var userToken = UserToken(-1, "")
-    private var cityId: Long = -1
+
+    fun setUserToken(loggedUser: UserToken) {
+
+        Log.d(TAG, "setUserToken: old token = $userToken, new $loggedUser")
+        userToken = loggedUser
+    }
+
+    var cityId: Long = -1
+        set(value) {
+            Log.d(TAG, "setCityId: old id = $cityId, new $value")
+
+            if (cityId != value) { // If the city has been updated, value is set and data is fetched
+                field = value
+
+                Log.d(TAG, "setCityId: fetching data")
+                loadSelectedDate()//Loading the actual day
+                getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+            }
+        }
 
 
     //remember date, it's used to show the selected date and move the calendar to the specified month
@@ -97,7 +115,10 @@ class CalendarViewModel : ViewModel() {
                 }
 
             } catch (e: IOException) {
-                Log.e(TAG, "loadSelectedDate: network exception (no network) ${e.message}  --//-- $e")
+                Log.e(
+                    TAG,
+                    "loadSelectedDate: network exception (no network) ${e.message}  --//-- $e"
+                )
                 dateInformation = CalendarData(-1, -1, listOf())
 
             } catch (e: Exception) {
@@ -132,7 +153,7 @@ class CalendarViewModel : ViewModel() {
                     webResponse.body()?.let { data ->
 
                         userDays = data.map { futureDates ->
-                           // val fields = futureDates.nextDate.split("-")
+                            // val fields = futureDates.nextDate.split("-")
 
                             val fields = futureDates.nextDate.split("-")
                             try {
@@ -161,7 +182,10 @@ class CalendarViewModel : ViewModel() {
                 }
 
             } catch (e: IOException) {
-                Log.e(TAG, "getUserDateList: network exception (no network) ${e.message}  --//-- $e")
+                Log.e(
+                    TAG,
+                    "getUserDateList: network exception (no network) ${e.message}  --//-- $e"
+                )
 
             } catch (e: Exception) {
                 Log.e(TAG, "getUserDateList: general exception ${e.message}  --//-- $e")
@@ -219,10 +243,6 @@ class CalendarViewModel : ViewModel() {
         }
     }
 
-    fun setCityId(id: Long) {
-        Log.d(TAG, "setCityId: old id = $cityId, new $id")
-        cityId = id
-    }
 
     /**
      * Creates the calendar layout ( days of the week) from a day of a month
@@ -285,7 +305,6 @@ class CalendarViewModel : ViewModel() {
                 }
 
 
-
             } catch (e: IOException) {
                 removeDate(date)
                 Log.e(TAG, "addDateToUserList: network exception (no network)  --//-- $e")
@@ -337,7 +356,6 @@ class CalendarViewModel : ViewModel() {
                 }
 
 
-
             } catch (e: IOException) {
                 Log.e(TAG, "addDateToUserList: network exception (no network)  --//-- $e")
 
@@ -358,11 +376,7 @@ class CalendarViewModel : ViewModel() {
         }
     }
 
-    fun setUserToken(loggedUser: UserToken) {
 
-        Log.d(TAG, "setCityId: old id = $userToken, new $loggedUser")
-        userToken = loggedUser
-    }
 }
 
 private fun MyDate.toLocalDate(): LocalDate {
