@@ -25,7 +25,7 @@ import com.esei.grvidal.nighttime.data.meUser
 fun ProfileEditorPage(navController: NavHostController) {
     val goBack = {
         navController.popBackStack(navController.graph.startDestination, false)
-        navController.navigate(BottomNavigationScreens.Profile.route)
+        navController.navigate(BottomNavigationScreens.ProfileNav.route)
     }
 
     var name by remember { mutableStateOf(TextFieldValue(meUser.name)) }

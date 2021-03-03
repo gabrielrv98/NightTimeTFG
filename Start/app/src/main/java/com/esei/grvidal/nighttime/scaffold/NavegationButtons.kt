@@ -32,16 +32,16 @@ sealed class BottomNavigationScreens(
     @StringRes val resourceId: Int,
     val icon: VectorAsset
 ) {
-    object Calendar :
+    object CalendarNav :
         BottomNavigationScreens("Calendar", R.string.calendar_route, Icons.Default.Today)
 
-    object Bar :
+    object BarNav :
         BottomNavigationScreens("Bar", R.string.bar_route, Icons.Default.LocalBar)
 
-    object Friends :
+    object FriendsNav :
         BottomNavigationScreens("Friends", R.string.friends_route, Icons.Default.People)
 
-    object Profile :
+    object ProfileNav :
         BottomNavigationScreens("Profile", R.string.profile_route, Icons.Default.Person)
 }
 
