@@ -56,13 +56,13 @@ fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
             actualChat = user.getChatConversation(chatId),
             navigateToProfile = { userId ->
                 navController.navigateWithId(
-                    BottomNavigationScreens.Profile.route,
-                    userId
+                    BottomNavigationScreens.ProfileNav.route,
+                    userId.toLong()
                 )
             },
             onBackIconPressed = {
                 navController.popBackStack(navController.graph.startDestination, false)
-                navController.navigate(BottomNavigationScreens.Friends.route)
+                navController.navigate(BottomNavigationScreens.FriendsNav.route)
             },
             user = user
         )

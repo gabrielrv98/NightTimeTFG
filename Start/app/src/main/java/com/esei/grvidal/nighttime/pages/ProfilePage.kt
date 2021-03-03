@@ -72,7 +72,7 @@ fun ProfilePageView(navController: NavHostController, userId: Int?, user: UserVi
                 {
                     navController.navigateWithId(
                         NavigationScreens.ChatConversation.route,
-                        userData.id
+                        userData.id.toLong()
                     )// or ...route , userId)
                 }
             }

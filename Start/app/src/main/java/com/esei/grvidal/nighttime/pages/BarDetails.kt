@@ -40,10 +40,10 @@ fun BarDetails(barId: Int?, navController: NavHostController) {
         ErrorComposable(errorText = stringResource(id = R.string.errorBarId))
     } else {
         //Accesses to the database to get the information of the bar through its ID
-        ShowDetails(bar = BarDAO().bares[barId],
+        ShowDetails(bar = Bar(0,"Test","Esto es un test"),
             onBackPressed = {
                 navController.popBackStack(navController.graph.startDestination, false)
-                navController.navigate(BottomNavigationScreens.Bar.route)
+                navController.navigate(BottomNavigationScreens.BarNav.route)
             }
         )
     }
