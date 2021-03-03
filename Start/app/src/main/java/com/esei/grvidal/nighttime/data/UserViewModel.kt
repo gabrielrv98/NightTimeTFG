@@ -27,7 +27,7 @@ enum class LoginState {
     EXCEPTION // Unexpected exception
 }
 
-class UserViewModel(
+class UserViewModel(//UserLogin(
     private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
@@ -71,7 +71,7 @@ class UserViewModel(
 
     fun doLogin() {
         viewModelScope.launch {
-            val loginData = fetchData()
+            val loginData = fetchLoginData()
 
             if (loggingState == LoginState.LOADING) {
                 login(loginData)
@@ -82,7 +82,7 @@ class UserViewModel(
     /**
      * Sets the value of the loggedUser with the respond of NightTime Api.//todo remake
      */
-    private suspend fun fetchData(): LoginData {
+    private suspend fun fetchLoginData(): LoginData {
 
 
         Log.e(TAG, "{tags: AssistLogging} login: creating client")
@@ -123,7 +123,7 @@ class UserViewModel(
                 loginData.username,
                 loginData.password
             )
-            Log.e(
+            Log.d(
                 TAG,
                 "{tags: AssistLogging} call to retrofit done"
             )
