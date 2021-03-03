@@ -62,12 +62,7 @@ fun BarPage(navController: NavHostController, barVM : BarViewModel) {
 
     TitleColumn(title = stringResource(id = R.string.baresZona) + " " + barVM.city.name) {
 
-        Text(text = barVM.barList.size.toString())
-
         val state = rememberLazyListState()
-        Text("state item firstVisibleItemIndex: ${state.firstVisibleItemIndex} ," +
-                "firstVisibleItemScrollOffset = ${state.firstVisibleItemScrollOffset}"+
-                " ")
 
         Log.d(TAG, "BarPage: size: ${barVM.barList.size}  state : ${state.firstVisibleItemIndex} " )
         /**
