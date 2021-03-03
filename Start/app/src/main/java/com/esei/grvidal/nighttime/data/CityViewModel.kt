@@ -23,10 +23,16 @@ class CityViewModel(
     private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
-
     var city by mutableStateOf(City(1, "Ourense"))
+    private set
 
-    var allCities by mutableStateOf(listOf(city))
+    var allCities by mutableStateOf(listOf<City>())
+    private set
+
+    var showDialog by mutableStateOf(false)
+        private set
+
+    fun setDialog(state: Boolean){ showDialog = state }
 
     /**
      * Call getCityFromPreferences() on init so we can display the last city used
@@ -34,8 +40,7 @@ class CityViewModel(
     init {
         Log.d(TAG, "init: starting City")
         getCityFromPreferences()
-        getCitiesRepository()
-
+        getCitiesRepository() // Only get all the cities once per application start
     }
 
     private fun getCityFromPreferences() {
@@ -58,14 +63,12 @@ class CityViewModel(
 
     private fun getCitiesRepository() {
         viewModelScope.launch {
-            allCities = getCitiesFromApi()
+            fetchCitiesFromApi()
         }
     }
 
-    private suspend fun getCitiesFromApi(): List<City> {
-        var cityList: List<City> = listOf()
+    private suspend fun fetchCitiesFromApi(){
         try {
-
             val webResponse = NightTimeApi.retrofitService.getAllCitiesAsync()
             Log.e(
                 TAG,
@@ -74,7 +77,7 @@ class CityViewModel(
 
             if (webResponse.isSuccessful) {
                 webResponse.body()?.let {
-                    cityList = it
+                    allCities = it
                 }
 
                 Log.d(TAG, "getCitiesFromApi: List of cities = ${webResponse.body()}")
@@ -85,16 +88,25 @@ class CityViewModel(
 
         } catch (e: IOException) {
             Log.e(TAG, "getCitiesFromApi: network exception (no network) ${e.message}  --//-- $e")
-
+            allCities = CitiesNoInternet.cities
         } catch (e: Exception) {
             Log.e(TAG, "getCitiesFromApi: general exception ${e.message}  --//-- $e")
 
         }
-        return cityList
 
     }
+}
 
-
+object CitiesNoInternet{
+    val cities = listOf(
+        City(1,"Ourense"),
+        City(2,"Vigo"),
+        City(3,"Pontevedra"),
+        City(4,"Coruña"),
+        City(5,"Allariz"),
+        City(6,"Lugo"),
+        City(7,"Rivadavia"),
+    )
 }
 
 
