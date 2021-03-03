@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.network
 
+import com.esei.grvidal.nighttime.data.BarDTO
 import com.esei.grvidal.nighttime.data.City
 import com.esei.grvidal.nighttime.data.EventData
 import com.esei.grvidal.nighttime.data.UserSnap
@@ -15,6 +16,7 @@ import retrofit2.http.*
 private const val BASE_URL = "http://192.168.1.11:8080/api/v1/"
 
 private const val USER_URL = "user/"
+private const val BAR_URL = "bar/"
 
 @JsonClass(generateAdapter = true)
 data class DateCityDTO(
@@ -45,13 +47,15 @@ interface NightTimeService {
         }
     }
 
-
+    // Login
     @POST(USER_URL + "login/")
     suspend fun loginAsync(@Header("username") username: String, @Header("password") password: String) : Response<Any>
 
+    // City
     @GET(USER_URL + "cities/")
     suspend fun getAllCitiesAsync() : Response<List<City>>
 
+    // Calendar
     @GET("$USER_URL{idUser}/{day}-{month}-{year}/{idCity}")
     suspend fun getPeopleAndEventsOnDateAsync(
         @Header("auth") auth: String,
@@ -95,5 +99,10 @@ interface NightTimeService {
         @Body dateCity: DateCityDTO
     ) : Response<Any>
 
+    @GET("$BAR_URL/byCity/{idCity}")
+    suspend fun listByCity(
+        @Path("idCity") idCity: Long,
+        @Query("page") page: Int = 0
+    ) : Response<List<BarDTO>>
 
 }

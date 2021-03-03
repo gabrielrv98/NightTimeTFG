@@ -7,8 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.ui.tooling.preview.Preview
 
@@ -37,14 +35,14 @@ class MainActivity : AppCompatActivity() {
      * so the object don't initialize until needed and if the Activity is destroyed and recreated afterwards
      * it will receive the same instance of ViewModel as it had previously
      * */
-    private val barData by viewModels<BarViewModel>()
-    private val calendarData by viewModels<CalendarViewModel>()
+    private val barVM by viewModels<BarViewModel>()
+    private val calendarVM by viewModels<CalendarViewModel>()
 
     /** This ViewModels need arguments in their constructors so we need to
      * use a Fabric to return a lazy initialization of the ViewModel
      */
     private lateinit var userVM: UserViewModel
-    private lateinit var city: CityViewModel
+    private lateinit var cityVM: CityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,21 +50,18 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "{tags: AssistLogging} onCreate: userToken is going to be created")
 
         /**
-         * [UserViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
-         * Factory [UserViewModelFactory]to return a ViewModel by lazy
+         * [UserViewModel] and [CityViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
+         * Factory [UserViewModelFactory] and [CityViewModelFactory] respectively to return a ViewModel by lazy
          */
         userVM = ViewModelProvider(
             this,
             UserViewModelFactory(DataStoreManager.getInstance(this))
         ).get(UserViewModel::class.java)
 
-        city = ViewModelProvider(
+        cityVM = ViewModelProvider(
             this,
             CityViewModelFactory(DataStoreManager.getInstance(this))
         ).get(CityViewModel::class.java)
-
-
-        //userToken.doLogin()
 
 
         setContent {
@@ -93,20 +88,31 @@ class MainActivity : AppCompatActivity() {
 
                     }
 
+                    LoginState.ACCEPTED ->{
 
-                    LoginState.ACCEPTED, LoginState.NO_NETWORK -> {
+                        calendarVM.setUserToken(userVM.loggedUser)
+                        Log.d(TAG, "onCreate: pulling MainScreen")
+                        MainScreen(
+                            userVM,
+                            cityVM,
+                            calendarVM,
+                            barVM
+                            //chat,
+                            //onAddItem = chat::addItem,
+                        )
 
-                        //Presetting CalendarVM to make calls to api
-                        calendarData.setCityId(city.city.id)
-                        calendarData.setUserToken(userVM.loggedUser)
+                    }
+
+                    LoginState.NO_NETWORK -> {
 
                         if (userVM.credentialsChecked) {
+
                             Log.d(TAG, "onCreate: pulling MainScreen")
                             MainScreen(
                                 userVM,
-                                city,
-                                calendarData,
-                                barData
+                                cityVM,
+                                calendarVM,
+                                barVM
                                 //chat,
                                 //onAddItem = chat::addItem,
                             )
@@ -151,59 +157,56 @@ Navigation with their own files ( no dependencies )
     val navController = rememberNavController()
 
     val bottomNavigationItems = listOf(
-        BottomNavigationScreens.Bar,
-        BottomNavigationScreens.Calendar,
-        BottomNavigationScreens.Friends,
-        BottomNavigationScreens.Profile
+        BottomNavigationScreens.BarNav,
+        BottomNavigationScreens.CalendarNav,
+        BottomNavigationScreens.FriendsNav,
+        BottomNavigationScreens.ProfileNav
     )
 
-    val (showCityDialog, setShowCityDialog) = remember { mutableStateOf(false) }
-
-
-    NavHost(navController, startDestination = BottomNavigationScreens.Calendar.route) {
-        composable(BottomNavigationScreens.Calendar.route) {
+    Log.d(TAG, "MainScreen: Starting navigation graph")
+    NavHost(navController, startDestination = BottomNavigationScreens.CalendarNav.route) {
+        composable(BottomNavigationScreens.CalendarNav.route) {
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
-                        setCityDialog = setShowCityDialog,
+                        setCityDialog = cityVM::setDialog,
                         nameCity = cityVM.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 CityDialogConstructor(
-                    cityDialog = showCityDialog,
+                    cityDialog = cityVM.showDialog,
                     items = cityVM.allCities,
-                    setCityDialog = setShowCityDialog,
-                    setCityId = { id: Long, name: String ->
-                        cityVM.setCity(id, name)
-                        calendarVM.setCityId(id)
-                    }
+                    setCityDialog = cityVM::setDialog,
+                    setCityId = cityVM::setCity
                 )
 
-                calendarVM.loadSelectedDate()//Loading the actual day
-                calendarVM.getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+                //Setting city to CalendarVM to make calls to api
+                calendarVM.cityId = (cityVM.city.id)
+
                 CalendarPage(calendarVM = calendarVM)
             }
         }
 
-        composable(BottomNavigationScreens.Bar.route) {
+        composable(BottomNavigationScreens.BarNav.route) {
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
-                        setCityDialog = setShowCityDialog,
+                        setCityDialog = cityVM::setDialog,
                         nameCity = cityVM.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 CityDialogConstructor(
-                    showCityDialog,
-                    cityVM.allCities,
-                    setShowCityDialog,
-                    cityVM::setCity
+                    cityDialog = cityVM.showDialog,
+                    items = cityVM.allCities,
+                    setCityDialog = cityVM::setDialog,
+                    setCityId = cityVM::setCity
                 )
-                BarPage(cityId = cityVM.city, navController, barVM)
+                barVM.city = cityVM.city
+                BarPage( navController, barVM )
             }
 
         }
@@ -220,7 +223,7 @@ Navigation with their own files ( no dependencies )
 
         }
 
-        composable(BottomNavigationScreens.Friends.route) {
+        composable(BottomNavigationScreens.FriendsNav.route) {
 
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
@@ -241,7 +244,7 @@ Navigation with their own files ( no dependencies )
         }
 
         composable(
-            BottomNavigationScreens.Profile.route
+            BottomNavigationScreens.ProfileNav.route
         ) {
             ScreenScaffolded(
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
@@ -252,7 +255,7 @@ Navigation with their own files ( no dependencies )
         }
 
         composable(
-            BottomNavigationScreens.Profile.route + "/{userId}",
+            BottomNavigationScreens.ProfileNav.route + "/{userId}",
             arguments = listOf(navArgument("userId") { type = NavType.IntType })
         ) { backStackEntry ->
 
@@ -278,7 +281,7 @@ Navigation with their own files ( no dependencies )
     }
 }
 
-fun NavHostController.navigateWithId(route: String, id: Int) {
+fun NavHostController.navigateWithId(route: String, id: Long) {
 
     val navString = StringBuilder()
         .append(route)

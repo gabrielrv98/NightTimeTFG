@@ -1,9 +1,12 @@
 package com.esei.grvidal.nighttime.pages
 
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -20,61 +23,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.City
+import com.esei.grvidal.nighttime.data.BarDTO
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.data.BarViewModel
-import com.esei.grvidal.nighttime.data.MyDate
 import com.esei.grvidal.nighttime.navigateWithId
-
-
-class BarDAO {
-    val bares: List<Bar> = listOf(
-        Bar(0, "Lazaros", "Un pub para gente pija").apply {
-            schedule = listOf(false, false, false, true, false, true, true)
-        },
-        Bar(1, "Lokal", "Un lokal para escuchar rock").apply {
-            schedule = listOf(true, true, false, true, false, false, true)
-        },
-        Bar(2, "Urbe", "Las mejores aspiradoras").apply {
-            schedule = listOf(false, true, false, false, false, true, false)
-            /*
-            events = listOf(
-                EventData(MyDate(26, 11, 2020), "Copas gratis"),
-                EventData(MyDate(6, 12, 2020), "Todo a mitad de precio"),
-                EventData(MyDate(12, 12, 2020), "Un euro rebajado"),
-                EventData(MyDate(14, 12, 2020), "Mas caro de lo normal"),
-                EventData(MyDate(21, 12, 2020), "Dj personalizado")
-            )
-
-             */
-        },
-        Bar(
-            3,
-            "Patio Andaluz",
-            "Otro gran local pero con una descripcion algo larga de mas que se acortara"
-        ).apply {
-            schedule = listOf(false, true, false, false, true, true, false)
-        },
-        Bar(4, "Mil petalos", "Chicas siempre listas para darlo todo").apply {
-            schedule = listOf(true, true, true, true, true, true, true)
-            /*
-            events = listOf(
-                EventData(MyDate(26, 11, 2020), "Copas gratis"),
-                EventData(MyDate(6, 12, 2020), "Todo a mitad de precio"),
-                EventData(MyDate(12, 12, 2020), "Un euro rebajado"),
-                EventData(MyDate(14, 12, 2020), "Mas caro de lo normal"),
-                EventData(MyDate(21, 12, 2020), "Dj personalizado")
-            )
-
-             */
-        }
-    )
-}
 
 
 data class Bar(val id: Int, val name: String, val description: String) {
@@ -93,29 +49,44 @@ data class Bar(val id: Int, val name: String, val description: String) {
     var address: String = "Rúa Pizarro, 8, 32005 Ourense"
 }
 
+private const val TAG = "BarPage"
+
 /**
  * StateFull composable that manage the main composition of the BarPAge view
  *
- * @param cityId selected city
  * @param navController navigator with the queue of destinies and it will be used to navigate or go back
+ * @param barVM ViewModel for Bar page
  */
 @Composable
-fun BarPage(cityId: City, navController: NavHostController, barData : BarViewModel) {
+fun BarPage(navController: NavHostController, barVM : BarViewModel) {
 
-    if (barData.loggedUser.value == null)
-        Text(
-            text="es null"
-        )
-    val barList = BarDAO().bares
-    //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
+    TitleColumn(title = stringResource(id = R.string.baresZona) + " " + barVM.city.name) {
 
-    TitleColumn(title = stringResource(id = R.string.baresZona) + " " + cityId.name) {
-        BarList(barList) {
-            val bar = it as Bar
+        Text(text = barVM.barList.size.toString())
+
+        val state = rememberLazyListState()
+        Text("state item firstVisibleItemIndex: ${state.firstVisibleItemIndex} ," +
+                "firstVisibleItemScrollOffset = ${state.firstVisibleItemScrollOffset}"+
+                " ")
+
+        Log.d(TAG, "BarPage: size: ${barVM.barList.size}  state : ${state.firstVisibleItemIndex} " )
+        /**
+         * [LazyListState.firstVisibleItemIndex] points at the number of items already scrolled
+         *
+         * So if barList is not empty then we check if the remaining bars in barList are 8 or less
+         * (Full screen of the app),
+         * if so, more than from API is fetched
+         */
+        if(barVM.barList.isNotEmpty() && barVM.barList.size - state.firstVisibleItemIndex <= 8  ) {
+            Log.d(TAG, "BarPage: more pages")
+            barVM.loadBarsOnCity()
+        }
+
+        BarList(barVM.barList, state = state) {
+            val bar = it as BarDTO
             BarChip(
                 name = bar.name,
                 description = bar.description,
-                time = bar.time,
                 schedule = bar.schedule,
                 onBarClick = {
                     navController.navigateWithId(
@@ -152,19 +123,21 @@ fun TitleColumn(
 /**
  * Composable that describes the list of the Bars and formats each row
  *
- * @param barList list of bars
+ * @param list list of bars
  * @param content content of the rows
  */
 @Composable
 fun BarList(
-    barList: List<Any>,
+    list: List<Any>,
+    state: LazyListState,
     content: @Composable (Any) -> Unit = {}
 ) {
     LazyColumnFor(
-        items = barList,
+        items = list,
         modifier = Modifier.fillMaxSize()
             .padding(top = 12.dp)
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 24.dp),
+        state = state
     ) {
 
         Row(
@@ -220,50 +193,43 @@ fun Header(
  * @param onBarClick action to be done when a bar is pressed
  * @param name name of the bar
  * @param description Description of the bar
- * @param time Time when its open
  * @param schedule schedule of what days it is open or not
  */
 @Composable
 fun BarChip(
-    onBarClick: () -> Unit = {},
     name: String,
+    schedule: List<Boolean>,
     description: String = "",
-    time: String,
-    schedule: List<Boolean>
+    onBarClick: () -> Unit = {}
 ) {
-    Column(
+    Row(
         modifier = Modifier.padding(8.dp)
+            .wrapContentHeight()
             .clickable(onClick = onBarClick)
     ) {
-        Row(
+        Column(
             modifier = Modifier.padding(bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalAlignment =Alignment.CenterHorizontally
         ) {
             Text(
                 modifier = Modifier
-                    .weight(0.5f)
                     .padding(start = 6.dp),
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold,
                 text = name
             )
-            Text(
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.body2,
-                text = makeLongShort(description, 25)
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(Modifier.width(5.dp))
+
+            Spacer(Modifier.width(55.dp))
             WeekSchedule(schedule = schedule)
 
+        }
+        Column(
+            horizontalAlignment =Alignment.CenterHorizontally
+        ) {
             Text(
-                modifier = Modifier.padding(start = 18.dp),
-                color = Color.Gray,
-                text = time,
-                style = MaterialTheme.typography.body2
+                modifier = Modifier.padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.body2,
+                text = makeLongShort(description, 80)
             )
         }
     }
@@ -275,13 +241,15 @@ fun BarChip(
  */
 @Composable
 fun WeekSchedule(schedule: List<Boolean>) {
-    DaySchedule(day = stringResource(id = R.string.lunes), schedule[0])
-    DaySchedule(day = stringResource(id = R.string.martes), schedule[1])
-    DaySchedule(day = stringResource(id = R.string.miercoles), schedule[2])
-    DaySchedule(day = stringResource(id = R.string.jueves), schedule[3])
-    DaySchedule(day = stringResource(id = R.string.viernes), schedule[4])
-    DaySchedule(day = stringResource(id = R.string.sabado), schedule[5])
-    DaySchedule(day = stringResource(id = R.string.domingo), schedule[6])
+    Row {
+        DaySchedule(day = stringResource(id = R.string.lunes), schedule[0])
+        DaySchedule(day = stringResource(id = R.string.martes), schedule[1])
+        DaySchedule(day = stringResource(id = R.string.miercoles), schedule[2])
+        DaySchedule(day = stringResource(id = R.string.jueves), schedule[3])
+        DaySchedule(day = stringResource(id = R.string.viernes), schedule[4])
+        DaySchedule(day = stringResource(id = R.string.sabado), schedule[5])
+        DaySchedule(day = stringResource(id = R.string.domingo), schedule[6])
+    }
 }
 
 /**
@@ -299,9 +267,9 @@ fun makeLongShort(text: String, maxLetter: Int): String {
  * Composable that describes if a day of the week that starts with [day] it's open [enable] or not
  * the day will be in a box with the border [border] and with a shape [shape]
  *
- * @param day Letter with the representated day
+ * @param day Letter with the represented day
  * @param enable boolean to show if its enabled
- * @param border border arround the letter
+ * @param border border around the letter
  * @param shape shape of the border
  */
 @Composable
@@ -343,14 +311,14 @@ fun DaySchedule(
  * Composable that describes if a day of the week that starts with [day] it's open [enable] or not
  * the day will be in a box with the border [border] and with a shape [shape]
  *
- * @param day Letter with the representated day
+ * @param day Letter with the represented day
  * @param enable boolean to show if its enabled
- * @param border border arround the letter
+ * @param border border aground the letter
  * @param shape shape of the border
  */
 @Deprecated("rounded days", ReplaceWith("daySchedule"))
 @Composable
-fun daySchedule2(
+fun DaySchedule2(
     day: String,
     enable: Boolean = false,
     border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colors.primary),
@@ -383,20 +351,49 @@ fun daySchedule2(
     }
 }
 
-@Preview("BarDetail")
+@Preview("BarPagePreview")
 @Composable
 fun BarPreview() {
     NightTimeTheme {
-        val barList = BarDAO().bares
-        //val barList = BarDAO().getBares(cityId.id)//Futuro llamamiento
+        val barList = listOf(
+            BarDTO(
+                id = 3,
+                name = "Night",
+                owner = "NightOwner",
+                address = "Rua cabeza de manzaneda",
+                description = "Ven y pasatelo como si volvieses a tener 15",
+                mondaySchedule = null,
+                tuesdaySchedule = "11:00-20:30",
+                wednesdaySchedule = "12:00-22:00",
+                thursdaySchedule = null,
+                fridaySchedule = "11:00-20:30",
+                saturdaySchedule = "14:40-21:20",
+                sundaySchedule = "09:30-21:30"
+            ),
+
+            BarDTO(
+                id = 4,
+                name = "Studio 34",
+                owner = "Studio Owner Santiago",
+                address = "Rua Concordia",
+                description = "Un lugar libre para gente libre",
+                mondaySchedule = "12:00-22:00",
+                tuesdaySchedule = "11:00-20:30",
+                wednesdaySchedule = null,
+                thursdaySchedule = "14:40-21:20",
+                fridaySchedule = "11:00-20:30",
+                saturdaySchedule = null,
+                sundaySchedule = "09:30-21:30"
+            )
+        )
 
         TitleColumn(title = stringResource(id = R.string.baresZona) + " Ourense") {
-            BarList(barList) {
+            val state =  rememberLazyListState()
+            BarList(barList, state) {
                 val bar = it as Bar
                 BarChip(
                     name = bar.name,
                     description = bar.description,
-                    time = bar.time,
                     schedule = bar.schedule,
                     onBarClick = {}
                 )
