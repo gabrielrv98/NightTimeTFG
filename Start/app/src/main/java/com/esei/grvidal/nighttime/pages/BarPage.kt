@@ -58,13 +58,13 @@ private const val TAG = "BarPage"
  * @param barVM ViewModel for Bar page
  */
 @Composable
-fun BarPage(navController: NavHostController, barVM : BarViewModel) {
+fun BarPage(navController: NavHostController, barVM: BarViewModel) {
 
     TitleColumn(title = stringResource(id = R.string.baresZona) + " " + barVM.city.name) {
 
         val state = rememberLazyListState()
 
-        Log.d(TAG, "BarPage: size: ${barVM.barList.size}  state : ${state.firstVisibleItemIndex} " )
+        Log.d(TAG, "BarPage: size: ${barVM.barList.size}  state : ${state.firstVisibleItemIndex} ")
         /**
          * [LazyListState.firstVisibleItemIndex] points at the number of items already scrolled
          *
@@ -72,7 +72,7 @@ fun BarPage(navController: NavHostController, barVM : BarViewModel) {
          * (Full screen of the app),
          * if so, more than from API is fetched
          */
-        if(barVM.barList.isNotEmpty() && barVM.barList.size - state.firstVisibleItemIndex <= 8  ) {
+        if (barVM.barList.isNotEmpty() && barVM.barList.size - state.firstVisibleItemIndex <= 8) {
             Log.d(TAG, "BarPage: more pages")
             barVM.loadBarsOnCity()
         }
@@ -84,6 +84,7 @@ fun BarPage(navController: NavHostController, barVM : BarViewModel) {
                 description = bar.description,
                 schedule = bar.schedule,
                 onBarClick = {
+                    Log.d(TAG, "BarPage: Navigating to barDetails id ${bar.id}")
                     navController.navigateWithId(
                         NavigationScreens.BarDetails.route, bar.id
                     )
@@ -101,7 +102,7 @@ fun BarPage(navController: NavHostController, barVM : BarViewModel) {
  */
 @Composable
 fun TitleColumn(
-    modifier :Modifier = Modifier.padding(top = 24.dp),
+    modifier: Modifier = Modifier.padding(top = 24.dp),
     title: String,
     content: @Composable () -> Unit = {}
 ) {
@@ -193,7 +194,7 @@ fun Header(
 @Composable
 fun BarChip(
     name: String,
-    schedule: List<Boolean>,
+    schedule: List<String>,
     description: String = "",
     onBarClick: () -> Unit = {}
 ) {
@@ -204,7 +205,7 @@ fun BarChip(
     ) {
         Column(
             modifier = Modifier.padding(bottom = 6.dp),
-            horizontalAlignment =Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 modifier = Modifier
@@ -219,7 +220,7 @@ fun BarChip(
 
         }
         Column(
-            horizontalAlignment =Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp),
@@ -235,15 +236,26 @@ fun BarChip(
  * @param schedule List of 7 booleans, each one represents if that day it's open
  */
 @Composable
-fun WeekSchedule(schedule: List<Boolean>) {
+fun WeekSchedule(schedule: List<String>) {
     Row {
-        DaySchedule(day = stringResource(id = R.string.lunes), schedule[0])
-        DaySchedule(day = stringResource(id = R.string.martes), schedule[1])
-        DaySchedule(day = stringResource(id = R.string.miercoles), schedule[2])
-        DaySchedule(day = stringResource(id = R.string.jueves), schedule[3])
-        DaySchedule(day = stringResource(id = R.string.viernes), schedule[4])
-        DaySchedule(day = stringResource(id = R.string.sabado), schedule[5])
-        DaySchedule(day = stringResource(id = R.string.domingo), schedule[6])
+        DaySchedule(day = stringResource(id = R.string.lunes), schedule[0].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.martes), schedule[1].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.miercoles), schedule[2].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.jueves), schedule[3].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.viernes), schedule[4].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.sabado), schedule[5].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.domingo), schedule[6].isNotEmpty())
+    }
+}
+
+/**
+ * Composable that shows the daily schedule
+ */
+@Composable
+fun DailySchedule(day: String, schedule: String) {
+    Row {
+        Text(text = "$day- ")
+        Text(schedule)
     }
 }
 
@@ -255,7 +267,7 @@ fun WeekSchedule(schedule: List<Boolean>) {
  */
 fun makeLongShort(text: String, maxLetter: Int): String {
     return if (text.length <= maxLetter) text
-        else text.removeRange(maxLetter, text.length).plus(" ...")
+    else text.removeRange(maxLetter, text.length).plus(" ...")
 }
 
 /**
@@ -383,9 +395,9 @@ fun BarPreview() {
         )
 
         TitleColumn(title = stringResource(id = R.string.baresZona) + " Ourense") {
-            val state =  rememberLazyListState()
+            val state = rememberLazyListState()
             BarList(barList, state) {
-                val bar = it as Bar
+                val bar = it as BarDTO
                 BarChip(
                     name = bar.name,
                     description = bar.description,

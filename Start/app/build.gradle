@@ -86,7 +86,6 @@ dependencies {
     // Navigation
     implementation "androidx.navigation:navigation-compose:$version_nav_compose"
 
-
     // DataStore
     implementation "androidx.datastore:datastore-preferences:$version_datastore"
 
@@ -108,6 +107,9 @@ dependencies {
     // Material Design
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation "com.google.android.material:material:$version_material"
+
+    // Picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     // Fragments //TODO delete
     implementation "androidx.fragment:fragment-ktx:1.2.5"

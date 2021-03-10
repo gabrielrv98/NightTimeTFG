@@ -23,7 +23,7 @@ class CityViewModel(
     private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
-    var city by mutableStateOf(City(1, "Ourense"))
+    var city by mutableStateOf(City(-1, "Ourense"))
     private set
 
     var allCities by mutableStateOf(listOf<City>())
@@ -48,7 +48,7 @@ class CityViewModel(
             city = try {
                 dataStoreManager.cityPreferences.first()
             } catch (e: NoSuchElementException) {
-                City(1, "Ourense")
+                City(-1, "Eligue Ciudad")
 
             }
         }

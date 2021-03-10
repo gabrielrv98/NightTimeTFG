@@ -1,9 +1,6 @@
 package com.esei.grvidal.nighttime.network
 
-import com.esei.grvidal.nighttime.data.BarDTO
-import com.esei.grvidal.nighttime.data.City
-import com.esei.grvidal.nighttime.data.EventData
-import com.esei.grvidal.nighttime.data.UserSnap
+import com.esei.grvidal.nighttime.data.*
 import com.squareup.moshi.JsonClass
 import retrofit2.Retrofit
 import com.squareup.moshi.Moshi
@@ -13,10 +10,10 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 
 
-private const val BASE_URL = "http://192.168.1.11:8080/api/v1/"
+const val BASE_URL = "http://192.168.1.11:8080/api/v1/"
 
 private const val USER_URL = "user/"
-private const val BAR_URL = "bar/"
+const val BAR_URL = "bar/"
 
 @JsonClass(generateAdapter = true)
 data class DateCityDTO(
@@ -105,4 +102,12 @@ interface NightTimeService {
         @Query("page") page: Int = 0
     ) : Response<List<BarDTO>>
 
+    @GET("$BAR_URL/{id}/details")
+    suspend fun getBarDetails(
+        @Path("id") id: Long
+    ): Response<BarDetailsDTO>
+
+
 }
+
+data class Photo(val photo: String)
