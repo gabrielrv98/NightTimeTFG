@@ -27,6 +27,8 @@ import java.lang.StringBuilder
 
 private const val TAG = "MainActivity"
 
+// Iconos personales
+// https://developer.android.com/studio/write/image-asset-studio?hl=es-419
 class MainActivity : AppCompatActivity() {
 
     //val chat by viewModels<ChatViewModel>()
@@ -165,7 +167,7 @@ Navigation with their own files ( no dependencies )
 
     Log.d(TAG, "MainScreen: Starting navigation graph")
     NavHost(navController, startDestination = BottomNavigationScreens.CalendarNav.route) {
-        composable(BottomNavigationScreens.CalendarNav.route) {
+        composable(BottomNavigationScreens.CalendarNav.route) {// Calendar
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
@@ -189,7 +191,7 @@ Navigation with their own files ( no dependencies )
             }
         }
 
-        composable(BottomNavigationScreens.BarNav.route) {
+        composable(BottomNavigationScreens.BarNav.route) {// Bar
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
@@ -210,15 +212,19 @@ Navigation with their own files ( no dependencies )
             }
 
         }
-        composable(
+        composable(  // Bar details
             NavigationScreens.BarDetails.route + "/{barId}",
             arguments = listOf(navArgument("barId") { type = NavType.IntType })
         ) { backStackEntry ->
+            //Sometimes Android would reorganize backStackEntry.arguments?.getLong  as an int and showing
+            // W/Bundle: Key barId expected Long but value was a java.lang.Integer.  The default value 0 was returned.
+            // So we send an int then transform it to long
+            barVM.getSelectedBarDetails(backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L)
 
             ScreenScaffolded(
                 modifier = Modifier
             ) {
-                BarDetails(backStackEntry.arguments?.getInt("barId"), navController)
+                BarDetails(barVM, navController)
             }
 
         }

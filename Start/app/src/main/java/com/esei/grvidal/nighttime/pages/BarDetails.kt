@@ -2,21 +2,20 @@ package com.esei.grvidal.nighttime.pages
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumnFor
-import androidx.compose.foundation.lazy.LazyRowFor
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.stringResource
@@ -26,6 +25,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.data.BarViewModel
+import com.esei.grvidal.nighttime.data.EventFromBar
+
+private const val TAG = "BarDetails"
 
 /**
  * Check of if the BarId is null, this could be by a problem in navHostController
@@ -34,13 +37,32 @@ import com.esei.grvidal.nighttime.R
  * @param navController navigator with the queue of destinies and it will be used to go back
  */
 @Composable
-fun BarDetails(barId: Int?, navController: NavHostController) {
+fun BarDetails(barVM: BarViewModel, barId: Long, navController: NavHostController) {
     //Null Check
-    if (barId == null) {
+    if (barId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorBarId))
     } else {
-        //Accesses to the database to get the information of the bar through its ID
-        ShowDetails(bar = Bar(0,"Test","Esto es un test"),
+
+        onCommit(barId) {
+
+            barVM.getSelectedBarDetails(barId)
+            // Release space from memory when composable is being detached from composition
+            onDispose {
+                barVM.eraseSelectedBar()
+            }
+        }
+
+        // Show details of the Bar
+        ShowDetails(
+            name = barVM.selectedBar.name,
+            description = barVM.selectedBar.description,
+            address = barVM.selectedBar.address,
+            schedule = barVM.selectedBar.schedule,
+            totalImages = barVM.totalNPhotos,
+            nImages = barVM.nPhotos,
+            images = barVM.barSelectedPhotos,
+            fetchImages = barVM::fetchPhotos,
+            events = barVM.barSelectedEvents,
             onBackPressed = {
                 navController.popBackStack(navController.graph.startDestination, false)
                 navController.navigate(BottomNavigationScreens.BarNav.route)
@@ -65,16 +87,36 @@ fun ErrorComposable(errorText: String) {
 /**
  * StateFull composable that manage the main composition of the BarDetails view
  *
- * @param bar BarClass that holds all the information that will be shown
+ * @param name name of the bar
+ * @param description description of the bar
+ * @param address address of the bar used to send the url to google maps
+ * @param schedule list of daily schedule
+ * @param totalImages number of total images
+ * @param nImages number of downloaded images
+ * @param images array with the [ImageAsset]
+ * @param fetchImages function to fetch more images when the row is ending
+ * @param events events of the bar
  * @param onBackPressed action to be done when the icon with arrow back is pressed
  */
 @Composable
-fun ShowDetails(bar: Bar, onBackPressed: () -> Unit = {}) {
+fun ShowDetails(
+    name: String,
+    description: String,
+    address: String,
+    schedule: List<String>,
+    totalImages: Int,
+    nImages: Int,
+    images: List<ImageAsset>,
+    fetchImages: () -> Unit,
+    events: List<EventFromBar>,
+    onBackPressed: () -> Unit = {}
+) {
 
-    val (showAlert, setShowAlert) = remember { mutableStateOf(false) }
-    val (selectedImage, setSelectedImage) = remember { mutableStateOf<VectorAsset?>(null) }
-
-    Column {
+    //ScrollableColumn with an horizontal padding
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+    ) {
         //Button with an icon of an arrow back, if pushed it will show the previous View
         IconButton(onClick = onBackPressed) {
             Icon(asset = Icons.Default.ArrowBack)
@@ -82,101 +124,113 @@ fun ShowDetails(bar: Bar, onBackPressed: () -> Unit = {}) {
         //Header of the page with the title
         Header(
             modifier = Modifier.padding(bottom = 12.dp),
-            text = bar.name,
+            text = name,
             style = MaterialTheme.typography.h4
         )
 
-        //Column with an horizontal padding
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 12.dp)
+        // Description of the bar
+        DetailView(
+            title = stringResource(R.string.descripcion)
         ) {
-
-            // Description of the bar
-            DetailView(
-                title = stringResource(R.string.descripcion)
-            ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    text = bar.description,
-                    style = MaterialTheme.typography.body1
-                )
-            }
-            //Schedule of the bar
-            DetailView(title = stringResource(R.string.horario), icon = Icons.Outlined.Alarm,
-                titleToRight = {
-                    Text(text = bar.time)
-                }
-            ) {
-                WeekSchedule(bar.schedule)
-            }
-
-            //Context to call google Maps
-            val context = ContextAmbient.current
-            val moveToMaps = {
-                val uri: String = "http://maps.google.co.in/maps?q=" + bar.address
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-                context.startActivity(intent)
-            }
-            //Localization of the bar
-            DetailView(title = stringResource(R.string.localizacion), icon = Icons.Outlined.Place,
-                titleToRight = {
-                    //Button that triggers Google Maps
-                    Button(onClick = moveToMaps) {
-                        Text(
-                            text = stringResource(id = R.string.openMaps),
-                            style = MaterialTheme.typography.body2
-                        )
-                    }
-
-                }
-            ) {
-                Text(bar.address)
-            }
-
-            //Text Multimedia with the Icon
-            DetailView(
-                title = stringResource(id = R.string.mutlimedia),
-                icon = Icons.Outlined.PhotoLibrary
+            Text(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                text = description,
+                style = MaterialTheme.typography.body1
             )
-
-        }//End Column with horizontal padding
-
-        //If multimedia is not null, it will be shown
-        bar.multimedia?.let {
-            //Lazy column with no horizontal padding
-            LazyRowFor(
-                items = it,
-                modifier = Modifier.fillMaxWidth()
-                    .align(Alignment.Start)
-            ) { image ->
-                Image(
-                    image as VectorAsset,
-                    modifier = Modifier.padding(2.dp).preferredSize(120.dp)
-                        .background(Color.Gray)
-                        .clickable(onClick = {
-                            setSelectedImage(image )
-                            setShowAlert(true)
-                        })
-                )
-            }
-            /*
-            MultimediaView(
-                photos = it, onImageClick = {
-                    setShowAlert(true)
-                },
-                setSelectedImage = setSelectedImage
-            )
-
-             */
         }
-        //Alert ready to be called
-        BigPicture(showAlert, selectedImage,
-            dismissAlert = {
-                setShowAlert(false)
-                setSelectedImage(null)
+        //Schedule of the bar
+        DetailView(title = stringResource(R.string.horario), icon = Icons.Outlined.Alarm,
+            titleToRight = { WeekSchedule(schedule) }
+        ) {
+            Column {// todo switch to a table
+                DailySchedule(
+                    day = stringResource(id = R.string.lunes),
+                    schedule = if (schedule[0] != "") schedule[0]
+                    else stringResource(
+                        id = R.string.cerrado
+                    )
+                )
+                DailySchedule(
+                    day = stringResource(id = R.string.martes),
+                    schedule = if (schedule[1] != "") schedule[0]
+                    else stringResource(
+                        id = R.string.cerrado
+                    )
+                )
+                DailySchedule(
+                    day = stringResource(id = R.string.miercoles),
+                    schedule = if (schedule[2] != "") schedule[0]
+                    else stringResource(
+                        id = R.string.cerrado
+                    )
+                )
+                DailySchedule(
+                    day = stringResource(id = R.string.jueves),
+                    schedule = if (schedule[3] != "") schedule[0]
+                    else stringResource(
+                        id = R.string.cerrado
+                    )
+                )
+                DailySchedule(
+                    day = stringResource(id = R.string.viernes),
+                    schedule = if (schedule[4] != "") schedule[0]
+                    else stringResource(
+                        id = R.string.cerrado
+                    )
+                )
+                DailySchedule(
+                    day = stringResource(id = R.string.sabado),
+                    schedule = if (schedule[5] != "") schedule[0]
+                    else stringResource(
+                        id = R.string.cerrado
+                    )
+                )
+                DailySchedule(
+                    day = stringResource(id = R.string.domingo),
+                    schedule = if (schedule[6] != "") schedule[0]
+                    else stringResource(
+                        id = R.string.cerrado
+                    )
+                )
             }
-        )
+
+        }
+
+        //Context to call google Maps
+        val context = ContextAmbient.current
+        val openGMaps = {
+            val uri = "http://maps.google.co.in/maps?q=$address"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            context.startActivity(intent)
+        }
+        //Localization of the bar
+        DetailView(title = stringResource(R.string.localizacion),
+            icon = Icons.Outlined.Place,//todo improve aesthetic
+            titleToRight = {
+                //Button that triggers Google Maps
+                Button(onClick = openGMaps) {
+                    Text(
+                        text = stringResource(id = R.string.openMaps),
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+
+            }
+        ) {
+            Text(address)
+        }
+
+        if (totalImages > 0) {
+            MultimediaView(
+                nImages = nImages,
+                images = images,
+                modifier = Modifier,
+                fetchImages = fetchImages
+            )
+        }else{
+            Log.d(TAG,"ShowDetails: no images $totalImages")
+        }
+
 
         //Events of the bar
         DetailView(
@@ -184,28 +238,109 @@ fun ShowDetails(bar: Bar, onBackPressed: () -> Unit = {}) {
             title = stringResource(id = R.string.nextEvents),
             icon = Icons.Outlined.LocalDrink
         ) {
-            Event(
-                title = "date",
-                description = "eventData.description"
-            )
-            /*
-            bar.events?.let {
+            // Because is still beta version you cannot put an scrollable inside another scrollable with the same direction
+            // If you could all this would be a Scrorrable Column
+            LazyColumnFor(
 
-                LazyColumnFor(items = it) { eventData ->
-                    Event(
-                        barName = eventData.date.toStringFormatted(),
-                        eventData.description
-                    )
-                }
+                items = events
+            ) { event ->
+                Event(
+                    title = event.date.toString(),
+                    description = event.description
+                )
             }
+        }
+    }
 
-             */
+
+}
+
+@Composable
+fun MultimediaView(
+    nImages: Int,
+    images: List<ImageAsset>,
+    modifier: Modifier,
+    fetchImages: () -> Unit
+) {
+
+    val (showAlert, setShowAlert) = remember { mutableStateOf(false) }
+    val (selectedImage, setSelectedImage) = remember { mutableStateOf<ImageAsset?>(null) }
+
+    //Text Multimedia with the Icon
+    DetailView(
+        title = stringResource(id = R.string.mutlimedia),
+        icon = Icons.Outlined.PhotoLibrary
+    )
+
+    val scrollState = rememberLazyListState()
+
+
+    // If image list is empty load 5 first images
+    if (nImages - scrollState.firstVisibleItemIndex <= 4) {
+        Log.d(TAG, "ShowDetails: fetching new Images, actual $nImages")
+        fetchImages()
+    }
+
+    if (images.isEmpty()) {
+        Log.d(TAG, "ShowDetails: no images yet")
+        Row {
+            CircularProgressIndicator(
+                modifier = Modifier.size(40.dp),
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(Modifier)
+            CircularProgressIndicator(
+                modifier = Modifier.size(40.dp),
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(Modifier)
+            CircularProgressIndicator(
+                modifier = Modifier.size(40.dp),
+                color = MaterialTheme.colors.primary
+            )
+        }
+    } else {
+        Log.d(TAG, "ShowDetails: showing ${images.size} images")
+        //Scrollable Row with the multimedia images
+
+        LazyRowFor(
+            items = images,
+            state = scrollState,
+            modifier = modifier.fillMaxWidth()
+        ) { img ->
+
+            Image(
+                asset = img,
+                modifier = Modifier
+                    .padding(2.dp)
+                    .preferredSize(120.dp)
+                    .background(Color.Gray)
+                    .clickable(onClick = {
+                        setSelectedImage(img)
+                        setShowAlert(true)
+                    })
+            )
+
         }
 
 
     }
 
+
+
+
+    Spacer(modifier = Modifier)
+
+
+    //Alert ready to be called
+    BigPicture(
+        showAlert, selectedImage
+    ) {
+        setShowAlert(false)
+        setSelectedImage(null)
+    }
 }
+
 
 /**
  * Composable that will check if the variable showAlert is true, if it is, it will show and alert
@@ -218,7 +353,7 @@ fun ShowDetails(bar: Bar, onBackPressed: () -> Unit = {}) {
 @Composable
 private fun BigPicture(
     showAlert: Boolean,
-    selectedImage: VectorAsset?,
+    selectedImage: ImageAsset?,
     dismissAlert: () -> Unit
 ) {
 
@@ -267,7 +402,7 @@ fun DetailView(
 
     Column(
         modifier = modifier
-            .padding(vertical = 12.dp)
+            .padding(vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.padding(bottom = 6.dp),
@@ -291,42 +426,5 @@ fun DetailView(
         ) {
             content()
         }
-    }
-}
-
-@Deprecated("DetailView with a LazyRow is actually used" , ReplaceWith("DetailView"))
-@Composable
-fun MultimediaView(
-    photos: List<Any>,
-    setSelectedImage: (VectorAsset) -> Unit,
-    onImageClick: () -> Unit
-) {
-
-    val photosChunked = photos.chunked(3)//TODO Size the pictures
-    LazyColumnFor(
-        modifier = Modifier.fillMaxSize(),
-        items = photosChunked,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 6.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            it.forEach { vector ->
-                Image(
-                    vector as VectorAsset,
-                    modifier = Modifier.padding(2.dp).preferredSize(120.dp)
-                        .background(Color.Gray)
-                        .clickable(onClick = {
-                            setSelectedImage( vector )
-                            onImageClick()
-                        })
-                )
-            }
-
-        }
-
-
     }
 }
