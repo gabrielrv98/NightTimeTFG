@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.esei.grvidal.nighttime.R
@@ -21,24 +22,29 @@ import java.util.*
 
 @Composable
 fun TopBarConstructor(
+    buttonText : String,
     title : String = stringResource(id = R.string.app_name),
-    setCityDialog : (Boolean) -> Unit,
-    nameCity : String
+    icon: VectorAsset? = null,
+    action : () -> Unit = {}
 ){
     TopAppBar(
         title = { Text(text = title) },
         actions = {
-            CityButton(setCityDialog,nameCity)
+            CityButton(buttonText, icon ,action)
         }
     )
 }
 
 @Composable
-fun CityButton(setCityDialog: (Boolean) -> Unit, nameCity : String ){
+fun CityButton(
+    nameCity: String,
+    icon: VectorAsset?,
+    setCityDialog: () -> Unit
+){
     Surface(
         modifier = Modifier
             .clip(RoundedCornerShape(25))
-            .clickable(onClick = { setCityDialog(true) }),
+            .clickable(onClick = setCityDialog),
         color = MaterialTheme.colors.primary
     ) {
         Row {
@@ -47,10 +53,14 @@ fun CityButton(setCityDialog: (Boolean) -> Unit, nameCity : String ){
                 text = nameCity.toUpperCase(Locale.getDefault()),
                 maxLines = 1
             )
-            Icon(
-                modifier = Modifier.padding(6.dp),
-                asset = Icons.Default.Search
-            )
+
+            icon?.let{
+                Icon(
+                    modifier = Modifier.padding(6.dp),
+                    asset = it
+                )
+            }
+
         }
     }
 }

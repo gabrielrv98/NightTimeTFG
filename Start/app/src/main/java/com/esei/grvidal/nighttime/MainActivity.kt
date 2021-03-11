@@ -1,17 +1,23 @@
 package com.esei.grvidal.nighttime
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.ui.tooling.preview.Preview
 
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -43,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     /** This ViewModels need arguments in their constructors so we need to
      * use a Fabric to return a lazy initialization of the ViewModel
      */
-    private lateinit var userVM: UserViewModel
+    private lateinit var loginVM: LoginViewModel
     private lateinit var cityVM: CityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,25 +58,24 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "{tags: AssistLogging} onCreate: userToken is going to be created")
 
         /**
-         * [UserViewModel] and [CityViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
+         * [LoginViewModel] and [CityViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
          * Factory [UserViewModelFactory] and [CityViewModelFactory] respectively to return a ViewModel by lazy
          */
-        userVM = ViewModelProvider(
+        loginVM = ViewModelProvider(
             this,
             UserViewModelFactory(DataStoreManager.getInstance(this))
-        ).get(UserViewModel::class.java)
+        ).get(LoginViewModel::class.java)
 
         cityVM = ViewModelProvider(
             this,
             CityViewModelFactory(DataStoreManager.getInstance(this))
         ).get(CityViewModel::class.java)
 
-
         setContent {
 
             NightTimeTheme {
 
-                when (userVM.loggingState) {
+                when (loginVM.loggingState) {
                     LoginState.LOADING -> {
 
                         Log.d(TAG, "onCreate: pulling LoadingPage")
@@ -81,49 +86,47 @@ class MainActivity : AppCompatActivity() {
                     LoginState.NO_DATA_STORED -> {
 
                         Log.d(TAG, "onCreate: pulling LoginPage")
-                        LoginPage(userVM)//todo add register
+                        LoginPage(loginVM)//todo add register
 
                     }
                     LoginState.REFUSED -> {
                         Log.d(TAG, "onCreate: pulling LoginPage with message")
-                        LoginPage(userVM, stringResource(id = R.string.loginError))
+                        LoginPage(loginVM, stringResource(id = R.string.loginError))
 
                     }
 
-                    LoginState.ACCEPTED ->{
+                    LoginState.ACCEPTED -> {
 
-                        calendarVM.setUserToken(userVM.loggedUser)
+                        calendarVM.setUserToken(loginVM.loggedUser)
                         Log.d(TAG, "onCreate: pulling MainScreen")
                         MainScreen(
-                            userVM,
+                            loginVM,
                             cityVM,
                             calendarVM,
-                            barVM
-                            //chat,
-                            //onAddItem = chat::addItem,
+                            barVM,
+                            searchImage = { selectImageLauncher.launch("image/*") }
                         )
 
                     }
 
                     LoginState.NO_NETWORK -> {
 
-                        if (userVM.credentialsChecked) {
+                        if (loginVM.credentialsChecked) {
 
                             Log.d(TAG, "onCreate: pulling MainScreen")
                             MainScreen(
-                                userVM,
+                                loginVM,
                                 cityVM,
                                 calendarVM,
-                                barVM
-                                //chat,
-                                //onAddItem = chat::addItem,
+                                barVM,
+                                searchImage = { selectImageLauncher.launch("image/*") }
                             )
                         } else {
                             Log.d(
                                 TAG,
-                                "onCreate: pulling LoginPage, credentials ${userVM.credentialsChecked}"
+                                "onCreate: pulling LoginPage, credentials ${loginVM.credentialsChecked}"
                             )
-                            LoginPage(userVM, stringResource(id = R.string.serverIsDown))
+                            LoginPage(loginVM, stringResource(id = R.string.serverIsDown))
                         }
 
                     }
@@ -135,7 +138,44 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+
     }
+
+    /**
+     * Invoke an Activity for result
+     */
+    private val selectImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            Log.d(TAG, "settingNewURi:  uri = $uri")
+            loginVM.uriPhoto = uri
+        }
+
+    /**
+     * Handle requested permission result
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            PERMISSION_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] ==
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    //permission from popup granted
+                    pickImageFromGallery(){selectImageLauncher.launch("image/*")}
+
+                } else {
+                    //permission from popup denied
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
 }
 
 /**
@@ -143,10 +183,11 @@ class MainActivity : AppCompatActivity() {
  */
 @Composable
 private fun MainScreen(
-    user: UserViewModel,
+    login: LoginViewModel,
     cityVM: CityViewModel,
     calendarVM: CalendarViewModel,
-    barVM: BarViewModel
+    barVM: BarViewModel,
+    searchImage: () -> Unit,
     //chat : ChatViewModel,
     //onAddItem: (Message) -> Unit,
 ) {
@@ -171,8 +212,9 @@ Navigation with their own files ( no dependencies )
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
-                        setCityDialog = cityVM::setDialog,
-                        nameCity = cityVM.city.name
+                        buttonText = cityVM.city.name,
+                        icon = Icons.Default.Search,
+                        action = { cityVM.setDialog(true) },
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
@@ -195,8 +237,9 @@ Navigation with their own files ( no dependencies )
             ScreenScaffolded(
                 topBar = {
                     TopBarConstructor(
-                        setCityDialog = cityVM::setDialog,
-                        nameCity = cityVM.city.name
+                        action = { cityVM.setDialog(true) },
+                        icon = Icons.Default.Search,
+                        buttonText = cityVM.city.name
                     )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
@@ -208,7 +251,7 @@ Navigation with their own files ( no dependencies )
                     setCityId = cityVM::setCity
                 )
                 barVM.city = cityVM.city
-                BarPage( navController, barVM )
+                BarPage(navController, barVM)
             }
 
         }
@@ -219,12 +262,16 @@ Navigation with their own files ( no dependencies )
             //Sometimes Android would reorganize backStackEntry.arguments?.getLong  as an int and showing
             // W/Bundle: Key barId expected Long but value was a java.lang.Integer.  The default value 0 was returned.
             // So we send an int then transform it to long
-            barVM.getSelectedBarDetails(backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L)
+            Log.d(TAG, "MainScreen: Pulling BarDetails")
 
             ScreenScaffolded(
                 modifier = Modifier
             ) {
-                BarDetails(barVM, navController)
+                BarDetails(
+                    barVM,
+                    backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L,
+                    navController
+                )
             }
 
         }
@@ -253,10 +300,16 @@ Navigation with their own files ( no dependencies )
             BottomNavigationScreens.ProfileNav.route
         ) {
             ScreenScaffolded(
-                topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
+                topBar = {
+                    TopBarConstructor(
+                        buttonText = stringResource(id = R.string.logoff),
+                        icon = vectorResource(id = R.drawable.ic_logout_24px),
+                        action = login::logOffAndExit
+                    )
+                },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                ProfilePageView(navController, User("me").id, user)//todo is hardcoded
+                ProfilePageView(navController, login.loggedUser.id, login)//todo is hardcoded
             }
         }
 
@@ -269,7 +322,11 @@ Navigation with their own files ( no dependencies )
                 topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                ProfilePageView(navController, backStackEntry.arguments?.getInt("userId"), user)
+                ProfilePageView(
+                    navController,
+                    backStackEntry.arguments?.getInt("userId")?.toLong() ?: -1L, login
+                )
+
             }
         }
 
@@ -278,10 +335,10 @@ Navigation with their own files ( no dependencies )
         ) {
 
             ScreenScaffolded(
-                topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
+                topBar = { TopAppBar(title = { Text(text =  stringResource(R.string.edit_profile)) }) },
                 bottomBar = {},
             ) {
-                ProfileEditorPage(navController)
+                ProfileEditorPage(navController, searchImage, login)
             }
         }
     }

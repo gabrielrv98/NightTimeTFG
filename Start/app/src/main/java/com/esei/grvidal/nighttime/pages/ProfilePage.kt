@@ -1,11 +1,13 @@
 package com.esei.grvidal.nighttime.pages
 
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.runtime.Composable
@@ -14,6 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.WithConstraints
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageAsset
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.res.imageResource
@@ -31,32 +36,14 @@ import com.esei.grvidal.nighttime.navigateWithId
 
 
 @Composable
-fun ProfilePageView(navController: NavHostController, userId: Int?, user: UserViewModel) {
-
-    Column {
-        ProfileProperty(
-            "token: ",
-            if (user.loggedUser.token.isNotEmpty())
-                user.loggedUser.token
-            else
-                "Vacio"
-        )
-
-        Button(modifier = Modifier, onClick = {
-            user.logOffAndExit()
-        }) {
-            Text(stringResource(id = R.string.logoff))
-        }
-    }
-
+fun ProfilePageView(navController: NavHostController, userId: Long?, login: LoginViewModel) {
 
     //Nullable check
     if (userId == null) {
         ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
     } else {
         //Datos del usuario
-        val userData =
-            if (userId == meUser.id) meUser else userPreview // user = UserDao.getUserbyId(userId)
+        val userData = meUser // user = UserDao.getUserbyId(userId)
 
         //ProfilePage(user.toProfileScreenState())
         //viewModel.component1().userData.observeAsState().value.let { userData: ProfileScreenState? ->
@@ -104,7 +91,8 @@ fun ProfilePage(user: ProfileScreenState, onClick: () -> Unit) {
                     ) {
                         ProfileHeader(
                             scrollState,
-                            user
+                            user.photo?.let { imageResource(id = it) },
+                            null
                         )
                         UserInfoFields(user, maxHeight)
                     }
@@ -159,34 +147,61 @@ private fun nickName(userData: ProfileScreenState, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun ProfileHeader(
+fun ProfileHeader(
     scrollState: ScrollState,
-    data: ProfileScreenState
+    asset: ImageAsset?,
+    drawable: Drawable?,
+    content: (@Composable (Modifier) -> Unit)? = null
 ) {
+
     val offset = (scrollState.value / 2)
     val offsetDp = with(DensityAmbient.current) { offset.toDp() }
+    val modifier = Modifier
+        .fillMaxSize()
+        .padding(top = offsetDp)
 
-    data.photo?.let {
-        val asset = imageResource(id = it)
-        val ratioAsset = asset.width / asset.height.toFloat()
+    val ratioAsset : Float = if(asset != null)   (asset.width / asset.height).toFloat()
+            else    1F
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                // Allow for landscape and portrait ratios
-                .preferredHeightIn(max = 320.dp)
-                .aspectRatio(ratioAsset)
-                .background(Color.LightGray)
-        ) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            // Allow for landscape and portrait ratios
+            .preferredHeightIn(max = 320.dp)
+            .aspectRatio(ratioAsset )
+            .background(Color.LightGray)
+    ) {
+
+        if(asset != null) {
             Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = offsetDp),
+                modifier = modifier,
                 asset = asset,
                 contentScale = ContentScale.Crop
             )
+
+        }else{
+
+            Canvas(
+                modifier = modifier.preferredSize(150.dp)
+            ) {
+                drawIntoCanvas {
+                    drawable?.draw(it.nativeCanvas) ?: Icons.Default.VerifiedUser
+                }
+            }
+        }
+
+        if (content != null) {
+            content(
+                Modifier
+                    .padding(bottom = 5.dp, end = 15.dp)
+                    .preferredSize(25.dp)
+                    .wrapContentHeight(Alignment.Bottom,true)
+                    .align(Alignment.BottomEnd)
+                    .then(modifier)
+            )
         }
     }
+
 }
 
 @Composable
