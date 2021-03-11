@@ -1,7 +1,6 @@
 package com.esei.grvidal.nighttime.pages
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.BaseTextField
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Text
@@ -16,7 +15,6 @@ import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focusObserver
 import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
@@ -25,13 +23,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.data.LoginViewModel
 
 
 private const val TAG = "LoginPage"
 
 @Composable
-fun LoginPage(userToken: UserViewModel, messageError: String = "") {
+fun LoginPage(loginToken: LoginViewModel, messageError: String = "") {
 
     val (username, setUsername) = remember { mutableStateOf(TextFieldValue()) }
     val (password, setPassword) = remember { mutableStateOf(TextFieldValue()) }
@@ -43,9 +41,9 @@ fun LoginPage(userToken: UserViewModel, messageError: String = "") {
         password = password,
         setPassword = setPassword,
         onClick = {
-            userToken.doLoginRefreshed(username.text,password.text)
+            loginToken.doLoginRefreshed(username.text,password.text)
         },
-        jumpHack = { userToken.jumpHack()
+        jumpHack = { loginToken.jumpHack()
             Log.d(TAG, "LoginPage: jumphack called")} //todo Limpiar
     )
 }

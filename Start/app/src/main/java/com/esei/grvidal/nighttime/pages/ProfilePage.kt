@@ -36,40 +36,36 @@ import com.esei.grvidal.nighttime.navigateWithId
 
 
 @Composable
-fun ProfilePageView(navController: NavHostController, userId: Long?, login: LoginViewModel) {
+fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: UserViewModel) {
 
     //Nullable check
     if (userId == null) {
         ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
+
     } else {
+        if( userId == -1L ){
+            userVM.user = null
+        }
+
         //Datos del usuario
         val userData = meUser // user = UserDao.getUserbyId(userId)
 
-        //ProfilePage(user.toProfileScreenState())
-        //viewModel.component1().userData.observeAsState().value.let { userData: ProfileScreenState? ->
-
-        if (userData.id == -1) {
-            ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
-        } else {
-            val onFavButtonClick = if (userData.toProfileScreenState().isMe()) {
-                {
-                    navController.navigate(NavigationScreens.ProfileEditor.route)
-                }
-            } else {
-                {
-                    navController.navigateWithId(
-                        NavigationScreens.ChatConversation.route,
-                        userData.id.toLong()
-                    )// or ...route , userId)
-                }
+        val onFavButtonClick = if (userId == userVM.getMyId()) {
+            {
+                navController.navigate(NavigationScreens.ProfileEditor.route)
             }
-            ProfilePage(
-                user = userData.toProfileScreenState(),
-                onClick = onFavButtonClick
-            )
-            //ProfilePage(userData)
+        } else {
+            {
+                navController.navigateWithId(
+                    NavigationScreens.ChatConversation.route,
+                    userId
+                )
+            }
         }
-        //}
+        ProfilePage(
+            user = userData.toProfileScreenState(),
+            onClick = onFavButtonClick
+        )
 
 
     }
@@ -160,26 +156,26 @@ fun ProfileHeader(
         .fillMaxSize()
         .padding(top = offsetDp)
 
-    val ratioAsset : Float = if(asset != null)   (asset.width / asset.height).toFloat()
-            else    1F
+    val ratioAsset: Float = if (asset != null) (asset.width / asset.height).toFloat()
+    else 1F
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             // Allow for landscape and portrait ratios
             .preferredHeightIn(max = 320.dp)
-            .aspectRatio(ratioAsset )
+            .aspectRatio(ratioAsset)
             .background(Color.LightGray)
     ) {
 
-        if(asset != null) {
+        if (asset != null) {
             Image(
                 modifier = modifier,
                 asset = asset,
                 contentScale = ContentScale.Crop
             )
 
-        }else{
+        } else {
 
             Canvas(
                 modifier = modifier.preferredSize(150.dp)
@@ -195,7 +191,7 @@ fun ProfileHeader(
                 Modifier
                     .padding(bottom = 5.dp, end = 15.dp)
                     .preferredSize(25.dp)
-                    .wrapContentHeight(Alignment.Bottom,true)
+                    .wrapContentHeight(Alignment.Bottom, true)
                     .align(Alignment.BottomEnd)
                     .then(modifier)
             )

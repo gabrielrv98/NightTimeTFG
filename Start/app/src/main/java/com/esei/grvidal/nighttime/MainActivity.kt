@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
      * */
     private val barVM by viewModels<BarViewModel>()
     private val calendarVM by viewModels<CalendarViewModel>()
+    private val userVM by viewModels<UserViewModel>()
 
     /** This ViewModels need arguments in their constructors so we need to
      * use a Fabric to return a lazy initialization of the ViewModel
@@ -98,9 +99,12 @@ class MainActivity : AppCompatActivity() {
                     LoginState.ACCEPTED -> {
 
                         calendarVM.setUserToken(loginVM.loggedUser)
+                        userVM.setUserToken(loginVM.loggedUser)
+
                         Log.d(TAG, "onCreate: pulling MainScreen")
                         MainScreen(
                             loginVM,
+                            userVM,
                             cityVM,
                             calendarVM,
                             barVM,
@@ -116,6 +120,7 @@ class MainActivity : AppCompatActivity() {
                             Log.d(TAG, "onCreate: pulling MainScreen")
                             MainScreen(
                                 loginVM,
+                                userVM,
                                 cityVM,
                                 calendarVM,
                                 barVM,
@@ -147,7 +152,7 @@ class MainActivity : AppCompatActivity() {
     private val selectImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             Log.d(TAG, "settingNewURi:  uri = $uri")
-            loginVM.uriPhoto = uri
+            userVM.uriPhoto = uri
         }
 
     /**
@@ -165,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                     PackageManager.PERMISSION_GRANTED
                 ) {
                     //permission from popup granted
-                    pickImageFromGallery(){selectImageLauncher.launch("image/*")}
+                    pickImageFromGallery{selectImageLauncher.launch("image/*")}
 
                 } else {
                     //permission from popup denied
@@ -184,6 +189,7 @@ class MainActivity : AppCompatActivity() {
 @Composable
 private fun MainScreen(
     login: LoginViewModel,
+    userVM: UserViewModel,
     cityVM: CityViewModel,
     calendarVM: CalendarViewModel,
     barVM: BarViewModel,
@@ -309,7 +315,8 @@ Navigation with their own files ( no dependencies )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                ProfilePageView(navController, login.loggedUser.id, login)//todo is hardcoded
+                ProfilePageView(navController, login.loggedUser.id, userVM
+                )
             }
         }
 
@@ -324,7 +331,7 @@ Navigation with their own files ( no dependencies )
             ) {
                 ProfilePageView(
                     navController,
-                    backStackEntry.arguments?.getInt("userId")?.toLong() ?: -1L, login
+                    backStackEntry.arguments?.getInt("userId")?.toLong() ?: -1L, userVM
                 )
 
             }
@@ -338,7 +345,7 @@ Navigation with their own files ( no dependencies )
                 topBar = { TopAppBar(title = { Text(text =  stringResource(R.string.edit_profile)) }) },
                 bottomBar = {},
             ) {
-                ProfileEditorPage(navController, searchImage, login)
+                ProfileEditorPage(navController, searchImage, userVM)
             }
         }
     }

@@ -39,7 +39,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.User
-import com.esei.grvidal.nighttime.data.LoginViewModel
+import com.esei.grvidal.nighttime.data.UserViewModel
 import com.esei.grvidal.nighttime.data.meUser
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.squareup.picasso.Picasso
@@ -54,7 +54,7 @@ const val PERMISSION_CODE = 1001
 fun ProfileEditorPage(
     navController: NavHostController,
     searchImage: () -> Unit,
-    login: LoginViewModel
+    user: UserViewModel
 ) {
 
     val (name, setName) = remember { mutableStateOf(TextFieldValue(meUser.name)) }
@@ -63,10 +63,10 @@ fun ProfileEditorPage(
     var img by remember { mutableStateOf<ImageAsset?>(null) }
     var drawable by remember { mutableStateOf<Drawable?>(null) }
 
-    onCommit(login.uriPhoto) {
+    onCommit(user.uriPhoto) {
 
-        Log.d(TAG, "ProfileEditorPage: new uri = ${login.uriPhoto}")
-        login.uriPhoto.let { uri ->
+        Log.d(TAG, "ProfileEditorPage: new uri = ${user.uriPhoto}")
+        user.uriPhoto.let { uri ->
 
             Picasso.get()
                 .load(uri)

@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.data
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,46 +19,21 @@ import kotlin.system.exitProcess
 private const val TAG = "UserViewModel"
 
 
-enum class LoginState {
-    LOADING, //Operation started
-    NO_DATA_STORED, // No data stored to call login
-    REFUSED, // Credentials don't match
-    NO_NETWORK, // Network error
-    ACCEPTED, // Credentials accepted
-    EXCEPTION // Unexpected exception
-}
-
-class UserViewModel(//UserLogin(
+class UserViewModel(
     private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
-    var loggedUser by mutableStateOf(UserToken(-1, ""))
+    private var userToken = UserToken(-1, "")
 
-    var loggingState by mutableStateOf(LoginState.LOADING)
-        private set
+    fun setUserToken(loggedUser: UserToken) {
 
-    var credentialsChecked by mutableStateOf(false) // todo creo que puede ser una variable normal
-        private set
-
-    private suspend fun setLoggingData(username: String, password: String) {
-        dataStoreManager.updateLoginCredentials(username, password)
+        Log.d(TAG, "setUserToken: old token = $userToken, new $loggedUser")
+        userToken = loggedUser
     }
 
-    fun logOffAndExit() {
-        viewModelScope.launch {
-            setLoggingData("", "")
-            exitProcess(0)
-        }
-    }
+    var uriPhoto by mutableStateOf<Uri?>(null)
 
-    fun doLoginRefreshed(username: String, password: String) {
-        viewModelScope.launch {
-            setLoggingData(username, password)
-            login(
-                LoginData(username, password, false)
-            )
-        }
-    }
+    var user by mutableStateOf<User?>(null)
 
 
     /**
@@ -65,56 +41,9 @@ class UserViewModel(//UserLogin(
      */
     init {
         Log.d(TAG, "{tags: AssistLogging} init: starting User")
-        doLogin()
 
     }
 
-    fun doLogin() {
-        viewModelScope.launch {
-            val loginData = fetchLoginData()
-
-            if (loggingState == LoginState.LOADING) {
-                login(loginData)
-            }
-        }
-    }
-
-    /**
-     * Sets the value of the loggedUser with the respond of NightTime Api.//todo remake
-     */
-    private suspend fun fetchLoginData(): LoginData {
-
-
-        Log.e(TAG, "{tags: AssistLogging} login: creating client")
-        loggingState = LoginState.LOADING
-
-        var loginData = LoginData("", "", false)
-
-        try {
-            loginData = dataStoreManager.userPreferences.first()
-            credentialsChecked = loginData.accepted
-
-            Log.e(
-                TAG,
-                "{tags: AssistLogging} login: getting LoginData = ${loginData.username} : ${loginData.password} [ ${loginData.accepted} ] loggingState : ${loggingState.name}"
-            )
-
-            if (loginData.username == "" || loginData.password == "") {
-                loggingState = LoginState.NO_DATA_STORED
-                Log.e(
-                    TAG,
-                    "{tags: AssistLogging} login data was empty"
-                )
-            }
-
-
-        } catch (e: NoSuchElementException) {
-            loggingState = LoginState.NO_DATA_STORED
-
-        }
-
-        return loginData
-    }
 
     private suspend fun login(loginData: LoginData) {
         try {
@@ -133,14 +62,11 @@ class UserViewModel(//UserLogin(
                 //If the credentials weren't accepted until now
                 if (!loginData.accepted) {
                     dataStoreManager.credentialsChecked()
-                    credentialsChecked = true
                 }
 
                 val id = webResponse.headers()["id"]!!.toLong()
                 val token = webResponse.headers()["token"]!!
 
-                loggedUser = UserToken(id, token)
-                loggingState = LoginState.ACCEPTED
 
                 Log.d(
                     TAG,
@@ -153,52 +79,25 @@ class UserViewModel(//UserLogin(
                     "{tags: AssistLogging} login: login unsuccessfully  ${loginData.username} : ${loginData.password}"
                 )
                 dataStoreManager.credentialsFailed()
-                loggingState = LoginState.REFUSED
             }
 
         } catch (e: IOException) {
-            loggingState = LoginState.NO_NETWORK
             Log.e(TAG, "login: network exception (no network) ${e.message}  --//-- $e")
 
         } catch (e: Exception) {
             Log.e(TAG, "login: general exception ${e.message}  --//-- $e")
 
         } finally {
-            if (loggingState == LoginState.LOADING) {
-                Log.e(TAG, "Something unexpected happended")
-                loggingState = LoginState.EXCEPTION
-
-            }
-            Log.d(TAG, "login: LoggingState = ${loggingState.name}")
+            Log.e(TAG, "Something unexpected happended")
 
         }
+
     }
 
-    fun jumpHack() {
-        viewModelScope.launch {
-            loggingState = LoginState.ACCEPTED
-            credentialsChecked = true
-        }
-    }
-
-
+    fun getMyId(): Long { return userToken.id }
 }
 
 
-class UserViewModelFactory(
-    private val dataStoreManager: DataStoreManager
-) : ViewModelProvider.Factory {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-
-        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-
-            @Suppress("UNCHECKED_CAST")
-            return UserViewModel(dataStoreManager) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-
-}
 
 
