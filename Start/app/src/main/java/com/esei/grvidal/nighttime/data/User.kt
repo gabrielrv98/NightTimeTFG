@@ -115,7 +115,7 @@ class User(var name: String) : ViewModel() {
 
     private var allChats: List<FullChat> = listOf(
         FullChat(
-            0, "Nuria Sotelo Domarco", 1, listOf(
+            0, "Nuria Sotelo Domarco", 67, listOf(
                 Message(0, "hey que tal?", "8:04 PM"),
                 Message(1, "Bien, llegando a casa y tu?", "8:04 PM"),
                 Message(0, "Acabando de trabjar", "8:04 PM"),
@@ -124,16 +124,16 @@ class User(var name: String) : ViewModel() {
             )
         ),
         FullChat(
-            1, "Maria Jose", 2, listOf(
-                Message(3, "Hola hijo", "8:04 PM"),
-                Message(3, "Estas bien?", "8:04 PM"),
-                Message(0, "Con algo de hambre", "8:04 PM"),
-                Message(3, "Yo me encargo", "8:04 PM"),
-                Message(3, "Ya he hecho lentejas", "8:04 PM")
+            1, "Santi", 71, listOf(
+                Message(3, "Heyy", "8:04 PM"),
+                Message(3, "Estas en casa", "8:04 PM"),
+                Message(0, "Claro", "8:04 PM"),
+                Message(3, "Llego en 15 min", "8:04 PM"),
+                Message(3, "No te quedes dormido", "8:04 PM")
             )
         ),
         FullChat(
-            2, "Pablo Pablito", 3, listOf(
+            2, "Maria Vidal", 75, listOf(
                 Message(3, "Hola hijo", "8:04 PM"),
                 Message(3, "Estas bien?", "8:04 PM"),
                 Message(0, "Con algo de hambre", "8:04 PM"),
@@ -142,7 +142,7 @@ class User(var name: String) : ViewModel() {
             )
         ),
         FullChat(
-            3, "Elma RockStar", 4, listOf(
+            3, "Elma RockStar", 79, listOf(
                 Message(3, "Hola hijo", "8:04 PM"),
                 Message(3, "Estas bien?", "8:04 PM"),
                 Message(0, "Con algo de hambre", "8:04 PM"),
