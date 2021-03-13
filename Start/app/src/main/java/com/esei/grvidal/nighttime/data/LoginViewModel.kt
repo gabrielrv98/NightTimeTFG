@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import kotlin.system.exitProcess
 
-private const val TAG = "UserViewModel"
+private const val TAG = "LoginViewModel"
 
 
 enum class LoginState {
@@ -166,7 +166,7 @@ class LoginViewModel(
 
         } finally {
             if (loggingState == LoginState.LOADING) {
-                Log.e(TAG, "Something unexpected happended")
+                Log.e(TAG, "Something unexpected happened")
                 loggingState = LoginState.EXCEPTION
 
             }
@@ -186,7 +186,7 @@ class LoginViewModel(
 }
 
 
-class UserViewModelFactory(
+class LoginViewModelFactory(
     private val dataStoreManager: DataStoreManager
 ) : ViewModelProvider.Factory {
 

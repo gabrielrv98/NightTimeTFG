@@ -37,8 +37,6 @@ private const val TAG = "MainActivity"
 // https://developer.android.com/studio/write/image-asset-studio?hl=es-419
 class MainActivity : AppCompatActivity() {
 
-    //val chat by viewModels<ChatViewModel>()
-
     /** Using kotlin delegate by viewModels returns an instance of ViewModel by lazy
      * so the object don't initialize until needed and if the Activity is destroyed and recreated afterwards
      * it will receive the same instance of ViewModel as it had previously
@@ -60,11 +58,11 @@ class MainActivity : AppCompatActivity() {
 
         /**
          * [LoginViewModel] and [CityViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
-         * Factory [UserViewModelFactory] and [CityViewModelFactory] respectively to return a ViewModel by lazy
+         * Factory [LoginViewModelFactory] and [CityViewModelFactory] respectively to return a ViewModel by lazy
          */
         loginVM = ViewModelProvider(
             this,
-            UserViewModelFactory(DataStoreManager.getInstance(this))
+            LoginViewModelFactory(DataStoreManager.getInstance(this))
         ).get(LoginViewModel::class.java)
 
         cityVM = ViewModelProvider(
@@ -87,7 +85,7 @@ class MainActivity : AppCompatActivity() {
                     LoginState.NO_DATA_STORED -> {
 
                         Log.d(TAG, "onCreate: pulling LoginPage")
-                        LoginPage(loginVM)//todo add register
+                        LoginPage(loginVM)
 
                     }
                     LoginState.REFUSED -> {
@@ -178,6 +176,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    // Prevents data from not being erased when leaving userProfileEditor with back button
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(userVM.lock) userVM.lock = false
     }
 
 

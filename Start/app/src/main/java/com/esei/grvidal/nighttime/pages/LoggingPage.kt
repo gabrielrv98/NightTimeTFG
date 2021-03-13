@@ -81,7 +81,7 @@ fun LoginScreen(
             }
         )
 
-        Footer(
+        Footer( //todo add register
             modifier = Modifier.weight(1f),
             text = "¿No tienes cuenta?\nRegistrate ya!",
             jumpHack = jumpHack
