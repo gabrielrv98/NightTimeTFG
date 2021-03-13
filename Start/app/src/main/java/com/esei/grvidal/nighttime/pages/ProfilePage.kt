@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime.pages
 
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.onCommit
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.WithConstraints
@@ -21,7 +23,6 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -35,36 +36,56 @@ import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.navigateWithId
 
 
+private const val TAG = "ProfilePage"
+
 @Composable
 fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: UserViewModel) {
 
+    Log.d(TAG, "ProfileEditorPage: user lock ${userVM.lock}")
+
     //Nullable check
-    if (userId == null) {
+    if (userId == null || userId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
 
     } else {
-        if( userId == -1L ){
-            userVM.user = null
+
+        //Get data when userId changes
+        onCommit(userId) {
+
+            userVM.fetchData(userId)
+
+            onDispose {
+                Log.d(TAG, "ProfilePageView: onDispose erasing data")
+                userVM.eraseData()
+            }
         }
 
         //Datos del usuario
         val userData = meUser // user = UserDao.getUserbyId(userId)
 
-        val onFavButtonClick = if (userId == userVM.getMyId()) {
-            {
-                navController.navigate(NavigationScreens.ProfileEditor.route)
-            }
-        } else {
-            {
-                navController.navigateWithId(
-                    NavigationScreens.ChatConversation.route,
-                    userId
-                )
-            }
-        }
         ProfilePage(
-            user = userData.toProfileScreenState(),
-            onClick = onFavButtonClick
+            //user = userData.toProfileScreenState(),
+            userDTO = userVM.user,
+            img = userVM.userPicture,
+            drawable = userVM.userDrawable,
+            isMe = userId == userVM.getMyId(),
+            onClick = if (userId == userVM.getMyId()) {
+
+                {
+                    userVM.lock = true // Blocks the erase of the data
+                    navController.navigate(NavigationScreens.ProfileEditor.route)
+                }
+
+            } else {
+
+                {
+                    userVM.lock = false
+                    navController.navigateWithId(
+                        NavigationScreens.ChatConversation.route,
+                        userId
+                    )
+                }
+            }
         )
 
 
@@ -73,7 +94,13 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
 
 
 @Composable
-fun ProfilePage(user: ProfileScreenState, onClick: () -> Unit) {
+fun ProfilePage(
+    userDTO: UserDTO,
+    img: ImageAsset?,
+    drawable: Drawable?,
+    isMe: Boolean,
+    onClick: () -> Unit
+) {
 
     val scrollState = rememberScrollState()
 
@@ -86,16 +113,17 @@ fun ProfilePage(user: ProfileScreenState, onClick: () -> Unit) {
                         scrollState = scrollState
                     ) {
                         ProfileHeader(
-                            scrollState,
-                            user.photo?.let { imageResource(id = it) },
-                            null
+                            scrollState = scrollState,
+                            //asset = user.photo?.let { imageResource(id = it) },
+                            asset = img,
+                            drawable = drawable
                         )
-                        UserInfoFields(user, maxHeight)
+                        UserInfoFields(userDTO, maxHeight)
                     }
                 }
                 ProfileFab(
                     extended = scrollState.value == 0f,
-                    userIsMe = user.isMe(),
+                    userIsMe = isMe,
                     modifier = Modifier.align(Alignment.BottomEnd),
                     onClick = onClick
                 )
@@ -105,23 +133,26 @@ fun ProfilePage(user: ProfileScreenState, onClick: () -> Unit) {
 }
 
 @Composable
-private fun UserInfoFields(userData: ProfileScreenState, containerHeight: Dp) {
+private fun UserInfoFields(
+    userDTO: UserDTO,
+    containerHeight: Dp
+) {
     Column {
         Spacer(modifier = Modifier.preferredHeight(8.dp))
 
         nickName(
-            userData = userData,
+            nickname = userDTO.nickname,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 4.dp)
         )
 
-        ProfileProperty(stringResource(R.string.display_name), userData.name)
+        ProfileProperty(stringResource(R.string.display_name), userDTO.name)
 
-        ProfileProperty(stringResource(R.string.status), userData.status)
+        ProfileProperty(stringResource(R.string.status), userDTO.state)
 
-        userData.nextDate?.let {
-            ProfileProperty(stringResource(R.string.nextDate), it.toStringFormatted())
+        userDTO.nextDate?.let {nextDate ->
+            ProfileProperty(stringResource(R.string.nextDate), nextDate.toString())
         }
 
 
@@ -132,10 +163,10 @@ private fun UserInfoFields(userData: ProfileScreenState, containerHeight: Dp) {
 }
 
 @Composable
-private fun nickName(userData: ProfileScreenState, modifier: Modifier = Modifier) {
+private fun nickName(nickname: String, modifier: Modifier = Modifier) {
     ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
         Text(
-            text = userData.nickname,
+            text = nickname,
             modifier = modifier,
             style = MaterialTheme.typography.h5
         )
@@ -261,12 +292,6 @@ fun ProfileFab(
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun ConvPreview480MeDefault() {
-    ProfilePage(userPreview.toProfileScreenState()) {}
 }
 
 @Preview

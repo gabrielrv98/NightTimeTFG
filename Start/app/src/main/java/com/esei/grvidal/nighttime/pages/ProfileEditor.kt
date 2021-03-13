@@ -57,22 +57,27 @@ fun ProfileEditorPage(
     user: UserViewModel
 ) {
 
+
     val (name, setName) = remember { mutableStateOf(TextFieldValue(meUser.name)) }
     val (status, setStatus) = remember { mutableStateOf(TextFieldValue(meUser.status)) }
 
-    var img by remember { mutableStateOf<ImageAsset?>(null) }
-    var drawable by remember { mutableStateOf<Drawable?>(null) }
+    Log.d(TAG, "ProfileEditorPage: starting userPic ${user.userPicture.toString()}")
+    var image by remember { mutableStateOf<ImageAsset?>(user.userPicture) }//todo since ProfilePage erase all data from [UserVM] we would need to call api again for picture
+    var drawable by remember { mutableStateOf<Drawable?>(user.userDrawable) }
 
     onCommit(user.uriPhoto) {
 
-        Log.d(TAG, "ProfileEditorPage: new uri = ${user.uriPhoto}")
-        user.uriPhoto.let { uri ->
+        Log.d(TAG, "ProfileEditorPage: onCommit actual uri = ${user.uriPhoto.toString()}")
+        user.uriPhoto?.let { uri ->
+
+            Log.d(TAG, "ProfileEditorPage: onCommit fetching from  $uri")
 
             Picasso.get()
                 .load(uri)
                 .placeholder(R.drawable.ic_loading)
                 .error(R.drawable.ic_broken_image)
                 .resize(500, 500)
+                .centerCrop()
                 .into(object : Target {
                     override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
                         Log.d(
@@ -80,14 +85,14 @@ fun ProfileEditorPage(
                             "fetchUserPics: onPrepareLoad: loading"
                         )
                         drawable = placeHolderDrawable
-                        img = null
+                        image = null
                     }
 
                     override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
                         //Handle the exception here
                         Log.d(TAG, "fetchUserPics: onBitmapFailed: error $e")
                         drawable = errorDrawable
-                        img = null
+                        image = null
                     }
 
                     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
@@ -97,8 +102,9 @@ fun ProfileEditorPage(
                             TAG,
                             "fetchUserPics: onBitmapLoaded: Image fetched "
                         )
-                        if (bitmap != null) {
-                            img = bitmap.asImageAsset()
+                        bitmap?.let{ img->
+
+                            image = img.asImageAsset()
                         }
 
                     }
@@ -106,8 +112,8 @@ fun ProfileEditorPage(
         }
 
         onDispose {
-            img = null
-            drawable = null
+            Log.d(TAG, "ProfileEditorPage:  onDispose erasing data")
+            user.eraseData()
         }
     }
 
@@ -118,7 +124,7 @@ fun ProfileEditorPage(
         setName = setName,
         status = status,
         setStatus = setStatus,
-        img = img,
+        img = image,
         drawable = drawable,
         searchImageButton = {
 
@@ -144,10 +150,9 @@ fun ProfileEditorPage(
         goBack = {
             navController.popBackStack(navController.graph.startDestination, false)
             navController.navigate(BottomNavigationScreens.ProfileNav.route)
+            user.lock = false
         }
     )
-
-
 }
 
 @Composable
@@ -274,6 +279,9 @@ fun pickImageFromGallery(searchImage: () -> Unit) {
 
 
 /*
+// todo mejora de codigo
+    https://developer.android.com/training/basics/intents/result?hl=es-419#kotlin
+https://www.youtube.com/watch?v=kZKL_JvPDG0
 @Composable
 fun pickImageFromGallery( ) {
     Log.d(TAG, "pickImageFromGallery: starting")
