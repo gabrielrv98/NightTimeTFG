@@ -5,15 +5,25 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyRowFor
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.LocalDrink
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.onCommit
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.WithConstraints
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.vector.VectorAsset
@@ -23,10 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
-import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.BarViewModel
 import com.esei.grvidal.nighttime.data.EventFromBar
+import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 
 private const val TAG = "BarDetails"
 
@@ -116,143 +126,183 @@ fun ShowDetails(
     Column(
         modifier = Modifier
             .padding(horizontal = 12.dp)
+            .fillMaxSize()
     ) {
-        //Button with an icon of an arrow back, if pushed it will show the previous View
-        IconButton(onClick = onBackPressed) {
-            Icon(asset = Icons.Default.ArrowBack)
-        }
-        //Header of the page with the title
-        Header(
-            modifier = Modifier.padding(bottom = 12.dp),
-            text = name,
-            style = MaterialTheme.typography.h4
-        )
+        WithConstraints {
+           // FoundationLayoutBox(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f)) {
+               // ComposeMaterialSurface(color = MaterialTheme.colors.background) {
+            Surface(color = MaterialTheme.colors.background) {
+                    ScrollableColumn {
 
-        // Description of the bar
-        DetailView(
-            title = stringResource(R.string.descripcion)
-        ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                text = description,
-                style = MaterialTheme.typography.body1
-            )
-        }
-        //Schedule of the bar
-        DetailView(title = stringResource(R.string.horario), icon = Icons.Outlined.Alarm,
-            titleToRight = { WeekSchedule(schedule) }
-        ) {
-            Column {// todo switch to a table
-                DailySchedule(
-                    day = stringResource(id = R.string.lunes),
-                    schedule = if (schedule[0] != "") schedule[0]
-                    else stringResource(
-                        id = R.string.cerrado
-                    )
-                )
-                DailySchedule(
-                    day = stringResource(id = R.string.martes),
-                    schedule = if (schedule[1] != "") schedule[0]
-                    else stringResource(
-                        id = R.string.cerrado
-                    )
-                )
-                DailySchedule(
-                    day = stringResource(id = R.string.miercoles),
-                    schedule = if (schedule[2] != "") schedule[0]
-                    else stringResource(
-                        id = R.string.cerrado
-                    )
-                )
-                DailySchedule(
-                    day = stringResource(id = R.string.jueves),
-                    schedule = if (schedule[3] != "") schedule[0]
-                    else stringResource(
-                        id = R.string.cerrado
-                    )
-                )
-                DailySchedule(
-                    day = stringResource(id = R.string.viernes),
-                    schedule = if (schedule[4] != "") schedule[0]
-                    else stringResource(
-                        id = R.string.cerrado
-                    )
-                )
-                DailySchedule(
-                    day = stringResource(id = R.string.sabado),
-                    schedule = if (schedule[5] != "") schedule[0]
-                    else stringResource(
-                        id = R.string.cerrado
-                    )
-                )
-                DailySchedule(
-                    day = stringResource(id = R.string.domingo),
-                    schedule = if (schedule[6] != "") schedule[0]
-                    else stringResource(
-                        id = R.string.cerrado
-                    )
-                )
-            }
 
-        }
+                        //Button with an icon of an arrow back, if pushed it will show the previous View
+                        IconButton(onClick = onBackPressed) {
+                            Icon(asset = Icons.Default.ArrowBack)
+                        }
+                        //Header of the page with the title
+                        Header(
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            text = name,
+                            style = MaterialTheme.typography.h4
+                        )
 
-        //Context to call google Maps
-        val context = ContextAmbient.current
-        val openGMaps = {
-            val uri = "http://maps.google.co.in/maps?q=$address"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-            context.startActivity(intent)
-        }
-        //Localization of the bar
-        DetailView(title = stringResource(R.string.localizacion),
-            icon = Icons.Outlined.Place,//todo improve aesthetic
-            titleToRight = {
-                //Button that triggers Google Maps
-                Button(onClick = openGMaps) {
-                    Text(
-                        text = stringResource(id = R.string.openMaps),
-                        style = MaterialTheme.typography.body2
-                    )
+                        // Description of the bar
+                        DetailView(
+                            title = stringResource(R.string.descripcion)
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                text = description,
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        // Schedule of the bar
+                        BarSchedule(schedule)
+
+                        // Address
+                        Localization(address)
+
+                        // Multimedia
+                        if (totalImages > 0) {
+                            MultimediaView(
+                                nImages = nImages,
+                                images = images,
+                                modifier = Modifier,
+                                fetchImages = fetchImages
+                            )
+                        } else {
+                            Log.d(TAG, "ShowDetails: no images $totalImages")
+                        }
+
+
+                        //Events of the bar
+                        EventsBar(events)
+
+                        // Add a spacer that always shows part (320.dp) of the fields list regardless of the device,
+                        // in order to always leave some content at the top.
+                        Log.d(TAG, "ShowDetails: maxHeight = $maxHeight")
+                        //Spacer(Modifier.preferredHeight((maxHeight - 320.dp).coerceAtLeast(0.dp)))
+                    }
                 }
-
-            }
-        ) {
-            Text(address)
-        }
-
-        if (totalImages > 0) {
-            MultimediaView(
-                nImages = nImages,
-                images = images,
-                modifier = Modifier,
-                fetchImages = fetchImages
-            )
-        }else{
-            Log.d(TAG,"ShowDetails: no images $totalImages")
-        }
-
-
-        //Events of the bar
-        DetailView(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            title = stringResource(id = R.string.nextEvents),
-            icon = Icons.Outlined.LocalDrink
-        ) {
-            // Because is still beta version you cannot put an scrollable inside another scrollable with the same direction
-            // If you could all this would be a Scrorrable Column
-            LazyColumnFor(
-
-                items = events
-            ) { event ->
-                Event(
-                    title = event.date.toString(),
-                    description = event.description
-                )
             }
         }
     }
+}
 
+@Composable
+private fun EventsBar(events: List<EventFromBar>) {
+    DetailView(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .preferredHeight(300.dp),
+        title = stringResource(id = R.string.nextEvents),
+        icon = Icons.Outlined.LocalDrink
+    ) {
+        LazyColumnFor(
+            items = events
+        ) { event ->
+            Event(
+                title = event.date.toString(),
+                description = event.description
+            )
+        }
+    }
+}
 
+@Composable
+private fun Localization(
+    address: String
+) {
+    //Context to call google Maps
+    val context = ContextAmbient.current
+
+    //Localization of the bar
+    DetailView(title = stringResource(R.string.localizacion),
+        icon = Icons.Outlined.Place,//todo improve aesthetic
+        titleToRight = {
+            //Button that triggers Google Maps
+            Button(
+                onClick = {
+                    val uri = "http://maps.google.co.in/maps?q=$address"
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                    context.startActivity(intent)
+                }
+            ) {
+                Text(
+                    text = stringResource(id = R.string.openMaps),
+                    style = MaterialTheme.typography.body2
+                )
+            }
+
+        }
+    ) {
+        Text(address)
+    }
+}
+
+@Composable
+private fun BarSchedule(schedule: List<String>) {
+    DetailView(title = stringResource(R.string.horario), icon = Icons.Outlined.Alarm,
+        titleToRight = { WeekSchedule(schedule) }
+    ) {
+        Column {// todo switch to a table
+            DailySchedule(
+                day = stringResource(id = R.string.lunes),
+                schedule = if (schedule[0] != "") {
+                    schedule[0]
+                }
+                else {
+                    stringResource(
+                        id = R.string.cerrado
+                    )
+                }
+            )
+            DailySchedule(
+                day = stringResource(id = R.string.martes),
+                schedule = if (schedule[1] != "") schedule[1]
+                else stringResource(
+                    id = R.string.cerrado
+                )
+            )
+            DailySchedule(
+                day = stringResource(id = R.string.miercoles),
+                schedule = if (schedule[2] != "") schedule[2]
+                else stringResource(
+                    id = R.string.cerrado
+                )
+            )
+            DailySchedule(
+                day = stringResource(id = R.string.jueves),
+                schedule = if (schedule[3] != "") schedule[3]
+                else stringResource(
+                    id = R.string.cerrado
+                )
+            )
+            DailySchedule(
+                day = stringResource(id = R.string.viernes),
+                schedule = if (schedule[4] != "") schedule[4]
+                else stringResource(
+                    id = R.string.cerrado
+                )
+            )
+            DailySchedule(
+                day = stringResource(id = R.string.sabado),
+                schedule = if (schedule[5] != "") schedule[5]
+                else stringResource(
+                    id = R.string.cerrado
+                )
+            )
+            DailySchedule(
+                day = stringResource(id = R.string.domingo),
+                schedule = if (schedule[6] != "") schedule[6]
+                else stringResource(
+                    id = R.string.cerrado
+                )
+            )
+        }
+
+    }
 }
 
 @Composable
