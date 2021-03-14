@@ -1,10 +1,13 @@
 package com.esei.grvidal.nighttime.network
 
+import androidx.compose.ui.graphics.ImageAsset
 import com.esei.grvidal.nighttime.data.*
 import com.squareup.moshi.JsonClass
 import retrofit2.Retrofit
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
@@ -32,6 +35,7 @@ private val retrofit = Retrofit.Builder()
 
 data class FutureDates( val nextDate: String)
 
+@Suppress("unused")
 interface NightTimeService {
 
     // Singleton object to make the calls to the api
@@ -112,7 +116,25 @@ interface NightTimeService {
         @Path("idUser") id: Long
     ): Response<UserDTO>
 
+    @GET("$USER_URL{idUser}/private")
+    suspend fun getUserPrivate(
+        @Header("auth") auth: String,
+        @Path("idUser") id: Long
+    ): Response<UserViewPrivate>
 
+    @PATCH("$USER_URL{idUser}")
+    suspend fun updateUser(
+        @Header("auth") auth: String,
+        @Path("idUser") id: Long,
+        @Body user: UserDTOEdit
+    ): Response<Any>
+
+    @Multipart
+    @POST("$USER_URL{idUser}/picture")
+    suspend fun setPicture(
+        @Header("auth") auth: String,
+        @Path("idUser") id: Long,
+        @Part("full_name")  fullName: RequestBody,
+        @Part img: MultipartBody.Part
+    ): Response<Any>
 }
-
-data class Photo(val photo: String)
