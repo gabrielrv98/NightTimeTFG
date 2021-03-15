@@ -98,11 +98,6 @@ dependencies {
     // DataStore
     implementation "androidx.datastore:datastore-preferences:$version_datastore"
 
-    // Security MasterKey //todo delete
-    implementation "androidx.security:security-crypto:$version_security_crypto"
-
-    // For Identity Credential APIs //todo delete
-    implementation "androidx.security:security-identity-credential:$version_identity_credential"
 
     // DataStore, new version of SharedPreferences
     implementation "androidx.datastore:datastore-preferences:$version_datastore"
@@ -118,27 +113,27 @@ dependencies {
     implementation "com.google.android.material:material:$version_material"
 
     // Picasso
-    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation "com.squareup.picasso:picasso:$version_picasso"
 
-    // Fragments //TODO delete
-    implementation "androidx.fragment:fragment-ktx:1.2.5"
+    // Compose https://developer.android.com/jetpack/androidx/releases/compose
+        // Animation
+    implementation "androidx.compose.animation:animation:$version_animation"
+        // Compiler
+    implementation "androidx.compose.compiler:compiler:$version_compiler"
+        // Foundation
+    implementation "androidx.compose.foundation:foundation:$version_foundation"
+    implementation "androidx.compose.foundation:foundation-layout:$version_foundation"
+        // Material
+    implementation "androidx.compose.material:material:$version_compose_material"
+    implementation "androidx.compose.material:material-icons-extended:$version_compose_material"
+        // Runtime
+    implementation "androidx.compose.runtime:runtime-livedata:$version_compose_runtime"
+    implementation "androidx.compose.runtime:runtime:$version_compose_runtime"
+    implementation "androidx.compose.runtime:runtime-rxjava2:$version_compose_runtime"
+        // IU
+    implementation "androidx.compose.ui:ui:$version_iu"
 
-    // Compose runtime
-    implementation "androidx.compose:compose-runtime:$version_compose_runtime" // A
-   //implementation "androidx.compose.runtime:runtime:$version_compose_runtime2" //todo future update
-
-
-    // Compose
-    implementation "androidx.compose.animation:animation:$version_compose"
-    implementation "androidx.compose.foundation:foundation:$version_compose"
-    implementation "androidx.compose.foundation:foundation-layout:$version_compose"
-    implementation "androidx.compose.material:material:$version_compose"
-    implementation "androidx.compose.material:material-icons-extended:$version_compose"
-    implementation "androidx.compose.runtime:runtime-livedata:$version_compose"
-    implementation "androidx.compose.runtime:runtime:$version_compose"// A
-    implementation "androidx.compose.ui:ui:$version_compose"
-    //implementation "androidx.compose.ui:ui:$version_compose_ui" todo future update
-
+    // Preview
     implementation "androidx.ui:ui-tooling:$version_ui_tooling"
     //implementation "androidx.compose.ui:ui-tooling:$version_ui_tooling"
 
