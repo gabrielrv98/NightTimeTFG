@@ -88,10 +88,18 @@ fun BarDetails(barVM: BarViewModel, barId: Long, navController: NavHostControlle
  */
 @Composable
 fun ErrorComposable(errorText: String) {
-    Text(
-        text = errorText,
-        color = MaterialTheme.colors.error
-    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+
+    ) {
+        Text(
+            text = errorText,
+            modifier = Modifier
+                .align(Alignment.Center),
+            color = MaterialTheme.colors.error
+        )
+    }
 }
 
 /**
@@ -129,10 +137,10 @@ fun ShowDetails(
             .fillMaxSize()
     ) {
         WithConstraints {
-           // FoundationLayoutBox(modifier = Modifier.weight(1f)) {
+            // FoundationLayoutBox(modifier = Modifier.weight(1f)) {
             Box(modifier = Modifier.weight(1f)) {
-               // ComposeMaterialSurface(color = MaterialTheme.colors.background) {
-            Surface(color = MaterialTheme.colors.background) {
+                // ComposeMaterialSurface(color = MaterialTheme.colors.background) {
+                Surface(color = MaterialTheme.colors.background) {
                     ScrollableColumn {
 
 
@@ -251,8 +259,7 @@ private fun BarSchedule(schedule: List<String>) {
                 day = stringResource(id = R.string.lunes),
                 schedule = if (schedule[0] != "") {
                     schedule[0]
-                }
-                else {
+                } else {
                     stringResource(
                         id = R.string.cerrado
                     )
