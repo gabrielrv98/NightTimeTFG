@@ -1,13 +1,11 @@
 package com.esei.grvidal.nighttime.network
 
-import androidx.compose.ui.graphics.ImageAsset
 import com.esei.grvidal.nighttime.data.*
 import com.squareup.moshi.JsonClass
 import retrofit2.Retrofit
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
@@ -29,7 +27,7 @@ private val moshi = Moshi.Builder()
     .build()
 
 private val retrofit = Retrofit.Builder()
-    .addConverterFactory(MoshiConverterFactory.create(moshi).asLenient())
+    .addConverterFactory(MoshiConverterFactory.create(moshi))//.asLenient())
     .baseUrl(BASE_URL)
     .build()
 
@@ -134,7 +132,12 @@ interface NightTimeService {
     suspend fun setPicture(
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
-        @Part("full_name")  fullName: RequestBody,
         @Part img: MultipartBody.Part
     ): Response<Any>
+
+    @POST(USER_URL)
+    suspend fun newUser(
+        @Body user: UserDTOInsert
+    ): Response<Boolean>
+
 }

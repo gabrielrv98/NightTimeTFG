@@ -1,18 +1,18 @@
 package com.esei.grvidal.nighttime.pages
 
 import android.util.Log
-import androidx.compose.foundation.BaseTextField
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Text
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusState
-import androidx.compose.ui.focusObserver
 import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -22,14 +22,54 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigate
+import androidx.navigation.compose.rememberNavController
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.LoginViewModel
+import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.scaffold.*
 
 
 private const val TAG = "LoginPage"
 
+
 @Composable
-fun LoginPage(loginToken: LoginViewModel, messageError: String = "") {
+fun LoginArchitecture(
+    loginVM: LoginViewModel,
+    userVM: UserViewModel,
+    messageError: String = "",
+    searchImage: () -> Unit,
+){
+    val navController = rememberNavController()
+
+    NavHost(navController, startDestination = NavigationScreens.LogginPage.route) {
+        composable(NavigationScreens.LogginPage.route) {// Login
+            LoginPage(
+                navController = navController,
+                loginVM = loginVM,
+                messageError = messageError
+            )
+        }
+
+        composable(NavigationScreens.RegisterPage.route) {// Register
+            RegisterPage(
+                loginVM = loginVM,
+                userVM = userVM,
+                searchImageButton = searchImage
+            )
+        }
+    }
+}
+
+@Composable
+fun LoginPage(
+    navController: NavHostController,
+    loginVM: LoginViewModel,
+    messageError: String = ""
+) {
 
     val (username, setUsername) = remember { mutableStateOf(TextFieldValue()) }
     val (password, setPassword) = remember { mutableStateOf(TextFieldValue()) }
@@ -40,11 +80,16 @@ fun LoginPage(loginToken: LoginViewModel, messageError: String = "") {
         setUsername = setUsername,
         password = password,
         setPassword = setPassword,
-        onClick = {
-            loginToken.doLoginRefreshed(username.text,password.text)
+        doLogin = {
+            loginVM.doLoginRefreshed(username.text, password.text)
         },
-        jumpHack = { loginToken.jumpHack()
-            Log.d(TAG, "LoginPage: jumphack called")} //todo Limpiar
+        register = {
+            navController.navigate(NavigationScreens.RegisterPage.route)
+        },
+        jumpHack = {
+            loginVM.jumpHack()
+            Log.d(TAG, "LoginPage: jump-hack called")
+        } //todo Limpiar
     )
 }
 
@@ -55,7 +100,8 @@ fun LoginScreen(
     setUsername: (TextFieldValue) -> Unit,
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit,
-    onClick: () -> Unit,
+    doLogin: () -> Unit,
+    register: () -> Unit,
     jumpHack: () -> Unit
 ) {
     Column(
@@ -75,15 +121,16 @@ fun LoginScreen(
             setPassword = setPassword,
             showMessageError = showMessageError,
             onClick = {
-                if(username.text.isNotEmpty() &&
+                if (username.text.isNotEmpty() &&
                     password.text.isNotEmpty()
-                ) onClick()
+                ) doLogin()
             }
         )
 
-        Footer( //todo add register
+        Footer( 
+            text = stringResource(id = R.string.registerAdd),
             modifier = Modifier.weight(1f),
-            text = "¿No tienes cuenta?\nRegistrate ya!",
+            register = register,
             jumpHack = jumpHack
         )
 
@@ -110,7 +157,7 @@ private fun LoggingForm(
                 setPassword = setPassword
             )
 
-            if(showMessageError.isNotEmpty()) {
+            if (showMessageError.isNotEmpty()) {
                 Text(
                     text = showMessageError,
                     style = MaterialTheme.typography.body2,
@@ -148,21 +195,40 @@ fun Header(modifier: Modifier = Modifier, title: String) {
 }
 
 @Composable
-fun Footer(modifier: Modifier = Modifier, text: String, jumpHack : () -> Unit) {
+fun Footer(
+    text: String,
+    modifier: Modifier = Modifier,
+    register: () -> Unit,
+    jumpHack: () -> Unit
+) {
 
     Box(
         modifier = modifier.fillMaxSize(),
         alignment = Alignment.TopStart
     ) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 modifier = Modifier,
                 text = text,
                 style = MaterialTheme.typography.body1
             )
+
+            Icon(
+                asset = Icons.Rounded.PersonAdd,
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                .clickable(
+                    onClick = { register() }
+                )
+            )
+
             Button(
+                modifier = Modifier
+                    .padding(start = 12.dp),
                 onClick = { jumpHack() }
-            ){
+            ) {
                 Text("Developer Skip")
             }
         }
@@ -215,163 +281,50 @@ fun TextWithInput(
     text: TextFieldValue,
     setText: (TextFieldValue) -> Unit,
     isPassword: Boolean = false,
+    canContainSpace: Boolean = false,
     maxLetters: Int = 25,
     onImePerformed: (SoftwareKeyboardController?) -> Unit = {},
     placeholder: @Composable (() -> Unit)? = null
 ) {
-    Row {
 
-        TextField(
-            modifier = modifier.fillMaxWidth()
-                .wrapContentHeight(),
-            value = text,
-            onValueChange = { newText ->
-
-                var trimmedText = newText.text.trim()
-
-                if (trimmedText.length >= maxLetters) //TODO ADJUST THIS
-                    trimmedText= trimmedText.dropLast(trimmedText.length - maxLetters )
-
-                if (trimmedText.contains('\n'))
-                    trimmedText = trimmedText.filter { letter -> letter != '\n' }
-
-                setText(
-                    TextFieldValue(
-                        text = trimmedText,
-                        selection = TextRange(trimmedText.length)
-                    )
-                )
-            },
-            placeholder = placeholder,
-            /** if it's [KeyboardType.Text] characters duplicates */
-            keyboardType = KeyboardType.Password,
-            visualTransformation = if (isPassword) PasswordVisualTransformation()
-            else VisualTransformation.None,
-            imeAction = ImeAction.Done,
-            textStyle = TextStyle(color = Color.DarkGray),
-            onImeActionPerformed = { action, softwareController ->
-
-                Log.d(TAG, "TextWithInput: action= $action")
-                onImePerformed(softwareController)
-            }
-        )
-    }
-}
-
-///-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-//                                                    Pro way //todo delete
-
-///-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun UserInput(
-    username: TextFieldValue,
-    setUsername: (TextFieldValue) -> Unit,
-    password: TextFieldValue,
-    setPassword: (TextFieldValue) -> Unit
-) {
-
-///    Text("borrar esto")//todo borrar esta linea
-
-    // Used to decide if the keyboard should be shown
-    var textFieldFocusState by remember { mutableStateOf(false) }
-
-    UserInputText(
-        modifier = Modifier.preferredWidth(200.dp),//.weight(1f),
-        textFieldValue = username,
-        onTextChanged = { setUsername(it) },
-        // Only show the keyboard if there's no input selector and text field has focus
-        keyboardShown = textFieldFocusState,
-        // Close extended selector if text field receives focus
-        onTextFieldFocused = { focused ->
-            textFieldFocusState = focused
-            Log.d("check1", "UserInput1: focus = $focused")
-        },
-        focusState = textFieldFocusState
-    )
-
-    Spacer(modifier = Modifier.size(15.dp))
-
-    UserInputText(
-        modifier = Modifier.preferredWidth(200.dp),//.weight(1f),
-        textFieldValue = password,
-        onTextChanged = { setPassword(it) },
-        // Only show the keyboard if there's no input selector and text field has focus
-        keyboardShown = textFieldFocusState,
-        // Close extended selector if text field receives focus
-        onTextFieldFocused = { focused ->
-
-            textFieldFocusState = focused
-            Log.d("check1", "UserInput2: focus = $focused")
-        },
-        focusState = textFieldFocusState
-    )
-}
-
-@OptIn(ExperimentalFocus::class)
-@ExperimentalFoundationApi
-@Composable
-private fun UserInputText(
-    modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    onTextChanged: (TextFieldValue) -> Unit,
-    textFieldValue: TextFieldValue,
-    keyboardShown: Boolean,
-    onTextFieldFocused: (Boolean) -> Unit,
-    focusState: Boolean
-) {
-    // Grab a reference to the keyboard controller whenever text input starts
-    var keyboardController by remember { mutableStateOf<SoftwareKeyboardController?>(null) }
-
-    // Show or hide the keyboard
-    onCommit(keyboardController, keyboardShown) { // Guard side-effects against failed commits
-        keyboardController?.let {
-            if (keyboardShown) it.showSoftwareKeyboard() else it.hideSoftwareKeyboard()
-        }
-    }
-
-    Row(
+    TextField(
         modifier = modifier
-            //.fillMaxWidth()
-            .preferredHeight(48.dp),
-        horizontalArrangement = Arrangement.End
-    ) {
-        Box(
-            modifier = Modifier.preferredHeight(48.dp).weight(1f).align(Alignment.Bottom)
-        ) {
-            var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
-            BaseTextField(
-                value = textFieldValue,
-                onValueChange = { onTextChanged(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp)
-                    .align(Alignment.CenterStart)
-                    .focusObserver { state ->
-                        if (lastFocusState != state) {
-                            onTextFieldFocused(state == FocusState.Active)
-                        }
-                        lastFocusState = state
-                    },
-                keyboardType = keyboardType,
-                imeAction = ImeAction.Send,
-                onTextInputStarted = { controller -> keyboardController = controller }
-            )
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        value = text,
+        onValueChange = { newText ->
 
-            val disableContentColor =
-                AmbientEmphasisLevels.current.disabled.applyEmphasis(MaterialTheme.colors.onSurface)
-            if (textFieldValue.text.isEmpty() && !focusState) {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 16.dp),
-                    text = stringResource(id = R.string.TextFieldHint),
-                    style = MaterialTheme.typography.body1.copy(color = disableContentColor)
+            var trimmedText = newText.text
+
+            if (!canContainSpace)
+                trimmedText = trimmedText.trim()
+
+            if (trimmedText.length >= maxLetters)
+                trimmedText = trimmedText.dropLast(trimmedText.length - maxLetters)
+
+            if (trimmedText.contains('\n'))
+                trimmedText = trimmedText.filter { letter -> letter != '\n' }
+
+            setText(
+                TextFieldValue(
+                    text = trimmedText,
+                    selection = TextRange(trimmedText.length)
                 )
-            }
+            )
+        },
+        placeholder = placeholder,
+        /** if it's [KeyboardType.Text] characters duplicates */
+        keyboardType = KeyboardType.Password,
+        visualTransformation = if (isPassword) PasswordVisualTransformation()
+        else VisualTransformation.None,
+        imeAction = ImeAction.Done,
+        textStyle = TextStyle(color = Color.DarkGray),
+        onImeActionPerformed = { action, softwareController ->
+
+            Log.d(TAG, "TextWithInput: action= $action")
+            onImePerformed(softwareController)
         }
-    }
+    )
+
 }
+

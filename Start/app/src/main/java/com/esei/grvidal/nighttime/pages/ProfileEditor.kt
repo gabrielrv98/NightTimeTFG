@@ -2,32 +2,36 @@ package com.esei.grvidal.nighttime.pages
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.foundation.*
-//import androidx.activity.compose.registerForActivityResult
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.ExperimentalFocus
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.ImageAsset
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageAsset
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -38,9 +42,8 @@ import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.User
+import com.esei.grvidal.nighttime.data.PhotoState
 import com.esei.grvidal.nighttime.data.UserViewModel
-import com.esei.grvidal.nighttime.data.meUser
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -54,28 +57,27 @@ const val PERMISSION_CODE = 1001
 fun ProfileEditorPage(
     navController: NavHostController,
     searchImage: () -> Unit,
-    user: UserViewModel
+    user: UserViewModel,
+    setLoginCredentials: (String) -> Unit
 ) {
 
 
-    val (name, setName) = remember { mutableStateOf(TextFieldValue(meUser.name)) }
-    val (status, setStatus) = remember { mutableStateOf(TextFieldValue(meUser.status)) }
-
     Log.d(TAG, "ProfileEditorPage: starting userPic ${user.userPicture.toString()}")
-    var image by remember { mutableStateOf<ImageAsset?>(user.userPicture) }//todo since ProfilePage erase all data from [UserVM] we would need to call api again for picture
-    var drawable by remember { mutableStateOf<Drawable?>(user.userDrawable) }
 
-    onCommit(user.uriPhoto) {
+    onCommit(user.user.id) {
+        user.fetchEditData()
+    }
 
-        Log.d(TAG, "ProfileEditorPage: onCommit actual uri = ${user.uriPhoto.toString()}")
-        user.uriPhoto?.let { uri ->
+
+    onCommit(user.uriPhotoPicasso) {
+
+        Log.d(TAG, "ProfileEditorPage: onCommit actual uri = ${user.uriPhotoPicasso.toString()}")
+        user.uriPhotoPicasso?.let { uri ->
 
             Log.d(TAG, "ProfileEditorPage: onCommit fetching from  $uri")
 
             Picasso.get()
                 .load(uri)
-                .placeholder(R.drawable.ic_loading)
-                .error(R.drawable.ic_broken_image)
                 .resize(500, 500)
                 .centerCrop()
                 .into(object : Target {
@@ -84,15 +86,15 @@ fun ProfileEditorPage(
                             TAG,
                             "fetchUserPics: onPrepareLoad: loading"
                         )
-                        drawable = placeHolderDrawable
-                        image = null
+                        user.photoState = PhotoState.LOADING
+                        user.userPicture = null
                     }
 
                     override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
                         //Handle the exception here
                         Log.d(TAG, "fetchUserPics: onBitmapFailed: error $e")
-                        drawable = errorDrawable
-                        image = null
+                        user.photoState = PhotoState.ERROR
+                        user.userPicture = null
                     }
 
                     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
@@ -102,9 +104,9 @@ fun ProfileEditorPage(
                             TAG,
                             "fetchUserPics: onBitmapLoaded: Image fetched "
                         )
-                        bitmap?.let{ img->
-
-                            image = img.asImageAsset()
+                        bitmap?.let { img ->
+                            user.userPicture = img.asImageAsset()
+                            user.photoState = PhotoState.DONE
                         }
 
                     }
@@ -112,20 +114,29 @@ fun ProfileEditorPage(
         }
 
         onDispose {
-            Log.d(TAG, "ProfileEditorPage:  onDispose erasing data")
-            user.eraseData()
+            user.lock = false
         }
     }
 
     val context = ContextAmbient.current
 
     ProfileEditorScreen(
-        name = name,
-        setName = setName,
-        status = status,
-        setStatus = setStatus,
-        img = image,
-        drawable = drawable,
+        name = user.name,
+        setName = { text -> user.name = text },
+        state = user.state,
+        setState = { text -> user.state = text },
+        password = user.password,
+        setPassword = { text -> user.password = text },
+        email = user.email,
+        setEmail = { text -> user.email = text },
+        img = user.userPicture,
+        photoState = user.photoState,
+        saveData = {
+            user.saveData(
+            setLoginCredentials,
+            user.uriPhotoPicasso?.let { getPathFromURI(context, it) }
+            )
+                   },
         searchImageButton = {
 
             if (checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) ==
@@ -150,24 +161,32 @@ fun ProfileEditorPage(
         goBack = {
             navController.popBackStack(navController.graph.startDestination, false)
             navController.navigate(BottomNavigationScreens.ProfileNav.route)
-            user.lock = false
         }
     )
 }
 
+
+@OptIn(ExperimentalFocus::class)
 @Composable
 fun ProfileEditorScreen(
     name: TextFieldValue,
     setName: (TextFieldValue) -> Unit,
-    status: TextFieldValue,
-    setStatus: (TextFieldValue) -> Unit,
+    state: TextFieldValue,
+    setState: (TextFieldValue) -> Unit,
+    password: TextFieldValue,
+    setPassword: (TextFieldValue) -> Unit,
+    email: TextFieldValue,
+    setEmail: (TextFieldValue) -> Unit,
     img: ImageAsset?,
-    drawable: Drawable?,
+    photoState: PhotoState,
+    saveData: () -> Unit,
     searchImageButton: () -> Unit,
     goBack: () -> Unit
 ) {
 
-val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()
+
+    val focusRequester = remember { FocusRequester() }
 
     ScrollableColumn(
         modifier = Modifier.fillMaxSize(),
@@ -175,108 +194,133 @@ val scrollState = rememberScrollState()
     ) {
 
         ProfileHeader(
-            scrollState,
-            img,
-            drawable
-        ){ modifier ->
+            scrollState = scrollState,
+            asset = img,
+            photoState = photoState,
+        ) { modifier ->
 
-            Icon(
-                asset = Icons.Default.Edit,
-                modifier = modifier.clip(CircleShape)
-                    .clickable(onClick = { searchImageButton() } )
-                    .size(25.dp),
-                tint = MaterialTheme.colors.primary
+            val difference = scrollState.value / 40
+            val offset = 12 - difference
+            Log.d(
+                TAG,
+                "ProfileEditorScreen: scroll state = ${scrollState.value} difference = $difference offset = $offset"
             )
+            val offsetDp = with(DensityAmbient.current) {
+                if (offset >= 0) offset.toDp()
+                else 0.dp
+            }
+            val myModifier = modifier
+                .padding(bottom = offsetDp)
+
+            Surface(
+                modifier = myModifier
+                    .padding(end = 6.dp)
+                    .size(45.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = { searchImageButton() })
+            ) {
+                Icon(
+                    modifier = Modifier,//.padding(3.dp),
+                    asset = Icons.Default.Edit,
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+
 
         }
+        Spacer(Modifier.preferredHeight(25.dp))
 
         TextChanger(
-            name = name,
-            set = { text -> setName(text) },
-            text = stringResource(id = R.string.display_name)
+            title = stringResource(id = R.string.display_name),
+            focusRequester = remember { FocusRequester() },
+            canContainSpace = true,
+            value = name,
+            setValue = setName
         )
 
         TextChanger(
-            name = status,
-            set = { text -> setStatus(text) },
+            title = stringResource(id = R.string.state),
+            focusRequester = focusRequester,
             canBeEmpty = true,
-            text = stringResource(id = R.string.status)
+            canContainSpace = true,
+            maxLetters = 50,
+            value = state,
+            setValue = setState
         )
+
+        TextChanger(
+            title = stringResource(id = R.string.email),
+            focusRequester = focusRequester,
+            value = email,
+            setValue = setEmail
+        )
+
+        TextWithInputPassword(
+            focusRequester = focusRequester,
+            password = password,
+            setPassword = setPassword
+        )
+
+
         AcceptDeclineButtons(
             accept = {
-                saveData(user = meUser, name = name, status = status)
+                // save password in storage
+                saveData()
                 goBack()
             },
             decline = { goBack() }
         )
-
-        Text("pene")
-        Text("pene")
-        Text("pene")
-        Text("pene")
-        Text("pene")
-        Text("pene")
-        Text("pene")
-        Text("pene")
-        Text("pene")
     }
 
 
 }
 
-@Composable
-fun UserPicture(
-    modifier: Modifier = Modifier,
-    CircleShape: Shape,
-    img: ImageAsset?,
-    drawable: Drawable?,
-    searchImageButton: () -> Unit
-) {
-    Row(
-        modifier = Modifier.padding(20.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = modifier
-                .clip(shape = CircleShape)
-        ) {
 
+fun getPathFromURI(context: Context, uri: Uri): String {
+    Log.d(TAG, "getPathFromURI: uri = $uri")
+    var realPath = String()
+    uri.path?.let { path ->
 
-            if (img != null) {
-                Log.d(TAG, "fetchUserPics: image is visible")
-                Image(
-                    asset = img,
-                    modifier = modifier
-                )
-
-            } else {
-                Log.d(TAG, "fetchUserPics: image was null")
-                Canvas(
-                    modifier = modifier
-                ) {
-                    drawIntoCanvas {
-                        drawable?.draw(it.nativeCanvas) ?: Icons.Default.VerifiedUser
-                    }
+        val databaseUri: Uri
+        val selection: String?
+        val selectionArgs: Array<String>?
+        if (path.contains("/document/image:")) { // files selected from "Documents"
+            databaseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            selection = "_id=?"
+            selectionArgs = arrayOf(DocumentsContract.getDocumentId(uri).split(":")[1])
+        } else { // files selected from all other sources, especially on Samsung devices
+            databaseUri = uri
+            selection = null
+            selectionArgs = null
+        }
+        try {
+            val column = "_data"
+            val projection = arrayOf(column)
+            val cursor = context.contentResolver.query(
+                databaseUri,
+                projection,
+                selection,
+                selectionArgs,
+                null
+            )
+            cursor?.let {
+                if (it.moveToFirst()) {
+                    val columnIndex = cursor.getColumnIndexOrThrow(column)
+                    realPath = cursor.getString(columnIndex)
                 }
+                cursor.close()
             }
-            Button(
-                onClick = { searchImageButton() },
-                modifier = Modifier.align(Alignment.BottomEnd)
-                    .preferredSize(50.dp)
-            ) {
-                Icon(Icons.Default.Edit)
-            }
+        } catch (e: Exception) {
+            println(e)
         }
     }
+    return realPath
 }
 
 fun pickImageFromGallery(searchImage: () -> Unit) {
     Log.d(TAG, "pickImageFromGallery: starting")
     searchImage()
-
 }
-
 
 /*
 // todo mejora de codigo
@@ -296,17 +340,12 @@ fun pickImageFromGallery( ) {
 
     val selectImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            Log.d(com.esei.grvidal.nighttime.TAG, "settingNewURi:  uri = $uri")
+            Log.d(TAG, "settingNewURi:  uri = $uri")
             userVM.uriPhoto = uri
         }
 
 }
  */
-
-
-
-
-
 
 
 @Composable
@@ -356,40 +395,125 @@ private fun IconButtonEditProfile(
     }
 }
 
-fun saveData(user: User, name: TextFieldValue, status: TextFieldValue) {
 
-    if (name.text.trim() != "")
-        user.name = name.text.trim()
-    user.status = status.text.trim()
-}
-
+@ExperimentalFocus
 @Composable
 fun TextChanger(
-    name: TextFieldValue,
-    set: (TextFieldValue) -> Unit,
+    modifier: Modifier = Modifier,
+    title: String,
+    focusRequester: FocusRequester,
     canBeEmpty: Boolean = false,
-    text: String
+    canContainSpace: Boolean = false,
+    isPassword: Boolean = false,
+    maxLetters: Int = 25,
+    value: TextFieldValue,
+    setValue: (TextFieldValue) -> Unit,
+    content: @Composable ((Modifier) -> Unit)? = null
 ) {
 
-    Row(
-        modifier = Modifier.padding(horizontal = 24.dp)
+    Column(
+        modifier = modifier.padding(horizontal = 24.dp)
             .padding(bottom = 6.dp, top = 6.dp)
     ) {
-        Column {
-            Row {
-                Text(text = text)
-                if (!canBeEmpty) {
-                    Advert(name.text, Modifier.align(Alignment.Bottom))
+        Row {
+            Text(text = title)
+            if (!canBeEmpty) {
+                Advert(value.text, Modifier.align(Alignment.Bottom))
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp)
+                .padding(top = 4.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextWithInput(
+                modifier = Modifier
+                    .weight(0.8F)
+                    .focusRequester(focusRequester = focusRequester),
+                text = value,
+                setText = { newValue -> setValue(newValue) },
+                isPassword = isPassword,
+                canContainSpace = canContainSpace,
+                maxLetters = maxLetters,
+                onImePerformed = { softwareController ->
+                    softwareController?.hideSoftwareKeyboard()
                 }
+            ) {
+                Text(text = title)
             }
 
-            TextField(
-                modifier = Modifier.padding(horizontal = 6.dp)
-                    .padding(top = 4.dp),
-                value = name, onValueChange = { set(it) })
+            content?.let { content ->
+                Spacer(modifier = Modifier.weight(0.1F))
+
+                Surface(
+                    modifier = modifier
+                        .weight(0.1F)
+                        .clip(CircleShape),
+                    elevation = 1.dp,
+                    color = MaterialTheme.colors.background
+                ) {
+                    content(Modifier.align(alignment = Alignment.CenterVertically))
+                }
+
+            }
         }
     }
+
 }
+
+
+@OptIn(ExperimentalFocus::class)
+@Composable
+fun TextWithInputPassword(
+    focusRequester: FocusRequester,
+    password: TextFieldValue,
+    setPassword: (TextFieldValue) -> Unit
+) {
+    /**
+     * Beta versions
+     * todo update
+     * https://stackoverflow.com/questions/66376112/hoist-pressed-state-in-jetpack-compose-beta-1-after-interactionstate-was-removed
+     */
+    val interactionState =
+        remember { InteractionState() } // remember { MutableInteractionSource() }
+    val showPassword =
+        interactionState.contains(Interaction.Pressed)// interactionSource.collectIsPressedAsState()
+    /*
+        .clickable(
+        interactionSource = interactionSource,
+        indication = LocalIndication.current
+         */
+
+    TextChanger(
+        modifier = Modifier,
+        title = stringResource(id = R.string.password),
+        focusRequester = focusRequester,
+        isPassword = !showPassword,
+        value = password,
+        setValue = setPassword
+    ) { modifier ->
+
+
+        Icon(
+            asset = if (showPassword) Icons.Default.Visibility
+            else Icons.Default.VisibilityOff,
+            modifier = modifier
+                .clip(CircleShape)
+                .clickable(
+                    onClick = {},
+                    interactionState = interactionState
+                )
+
+        )
+
+
+    }
+}
+
 
 @Composable
 fun Advert(text: String, modifier: Modifier) {

@@ -1,14 +1,15 @@
 package com.esei.grvidal.nighttime.pages
 
-import android.graphics.drawable.Drawable
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.runtime.Composable
@@ -19,9 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.WithConstraints
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageAsset
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -41,10 +41,9 @@ private const val TAG = "ProfilePage"
 @Composable
 fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: UserViewModel) {
 
-    Log.d(TAG, "ProfileEditorPage: user lock ${userVM.lock}")
 
     //Nullable check
-    if (userId == null || userId == -1L) {
+    if (userId == null) {
         ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
 
     } else {
@@ -57,29 +56,25 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
             onDispose {
                 Log.d(TAG, "ProfilePageView: onDispose erasing data")
                 userVM.eraseData()
+
             }
         }
 
-        //Datos del usuario
-        val userData = meUser // user = UserDao.getUserbyId(userId)
-
         ProfilePage(
-            //user = userData.toProfileScreenState(),
-            userDTO = userVM.user,
+            name = userVM.user.name,
+            nickname = userVM.user.nickname,
+            state = userVM.user.state,
+            nextDate = userVM.user.nextDate,
             img = userVM.userPicture,
-            drawable = userVM.userDrawable,
+            photoState = userVM.photoState,
             isMe = userId == userVM.getMyId(),
             onClick = if (userId == userVM.getMyId()) {
-
                 {
-                    userVM.lock = true // Blocks the erase of the data
+                    userVM.lock = true
                     navController.navigate(NavigationScreens.ProfileEditor.route)
                 }
-
             } else {
-
                 {
-                    userVM.lock = false
                     navController.navigateWithId(
                         NavigationScreens.ChatConversation.route,
                         userId
@@ -95,9 +90,12 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
 
 @Composable
 fun ProfilePage(
-    userDTO: UserDTO,
+    name: String,
+    nickname: String,
+    state: String?,
+    nextDate: NextDate?,
     img: ImageAsset?,
-    drawable: Drawable?,
+    photoState: PhotoState,
     isMe: Boolean,
     onClick: () -> Unit
 ) {
@@ -114,11 +112,16 @@ fun ProfilePage(
                     ) {
                         ProfileHeader(
                             scrollState = scrollState,
-                            //asset = user.photo?.let { imageResource(id = it) },
                             asset = img,
-                            drawable = drawable
+                            photoState = photoState
                         )
-                        UserInfoFields(userDTO, maxHeight)
+                        UserInfoFields(
+                            name = name,
+                            nickname = nickname,
+                            state = state,
+                            nextDate = nextDate,
+                            containerHeight = maxHeight
+                        )
                     }
                 }
                 ProfileFab(
@@ -134,24 +137,27 @@ fun ProfilePage(
 
 @Composable
 private fun UserInfoFields(
-    userDTO: UserDTO,
+    name: String,
+    nickname: String,
+    state: String?,
+    nextDate: NextDate?,
     containerHeight: Dp
 ) {
     Column {
         Spacer(modifier = Modifier.preferredHeight(8.dp))
 
         nickName(
-            nickname = userDTO.nickname,
+            nickname = nickname,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 4.dp)
         )
 
-        ProfileProperty(stringResource(R.string.display_name), userDTO.name)
+        ProfileProperty(stringResource(R.string.display_name), name)
 
-        ProfileProperty(stringResource(R.string.status), userDTO.state)
+        ProfileProperty(stringResource(R.string.state), state ?: " ")
 
-        userDTO.nextDate?.let {nextDate ->
+        nextDate?.let { nextDate ->
             ProfileProperty(stringResource(R.string.nextDate), nextDate.toString())
         }
 
@@ -177,8 +183,8 @@ private fun nickName(nickname: String, modifier: Modifier = Modifier) {
 fun ProfileHeader(
     scrollState: ScrollState,
     asset: ImageAsset?,
-    drawable: Drawable?,
-    content: (@Composable (Modifier) -> Unit)? = null
+    photoState: PhotoState,
+    content: @Composable ((Modifier) -> Unit)? = null
 ) {
 
     val offset = (scrollState.value / 2)
@@ -207,14 +213,33 @@ fun ProfileHeader(
             )
 
         } else {
-
-            Canvas(
-                modifier = modifier.preferredSize(150.dp)
+            val context = ContextAmbient.current
+            Box(
+                modifier = modifier.fillMaxSize(),
+                alignment = Alignment.Center
             ) {
-                drawIntoCanvas {
-                    drawable?.draw(it.nativeCanvas) ?: Icons.Default.VerifiedUser
+                when (photoState) {
+                    PhotoState.LOADING -> {
+                        CircularProgressIndicator()
+                    }
+                    PhotoState.ERROR -> {
+
+                        Icon(asset = Icons.Default.BrokenImage)
+                        Toast.makeText(
+                            context,
+                            stringResource(id = R.string.errorPhoto),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    PhotoState.DONE -> {
+
+                        Icon( asset =  Icons.Default.Person.copy(defaultHeight = 500.dp, defaultWidth = 500.dp))//todo hack way to change the size
+
+                    }
                 }
+
             }
+
         }
 
         if (content != null) {

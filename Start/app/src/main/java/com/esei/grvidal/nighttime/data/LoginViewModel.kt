@@ -1,6 +1,5 @@
 package com.esei.grvidal.nighttime.data
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,26 +39,28 @@ class LoginViewModel(
     var credentialsChecked by mutableStateOf(false) // todo creo que puede ser una variable normal
         private set
 
-    private suspend fun setLoggingData(username: String, password: String) {
-        dataStoreManager.updateLoginCredentials(username, password)
-    }
 
     fun logOffAndExit() {
         viewModelScope.launch {
-            setLoggingData("", "")
+            dataStoreManager.updateLoginCredentials(password = "", isChecked = false)
             exitProcess(0)
         }
     }
 
     fun doLoginRefreshed(username: String, password: String) {
         viewModelScope.launch {
-            setLoggingData(username, password)
+            dataStoreManager.updateLoginCredentials(login = username, password = password)
             login(
                 LoginData(username, password, false)
             )
         }
     }
 
+    fun setPassword(password: String) {
+        viewModelScope.launch {
+            dataStoreManager.updateLoginCredentials(password = password)
+        }
+    }
 
     /**
      * Call login() on init so we can display get the token for future calls.
@@ -182,24 +183,21 @@ class LoginViewModel(
         }
     }
 
-
 }
+    class LoginViewModelFactory(
+        private val dataStoreManager: DataStoreManager
+    ) : ViewModelProvider.Factory {
 
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-class LoginViewModelFactory(
-    private val dataStoreManager: DataStoreManager
-) : ViewModelProvider.Factory {
+            if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-
-        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-
-            @Suppress("UNCHECKED_CAST")
-            return LoginViewModel(dataStoreManager) as T
+                @Suppress("UNCHECKED_CAST")
+                return LoginViewModel(dataStoreManager) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
 
-}
+    }
 
 

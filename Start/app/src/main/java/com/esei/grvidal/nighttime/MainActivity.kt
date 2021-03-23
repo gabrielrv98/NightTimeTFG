@@ -13,8 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.ui.tooling.preview.Preview
-
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -22,14 +20,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.pages.*
 import com.esei.grvidal.nighttime.scaffold.*
-
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
-import java.lang.StringBuilder
+
 
 private const val TAG = "MainActivity"
 
@@ -85,12 +83,22 @@ class MainActivity : AppCompatActivity() {
                     LoginState.NO_DATA_STORED -> {
 
                         Log.d(TAG, "onCreate: pulling LoginPage")
-                        LoginPage(loginVM)
+                        LoginArchitecture(
+                            loginVM = loginVM,
+                            userVM = userVM,
+                            searchImage = { selectImageLauncher.launch("image/*") }
+                        )
 
                     }
                     LoginState.REFUSED -> {
                         Log.d(TAG, "onCreate: pulling LoginPage with message")
-                        LoginPage(loginVM, stringResource(id = R.string.loginError))
+                        LoginArchitecture(
+                            loginVM = loginVM,
+                            userVM = userVM,
+                            messageError = stringResource(id = R.string.loginError),
+                            searchImage = { selectImageLauncher.launch("image/*") }
+                        )
+
 
                     }
 
@@ -129,7 +137,12 @@ class MainActivity : AppCompatActivity() {
                                 TAG,
                                 "onCreate: pulling LoginPage, credentials ${loginVM.credentialsChecked}"
                             )
-                            LoginPage(loginVM, stringResource(id = R.string.serverIsDown))
+                            LoginArchitecture(
+                                loginVM = loginVM,
+                                userVM = userVM,
+                                messageError = stringResource(id = R.string.serverIsDown),
+                                searchImage = { selectImageLauncher.launch("image/*") }
+                            )
                         }
 
                     }
@@ -150,7 +163,7 @@ class MainActivity : AppCompatActivity() {
     private val selectImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             Log.d(TAG, "settingNewURi:  uri = $uri")
-            userVM.uriPhoto = uri
+            userVM.uriPhotoPicasso = uri
         }
 
     /**
@@ -176,12 +189,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    // Prevents data from not being erased when leaving userProfileEditor with back button
-    override fun onBackPressed() {
-        super.onBackPressed()
-        if(userVM.lock) userVM.lock = false
     }
 
 
@@ -349,7 +356,7 @@ Navigation with their own files ( no dependencies )
                 topBar = { TopAppBar(title = { Text(text =  stringResource(R.string.edit_profile)) }) },
                 bottomBar = {},
             ) {
-                ProfileEditorPage(navController, searchImage, userVM)
+                ProfileEditorPage(navController, searchImage, userVM,login::setPassword)
             }
         }
     }

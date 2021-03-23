@@ -3,14 +3,12 @@ package com.esei.grvidal.nighttime.datastore
 import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.createDataStore
 import com.esei.grvidal.nighttime.data.City
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.single
 import java.io.IOException
 
 /* https://developer.android.com/codelabs/android-preferences-datastore#2 */
@@ -72,12 +70,26 @@ class DataStoreManager private constructor(context: Context) {
      * Async updates credentials in the DataStore, every time data is changed,
      * [PreferencesKeys.CONFIRMATION_CREDENTIALS] is set to false to avoid false logins
      */
-    suspend fun updateLoginCredentials(login: String, password: String) {
+    suspend fun updateLoginCredentials(login: String? = null, password: String? = null, isChecked: Boolean? = null) {
 
         Log.d(TAG, "updateLoginCredentials: new credentials \"$login\", \"$password\"")
 
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.LOGIN_CREDENTIALS] = login
+            login?.let { preferences[PreferencesKeys.LOGIN_CREDENTIALS] = it }
+            password?.let { preferences[PreferencesKeys.PASSWORD_CREDENTIALS] = it }
+            isChecked?.let { preferences[PreferencesKeys.CONFIRMATION_CREDENTIALS] = it }
+        }
+    }
+
+    /**
+     * Async updates credentials in the DataStore, every time data is changed,
+     * [PreferencesKeys.CONFIRMATION_CREDENTIALS] is set to false to avoid false logins
+     */
+    suspend fun updateLoginPassword(password: String, isChecked: Boolean) {
+
+        Log.d(TAG, "updateLoginPassword: new password \"$password\" is cheked $isChecked")
+
+        dataStore.edit { preferences ->
             preferences[PreferencesKeys.PASSWORD_CREDENTIALS] = password
             preferences[PreferencesKeys.CONFIRMATION_CREDENTIALS] = false
         }

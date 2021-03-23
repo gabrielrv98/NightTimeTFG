@@ -56,7 +56,7 @@
     <string name="send">Enviar</string>
     <string name="TextFieldHint">Escribe aqui</string>
     <string name="display_name">Nombre</string>
-    <string name="status">Estado</string>
+    <string name="state">Estado</string>
     <string name="edit_profile">Editar perfil</string>
     <string name="sed_message">Enviar mensaje</string>
     <string name="nextDate">Proxima fecha marcada</string>
@@ -68,6 +68,7 @@
     <!-- Login form -->
     <string name="volver">Volver</string>
     <string name="log_in">log in</string>
+    <string name="login">login</string>
     <string name="loading">Cargando</string>
     <string name="no_internet">No hay conexion con internet</string>
     <string name="username">Nombre de usuario</string>
@@ -77,4 +78,8 @@
     <string name="logoff">Log off</string>
     <string name="cerrado">Cerrado.</string>
     <string name="no_image">Error cargando la imagen</string>
+    <string name="email">Email</string>
+    <string name="registerAdd">¿No tienes cuenta?\nRegistrate ya!</string>
+    <string name="register">Registro</string>
+    <string name="errorPhoto">Error cargando la foto</string>
 </resources>

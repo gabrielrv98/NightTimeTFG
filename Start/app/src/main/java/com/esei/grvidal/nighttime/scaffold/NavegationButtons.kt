@@ -55,6 +55,10 @@ sealed class NavigationScreens(
     val route: String,
     @StringRes val resourceId: Int
 ) {
+    object LogginPage:
+            NavigationScreens("Logging",R.string.login)
+    object RegisterPage:
+        NavigationScreens("Register",R.string.register)
     object BarDetails :
         NavigationScreens("BarDetails", R.string.barDetails_route)
     object ChatConversation :
