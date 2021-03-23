@@ -7,8 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.network.DateCityDTO
-import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
-import com.squareup.moshi.Json
+import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.LocalDate
@@ -71,14 +70,14 @@ class CalendarViewModel : ViewModel() {
     var userFriends by mutableStateOf(listOf<UserSnap>())
         private set
 
-    fun loadSelectedDate() {
+    private fun loadSelectedDate() {
         //call api
         Log.d(TAG, "load: $selectedDate userToken $userToken")
 
         viewModelScope.launch {
             try {
 
-                val webResponse = NightTimeApi.retrofitService.getPeopleAndEventsOnDateAsync(
+                val webResponse =  retrofitService.getPeopleAndEventsOnDateAsync(
                     auth = userToken.token,
                     id = userToken.id,
                     day = selectedDate.day,
@@ -130,7 +129,7 @@ class CalendarViewModel : ViewModel() {
     }
 
 
-    fun getUserDateList() {
+    private fun getUserDateList() {
 
         Log.d(TAG, "getUserDateList: $userToken, cityId = $cityId")
 
@@ -138,7 +137,7 @@ class CalendarViewModel : ViewModel() {
 
             try {
 
-                val webResponse = NightTimeApi.retrofitService.getFutureUsersDateList(
+                val webResponse = retrofitService.getFutureUsersDateList(
                     auth = userToken.token,
                     id = userToken.id,
                     idCity = cityId
@@ -203,7 +202,7 @@ class CalendarViewModel : ViewModel() {
 
             try {
 
-                val webResponse = NightTimeApi.retrofitService.getUsersOnDateAsync(
+                val webResponse = retrofitService.getUsersOnDateAsync(
                     auth = userToken.token,
                     id = userToken.id,
                     day = selectedDate.day,
@@ -245,23 +244,13 @@ class CalendarViewModel : ViewModel() {
 
 
     /**
-     * Creates the calendar layout ( days of the week) from a day of a month
-     *
-     * @param myDate selected date that will be used to select the month
-     */
-    fun setCalendar(myDate: MyDate) {
-        calendar = ChipDayFactory.datesCreator(myDate)
-    }
-
-
-    /**
      * Set the selected day to show relative information like people and events,
      *  besides checks if its needed to different a new month
      */
     fun setDate(myDate: MyDate) {
 
         if (selectedDate.month != myDate.month)
-            setCalendar(myDate)
+            calendar = ChipDayFactory.datesCreator(myDate) //Creates the calendar layout ( days of the week) from a day of a month
 
         selectedDate = myDate
         loadSelectedDate()
@@ -276,7 +265,7 @@ class CalendarViewModel : ViewModel() {
 
             try {
 
-                val webResponse = NightTimeApi.retrofitService.addDateAsync(
+                val webResponse = retrofitService.addDateAsync(
                     auth = userToken.token,
                     id = userToken.id,
                     dateCity = DateCityDTO(date.toLocalDate().toString(), cityId)
@@ -327,7 +316,7 @@ class CalendarViewModel : ViewModel() {
 
             try {
 
-                val webResponse = NightTimeApi.retrofitService.removeDateAsync(
+                val webResponse = retrofitService.removeDateAsync(
                     auth = userToken.token,
                     id = userToken.id,
                     dateCity = DateCityDTO(date.toLocalDate().toString(), cityId)
@@ -335,14 +324,14 @@ class CalendarViewModel : ViewModel() {
 
                 Log.d(
                     TAG,
-                    "call to retrofit done"
+                    "removeDateFromUserList: call to retrofit done"
                 )
 
                 if (webResponse.isSuccessful) {
 
                     Log.d(
                         TAG,
-                        "data deleted ${webResponse.body()}"
+                        "removeDateFromUserList: data deleted ${webResponse.body()}"
                     )
 
                 } else {
@@ -351,16 +340,16 @@ class CalendarViewModel : ViewModel() {
 
                     Log.e(
                         TAG,
-                        "error deleting data from CalendarViewModel removeDate body = ${webResponse.toString()} "
+                        "removeDateFromUserList: error deleting data from CalendarViewModel removeDate body = $webResponse "
                     )
                 }
 
 
             } catch (e: IOException) {
-                Log.e(TAG, "addDateToUserList: network exception (no network)  --//-- $e")
+                Log.e(TAG, "removeDateFromUserList: network exception (no network)  --//-- $e")
 
             } catch (e: Exception) {
-                Log.e(TAG, "addDateToUserList: general exception  --//-- $e --//--${e.stackTrace}")
+                Log.e(TAG, "removeDateFromUserList: general exception  --//-- $e --//--${e.stackTrace}")
 
 
             }

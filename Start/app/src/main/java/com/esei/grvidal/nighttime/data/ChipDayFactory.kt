@@ -34,6 +34,10 @@ data class MyDate(val day: Int, val month: Int, val year: Int){
     }
 }
 
+/**
+ * Creates the calendar layout ( days of the week) from a day of a month
+ *
+ */
 class ChipDayFactory {
 
 
