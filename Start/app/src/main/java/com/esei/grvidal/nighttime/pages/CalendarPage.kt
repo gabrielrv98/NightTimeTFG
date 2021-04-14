@@ -6,6 +6,8 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -13,6 +15,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -234,25 +237,31 @@ fun CalendarPageView(
  */
 @Composable
 fun FriendlyUsersDialog(
-    itemsUser: List<UserSnap>,
-    modifier: Modifier = Modifier
+    itemsUser: List<UserSnapImage>,
+    modifier: Modifier = Modifier,
+    state: LazyListState =  rememberLazyListState(),
+    buttonRight: (@Composable (Long) -> Unit)? = null
 ) {
     //List with the users
     LazyColumnFor(
         items = itemsUser,
-        modifier = modifier
-    ) {
+        modifier = modifier,
+        state = state
+    ) { user->
         //Each user
         Row(
             modifier = Modifier.padding(vertical = 12.dp)
         ) {
             //Image
             Surface(
-                modifier = Modifier.preferredSize(20.dp),
+                modifier = Modifier.preferredSize(40.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
             ) {
-                // Image goes here
+                user.img?.let{
+                    Image(asset = it)
+                } ?: Icon(asset = Icons.Default.Person)
+
             }
 
             //Name
@@ -261,10 +270,12 @@ fun FriendlyUsersDialog(
                     .padding(start = 8.dp)
                     .align(Alignment.CenterVertically)
             ) {
-                Text(text ="${it.username} - ${it.realname}")
+                Text(text ="${user.username} - ${user.name}")
+            }
+            if (buttonRight != null) {
+                buttonRight(user.userId)
             }
         }
-
     }
 
 }
@@ -295,7 +306,7 @@ fun CalendarWindow(
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 6.dp)
-            .animateContentSize() // automatically animate size when it changes//todo check this
+            .animateContentSize() // automatically animate size when it changes
         ) {
 
             //Header of the Calendar
@@ -344,31 +355,31 @@ fun CalendarWindow(
                     ) {
 
                         CenteredText(
-                            text = stringResource(id = R.string.lunes),
+                            text = stringResource(id = R.string.lunes_abbreviation),
                             modifier = myModifier
                         )
                         CenteredText(
-                            text = stringResource(id = R.string.martes),
+                            text = stringResource(id = R.string.martes_abbreviation),
                             modifier = myModifier
                         )
                         CenteredText(
-                            text = stringResource(id = R.string.miercoles),
+                            text = stringResource(id = R.string.miercoles_abbreviation),
                             modifier = myModifier
                         )
                         CenteredText(
-                            text = stringResource(id = R.string.jueves),
+                            text = stringResource(id = R.string.jueves_abbreviation),
                             modifier = myModifier
                         )
                         CenteredText(
-                            text = stringResource(id = R.string.viernes),
+                            text = stringResource(id = R.string.viernes_abbreviation),
                             modifier = myModifier
                         )
                         CenteredText(
-                            text = stringResource(id = R.string.sabado),
+                            text = stringResource(id = R.string.sabado_abbreviation),
                             modifier = myModifier
                         )
                         CenteredText(
-                            text = stringResource(id = R.string.domingo),
+                            text = stringResource(id = R.string.domingo_abbreviation),
                             modifier = myModifier
                         )
                     }
@@ -842,32 +853,32 @@ fun CalendarPreview() {
 fun DialogPreview() {
     val userList =
         listOf(
-            UserSnap( 1,"Nuria","pinknut"),
-            UserSnap( 1,"Miguel","emikepick"),
-            UserSnap(1,"Maria","dulceFlor"),
-            UserSnap( 1,"Marcos","Tigre"),
-            UserSnap( 1,"Laura","laux21"),
-            UserSnap( 1,"Sara","saraaldo"),
-            UserSnap( 1,"Julio","itsme"),
-            UserSnap( 1,"Juan","john32"),
-            UserSnap( 1,"Pedro","pcsantiago"),
-            UserSnap( 1,"Salva","Salvador"),
-            UserSnap( 1,"Gabriel","grvidal"),
-            UserSnap( 1,"Jose","JS"),
-            UserSnap( 1,"Emma","EmmaSant"),
-            UserSnap( 1,"Santi","santii810"),
-            UserSnap( 1,"Filo","erfilo"),
-            UserSnap( 1,"Nuria","pinknut"),
-            UserSnap( 1,"Miguel","emikepick"),
-            UserSnap(1,"Maria","dulceFlor"),
-            UserSnap( 1,"Marcos","Tigre"),
-            UserSnap( 1,"Laura","laux21"),
-            UserSnap( 1,"Sara","saraaldo"),
-            UserSnap( 1,"Julio","itsme"),
-            UserSnap( 1,"Juan","john32"),
-            UserSnap( 1,"Pedro","pcsantiago"),
-            UserSnap( 1,"Salva","Salvador"),
-            UserSnap( 1,"Gabriel","grvidal"),
+            UserSnapImage( 1,"Nuria","pinknut",null),
+            UserSnapImage( 1,"Miguel","emikepick",null),
+            UserSnapImage(1,"Maria","dulceFlor",null),
+            UserSnapImage( 1,"Marcos","Tigre",null),
+            UserSnapImage( 1,"Laura","laux21",null),
+            UserSnapImage( 1,"Sara","saraaldo",null),
+            UserSnapImage( 1,"Julio","itsme",null),
+            UserSnapImage( 1,"Juan","john32",null),
+            UserSnapImage( 1,"Pedro","pcsantiago",null),
+            UserSnapImage( 1,"Salva","Salvador",null),
+            UserSnapImage( 1,"Gabriel","grvidal",null),
+            UserSnapImage( 1,"Jose","JS",null),
+            UserSnapImage( 1,"Emma","EmmaSant",null),
+            UserSnapImage( 1,"Santi","santii810",null),
+            UserSnapImage( 1,"Filo","erfilo",null),
+            UserSnapImage( 1,"Nuria","pinknut",null),
+            UserSnapImage( 1,"Miguel","emikepick",null),
+            UserSnapImage(1,"Maria","dulceFlor",null),
+            UserSnapImage( 1,"Marcos","Tigre",null),
+            UserSnapImage( 1,"Laura","laux21",null),
+            UserSnapImage( 1,"Sara","saraaldo",null),
+            UserSnapImage( 1,"Julio","itsme",null),
+            UserSnapImage( 1,"Juan","john32",null),
+            UserSnapImage( 1,"Pedro","pcsantiago",null),
+            UserSnapImage( 1,"Salva","Salvador",null),
+            UserSnapImage( 1,"Gabriel","grvidal",null),
         )
     NightTimeTheme {
 

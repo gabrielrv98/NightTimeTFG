@@ -1,13 +1,20 @@
 package com.esei.grvidal.nighttime.data
 
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.DateCityDTO
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
+import com.esei.grvidal.nighttime.network.USER_URL
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.LocalDate
@@ -26,6 +33,9 @@ data class EventData(val id: Long, val date: String, val description: String, va
 class CalendarViewModel : ViewModel() {
 
     private var userToken = UserToken(-1, "")
+
+    // Strong reference point to avoid loosing them
+    private var targetList = mutableListOf<Target>()
 
     fun setUserToken(loggedUser: UserToken) {
 
@@ -67,7 +77,7 @@ class CalendarViewModel : ViewModel() {
     var userDays by mutableStateOf(listOf<MyDate>())
         private set
 
-    var userFriends by mutableStateOf(listOf<UserSnap>())
+    var userFriends by mutableStateOf(listOf<UserSnapImage>())
         private set
 
     private fun loadSelectedDate() {
@@ -77,7 +87,7 @@ class CalendarViewModel : ViewModel() {
         viewModelScope.launch {
             try {
 
-                val webResponse =  retrofitService.getPeopleAndEventsOnDateAsync(
+                val webResponse = retrofitService.getPeopleAndEventsOnDateAsync(
                     auth = userToken.token,
                     id = userToken.id,
                     day = selectedDate.day,
@@ -218,7 +228,10 @@ class CalendarViewModel : ViewModel() {
                 if (webResponse.isSuccessful) {
 
                     webResponse.body()?.let { data ->
-                        userFriends = data
+                        userFriends = data.map { userSnap ->
+                            userSnap.toUserSnapImage(null)
+                        }
+                        fetchPhotosUserSnap()
 
                     }
                     Log.d(
@@ -242,6 +255,82 @@ class CalendarViewModel : ViewModel() {
         }
     }
 
+    private suspend fun fetchPhotosUserSnap() {
+        Log.d(TAG, "fetchPhotosUserSnap starting to fetch photos")
+        for (user in userFriends) {
+
+            loadImage(
+                url = "$BASE_URL$USER_URL${user.userId}/photo",
+                userId = user.userId
+            )
+        }
+    }
+
+    private suspend fun loadImage(
+        url: String,
+        userId: Long,
+        picasso: Picasso = Picasso.get()
+    ) {
+
+        val target = object : Target {
+            override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+                Log.d(
+                    TAG,
+                    "fetchPhotos: onPrepareLoad: loading image user id $userId"
+                )
+            }
+
+            override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
+                //Handle the exception here
+                Log.d(TAG, "fetchPhotos: onBitmapFailed: error $e")
+                targetList.remove(this)
+            }
+
+            override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+
+
+                //Here we get the loaded image
+                Log.d(
+                    TAG,
+                    "fetchPhotos: onBitmapLoaded: Image fetched size ${bitmap?.byteCount} height ${bitmap?.height}, width ${bitmap?.width}"
+                )
+
+                bitmap?.let { img ->
+                    userFriends.filter { chat -> chat.userId == userId }.getOrNull(
+                        0
+                    )?.let { user ->
+
+                        // Recomposition is made when the setter of the list is called,
+                        // so we need to delete, edit (adding the picture) and re-add the element
+                        userFriends = userFriends.toMutableList().also {
+                            it.remove(user)
+                            user.img = img.asImageAsset()
+
+                        } + listOf(user)
+
+
+
+                        Log.d(
+                            TAG,
+                            "onBitmapLoaded: getting Image user $userId size ${img.byteCount} height ${img.height}, width ${img.width}"
+                        )
+                    }
+                }
+                targetList.remove(this)
+
+
+            }
+        }
+        targetList.add(target)
+
+        picasso
+            .load(url)
+            .resize(250, 250)
+            .centerCrop()
+            .into(target)
+
+    }
+
 
     /**
      * Set the selected day to show relative information like people and events,
@@ -250,7 +339,8 @@ class CalendarViewModel : ViewModel() {
     fun setDate(myDate: MyDate) {
 
         if (selectedDate.month != myDate.month)
-            calendar = ChipDayFactory.datesCreator(myDate) //Creates the calendar layout ( days of the week) from a day of a month
+            calendar =
+                ChipDayFactory.datesCreator(myDate) //Creates the calendar layout ( days of the week) from a day of a month
 
         selectedDate = myDate
         loadSelectedDate()
@@ -349,7 +439,10 @@ class CalendarViewModel : ViewModel() {
                 Log.e(TAG, "removeDateFromUserList: network exception (no network)  --//-- $e")
 
             } catch (e: Exception) {
-                Log.e(TAG, "removeDateFromUserList: general exception  --//-- $e --//--${e.stackTrace}")
+                Log.e(
+                    TAG,
+                    "removeDateFromUserList: general exception  --//-- $e --//--${e.stackTrace}"
+                )
 
 
             }
