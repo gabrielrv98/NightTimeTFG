@@ -252,9 +252,14 @@ private fun Localization(
 @Composable
 private fun BarSchedule(schedule: List<String>) {
     DetailView(title = stringResource(R.string.horario), icon = Icons.Outlined.Alarm,
-        titleToRight = { WeekSchedule(schedule) }
+        titleToRight = { WeekScheduleIcon(schedule) }
     ) {
-        Column {// todo switch to a table
+
+
+        Column(
+            modifier = Modifier.preferredWidth(250.dp)
+        ) {
+            Divider(thickness = 1.dp, color = AmbientContentColor.current.copy(alpha = 0.15f))
             DailySchedule(
                 day = stringResource(id = R.string.lunes),
                 schedule = if (schedule[0] != "") {

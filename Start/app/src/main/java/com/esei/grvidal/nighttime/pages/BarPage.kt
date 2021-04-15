@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,23 +29,6 @@ import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.data.BarViewModel
 import com.esei.grvidal.nighttime.navigateWithId
-
-
-data class Bar(val id: Int, val name: String, val description: String) {
-    var multimedia: List<Any>? = listOf(
-        Icons.Outlined.PartyMode,
-        Icons.Outlined.LocalDining,
-        Icons.Outlined.Photo,
-        Icons.Outlined.Photo,
-        Icons.Outlined.Dehaze,
-        Icons.Outlined.Photo,
-        Icons.Outlined.PartyMode,
-        Icons.Outlined.CompareArrows
-    )
-    lateinit var schedule: List<Boolean>
-    var time: String = "21:00 - 06:00"
-    var address: String = "Rúa Pizarro, 8, 32005 Ourense"
-}
 
 private const val TAG = "BarPage"
 
@@ -77,7 +58,10 @@ fun BarPage(navController: NavHostController, barVM: BarViewModel) {
             barVM.loadBarsOnCity()
         }
 
-        BarList(barVM.barList, state = state) {
+        BarList(
+            barVM.barList,
+            state = state
+        ) {
             val bar = it as BarDTO
             BarChip(
                 name = bar.name,
@@ -216,7 +200,7 @@ fun BarChip(
             )
 
             Spacer(Modifier.width(55.dp))
-            WeekSchedule(schedule = schedule)
+            WeekScheduleIcon(schedule = schedule)
 
         }
         Column(
@@ -236,15 +220,15 @@ fun BarChip(
  * @param schedule List of 7 booleans, each one represents if that day it's open
  */
 @Composable
-fun WeekSchedule(schedule: List<String>) {
+fun WeekScheduleIcon(schedule: List<String>) {
     Row {
-        DaySchedule(day = stringResource(id = R.string.lunes), schedule[0].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.martes), schedule[1].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.miercoles), schedule[2].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.jueves), schedule[3].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.viernes), schedule[4].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.sabado), schedule[5].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.domingo), schedule[6].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.lunes_abbreviation), schedule[0].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.martes_abbreviation), schedule[1].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.miercoles_abbreviation), schedule[2].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.jueves_abbreviation), schedule[3].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.viernes_abbreviation), schedule[4].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.sabado_abbreviation), schedule[5].isNotEmpty())
+        DaySchedule(day = stringResource(id = R.string.domingo_abbreviation), schedule[6].isNotEmpty())
     }
 }
 
@@ -253,10 +237,14 @@ fun WeekSchedule(schedule: List<String>) {
  */
 @Composable
 fun DailySchedule(day: String, schedule: String) {
-    Row {
-        Text(text = "$day- ")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = day)
         Text(schedule)
     }
+    Divider(thickness = 1.dp, color = AmbientContentColor.current.copy(alpha = 0.15f))
 }
 
 /**
