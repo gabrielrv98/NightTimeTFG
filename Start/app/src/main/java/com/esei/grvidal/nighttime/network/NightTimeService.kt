@@ -16,6 +16,8 @@ const val BASE_URL = "http://192.168.1.11:8080/api/v1/"
 const val USER_URL = "user/"
 const val BAR_URL = "bar/"
 
+const val ERROR_HEADER_TAG = "error"
+
 @JsonClass(generateAdapter = true)
 data class DateCityDTO(
     val nextDate: String,
@@ -48,7 +50,9 @@ interface NightTimeService {
 
     // Login
     @POST(USER_URL + "login/")
-    suspend fun loginAsync(@Header("username") username: String, @Header("password") password: String) : Response<Any>
+    suspend fun loginAsync(
+        @Header("username") username: String, @Header("password") password: String
+    ) : Response<Any>
 
     // City
     @GET(USER_URL + "cities/")
@@ -139,5 +143,27 @@ interface NightTimeService {
     suspend fun newUser(
         @Body user: UserDTOInsert
     ): Response<Boolean>
+
+    @GET("$USER_URL/{idUser}/chat")
+    suspend fun getChats(
+        @Header("auth") auth: String,
+        @Path("idUser") id: Long
+    ): Response<List<ChatView>>
+
+    @GET(USER_URL+"search/{userNickname}")
+    suspend fun searchUsers(
+        @Path("userNickname") string: String,
+        @Query("page") page: Int = 0
+    ): Response<List<UserSnap>>
+
+    /*
+    @POST("$USER_URL/{idUser}/friends")
+    suspend fun addUserRequest(
+        @Header("auth") auth: String,
+        @Path("idUser") id: Long,
+        @Body friendship : FriendshipInsertRequest
+    ): Response<List<ChatView>>
+
+     */
 
 }
