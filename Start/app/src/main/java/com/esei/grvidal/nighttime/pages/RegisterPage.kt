@@ -266,7 +266,7 @@ fun RegisterScreen(
             onClick = { register() },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Confirm")//todo hardcoded
+            Text(stringResource(id = R.string.confirm))
         }
     }
 }

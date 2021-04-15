@@ -36,7 +36,7 @@ class LoginViewModel(
     var loggingState by mutableStateOf(LoginState.LOADING)
         private set
 
-    var credentialsChecked by mutableStateOf(false) // todo creo que puede ser una variable normal
+    var credentialsChecked  = false
         private set
 
 
@@ -82,7 +82,7 @@ class LoginViewModel(
     }
 
     /**
-     * Sets the value of the loggedUser with the respond of NightTime Api.//todo remake
+     * Sets the value of the loggedUser with the respond of NightTime Api.
      */
     private suspend fun fetchLoginData(): LoginData {
 

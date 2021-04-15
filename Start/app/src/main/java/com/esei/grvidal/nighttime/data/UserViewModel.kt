@@ -233,7 +233,6 @@ class UserViewModel : ViewModel() {
             .load("$BASE_URL$USER_URL$userId/photo")
             .resize(500, 500)
             .centerCrop()
-            //.fit() // todo try this
             .into(
                 object : Target {
                     override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
@@ -258,7 +257,7 @@ class UserViewModel : ViewModel() {
                             //Here we get the loaded image
                             Log.d(
                                 TAG,
-                                "fetchPhotos: onBitmapLoaded: Image fetched size ${img.byteCount} height ${img.height}, width ${img.width}"
+                                "fetchPhotos: onBitmapLoaded: Image fetched user $userId size ${img.byteCount} height ${img.height}, width ${img.width}"
                             )
                             photoState = PhotoState.DONE
                             userPicture = img.asImageAsset()
@@ -410,11 +409,11 @@ class UserViewModel : ViewModel() {
                 val token = headers.get("token") ?: ""
 
 
-                if(id == -1L || token.isBlank()) {
+                if (id == -1L || token.isBlank()) {
 
                     errorText = "Unexpected error, contact with admin"
 
-                }else{
+                } else {
                     userToken = UserToken(id, token)
                     errorText = ""
 
@@ -422,7 +421,7 @@ class UserViewModel : ViewModel() {
                         updatePicture(File(it))
                     }
                     eraseData()
-                    loginFunction(username.text,password.text)
+                    loginFunction(username.text, password.text)
                 }
 
             } else if (webResponse.code() == 208) { // User nickname repeated
@@ -430,7 +429,7 @@ class UserViewModel : ViewModel() {
                 Log.d(TAG, "newUser: User refused, nickname already in use")
                 errorText = "Nombre de usuario en uso"
 
-            }else {
+            } else {
                 Log.d(TAG, "newUser: response code ${webResponse.code()}")
                 errorText = webResponse.headers()["error"] ?: "Error desconocido"
             }

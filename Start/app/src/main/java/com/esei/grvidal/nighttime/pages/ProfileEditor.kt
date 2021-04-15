@@ -232,7 +232,7 @@ fun ProfileEditorScreen(
 
         TextChanger(
             title = stringResource(id = R.string.display_name),
-            focusRequester = remember { FocusRequester() },
+            focusRequester = focusRequester,
             canContainSpace = true,
             value = name,
             setValue = setName
@@ -396,12 +396,12 @@ private fun IconButtonEditProfile(
 }
 
 
-@ExperimentalFocus
+@OptIn(ExperimentalFocus::class)
 @Composable
 fun TextChanger(
     modifier: Modifier = Modifier,
     title: String,
-    focusRequester: FocusRequester,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     canBeEmpty: Boolean = false,
     canContainSpace: Boolean = false,
     isPassword: Boolean = false,
@@ -413,12 +413,12 @@ fun TextChanger(
 
     Column(
         modifier = modifier.padding(horizontal = 24.dp)
-            .padding(bottom = 6.dp, top = 6.dp)
+            .padding(vertical = 6.dp)
     ) {
         Row {
             Text(text = title)
             if (!canBeEmpty) {
-                Advert(value.text, Modifier.align(Alignment.Bottom))
+                Advert(value.text.isBlank(),Modifier.align(Alignment.Bottom))
             }
         }
 
@@ -475,7 +475,7 @@ fun TextWithInputPassword(
 ) {
     /**
      * Beta versions
-     * todo update
+     * todo update for greater than beta01
      * https://stackoverflow.com/questions/66376112/hoist-pressed-state-in-jetpack-compose-beta-1-after-interactionstate-was-removed
      */
     val interactionState =
@@ -499,31 +499,29 @@ fun TextWithInputPassword(
 
 
         Icon(
-            asset = if (showPassword) Icons.Default.Visibility
-            else Icons.Default.VisibilityOff,
             modifier = modifier
                 .clip(CircleShape)
                 .clickable(
                     onClick = {},
                     interactionState = interactionState
-                )
-
+                ),
+            asset = if (showPassword) Icons.Default.Visibility
+                else Icons.Default.VisibilityOff,
         )
-
-
     }
 }
 
 
 @Composable
-fun Advert(text: String, modifier: Modifier) {
+fun Advert(isBlank: Boolean, modifier: Modifier) {
     ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
         Text(
             modifier = modifier.padding(start = 6.dp),
             style = MaterialTheme.typography.subtitle1,
             fontSize = 12.sp,
             text = "*" + stringResource(id = R.string.cant_be_empty),
-            color = if (text.isBlank()) MaterialTheme.colors.error else MaterialTheme.colors.onSurface
+            color = if (isBlank) MaterialTheme.colors.error
+                else MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
         )
     }
 }

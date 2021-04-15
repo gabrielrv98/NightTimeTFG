@@ -233,7 +233,7 @@ fun ProfileHeader(
                     }
                     PhotoState.DONE -> {
 
-                        Icon( asset =  Icons.Default.Person.copy(defaultHeight = 500.dp, defaultWidth = 500.dp))//todo hack way to change the size
+                        Icon( asset =  Icons.Default.Person.copy(defaultHeight = 500.dp, defaultWidth = 500.dp))
 
                     }
                 }

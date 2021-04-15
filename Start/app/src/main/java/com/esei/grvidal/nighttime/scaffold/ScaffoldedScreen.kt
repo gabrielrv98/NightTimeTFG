@@ -22,7 +22,7 @@ import com.esei.grvidal.nighttime.data.City
  */
 @Composable
 fun ScreenScaffolded(
-    modifier : Modifier = Modifier.padding(bottom = 57.dp),//TODO Bottom padding of the size of the bottomBar
+    modifier : Modifier = Modifier.padding(bottom = 57.dp),
     bottomBar: @Composable () -> Unit = { },
     topBar: @Composable () -> Unit = { },
     content: @Composable () -> Unit,
