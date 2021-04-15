@@ -227,12 +227,6 @@ class BarViewModel : ViewModel() {
         }
     }
 
-    fun addImage(img: Bitmap?) {
-        img?.let {
-            Log.d(TAG, "addImage: Adding img number ${barSelectedPhotos.size + 1}")
-            barSelectedPhotos = barSelectedPhotos + listOf(img.asImageAsset())
-        }
-    }
 
 
     fun eraseSelectedBar() {
@@ -247,7 +241,6 @@ class BarViewModel : ViewModel() {
     fun fetchPhotos() {
 
         if (nPhotos < totalNPhotos) {
-            val picasso = Picasso.get()
             var url: String
             var nextId: Int
 
@@ -265,13 +258,14 @@ class BarViewModel : ViewModel() {
                 url = BASE_URL + BAR_URL + selectedBar.id + "/photo/$nextId"
                 Log.d(TAG, "ShowDetails: url $url")
 
-                loadImage(url,picasso = picasso)
+                loadImage(url)
 
             }
         }
     }
 
-    private fun loadImage(url: String, picasso: Picasso){
+    private fun loadImage(url: String ){
+        val picasso = Picasso.get()
 
         val target = object : Target {
             override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
@@ -289,11 +283,15 @@ class BarViewModel : ViewModel() {
             override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
 
                 //Here we get the loaded image
-                Log.d(
-                    TAG,
-                    "fetchPhotos: onBitmapLoaded: Image fetched size ${barSelectedPhotos.size}"
-                )
-                addImage(bitmap)
+
+                bitmap?.let { img->
+                    Log.d(
+                        TAG,
+                        "fetchPhotos: onBitmapLoaded: Image fetched size ${barSelectedPhotos.size }, size ${img.byteCount} height ${img.height}, width ${img.width}"
+                    )
+                    barSelectedPhotos = barSelectedPhotos + listOf(img.asImageAsset())
+                }
+
                 targetList.remove(this)
 
             }
@@ -302,7 +300,10 @@ class BarViewModel : ViewModel() {
 
         picasso
             .load(url)
+            .resize(250, 250)
+            .centerCrop()
             .into(target)
+
 
     }
 
