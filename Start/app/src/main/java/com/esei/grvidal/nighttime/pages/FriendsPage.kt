@@ -3,7 +3,6 @@ package com.esei.grvidal.nighttime.pages
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Text
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
@@ -128,9 +127,8 @@ fun ChatEntry(
             ) {
                 Log.d(
                     TAG,
-                    "ChatEntry, timeing: lasRecomposition user $userName, img ${img != null} "
+                    "ChatEntry, timing: lasRecomposition user $userName, img ${img != null} "
                 )
-
 
                 img?.let {
                     Image(
@@ -206,16 +204,16 @@ fun FriendsSearch(
 fun previewSearch() {
     MaterialTheme {
         FriendsSearch(addUser = {}, onSearch = {}, users = listOf(
-            UserSnapImage(1, "Nuria", "pinknut", null),
-            UserSnapImage(1, "Miguel", "emikepick", null),
-            UserSnapImage(1, "Maria", "dulceFlor", null),
-            UserSnapImage(1, "Marcos", "Tigre", null),
-            UserSnapImage(1, "Laura", "laux21", null),
-            UserSnapImage(1, "Sara", "saraaldo", null),
-            UserSnapImage(1, "Julio", "itsme", null),
-            UserSnapImage(1, "Juan", "john32", null),
-            UserSnapImage(1, "Pedro", "pcsantiago", null),
-            UserSnapImage(1, "Salva", "Salvador", null)
+            UserSnapImage(1, "Nuria", "pinknut", false,null),
+            UserSnapImage(1, "Miguel", "emikepick", false,null),
+            UserSnapImage(1, "Maria", "dulceFlor", false,null),
+            UserSnapImage(1, "Marcos", "Tigre", false,null),
+            UserSnapImage(1, "Laura", "laux21", false,null),
+            UserSnapImage(1, "Sara", "saraaldo", false,null),
+            UserSnapImage(1, "Julio", "itsme", false,null),
+            UserSnapImage(1, "Juan", "john32", false,null),
+            UserSnapImage(1, "Pedro", "pcsantiago", false,null),
+            UserSnapImage(1, "Salva", "Salvador", false,null)
         )
         )
     }

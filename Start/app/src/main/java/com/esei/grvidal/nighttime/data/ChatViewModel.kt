@@ -21,6 +21,7 @@ data class ChatView(
     val friendshipId: Long,
     val userId: Long,
     val userNickname: String,
+    val hasImage: Boolean,
     val messages: List<MessageView>
 )
 
@@ -31,6 +32,7 @@ fun ChatView.toFullView(
         friendshipId,
         userId,
         userNickname,
+        hasImage,
         messages,
         img
     )
@@ -48,6 +50,7 @@ data class ChatFullView(
     val friendshipId: Long,
     val userId: Long,
     val userNickname: String,
+    val hasImage: Boolean,
     val messages: List<MessageView>,
     var img: ImageAsset?
 )
@@ -100,7 +103,7 @@ class ChatViewModel : ViewModel() {
                     }
 
                 }
-                fetchPhotos()
+                fetchPhotosChat()
 
             } else Log.d(TAG, "getChats: ${webResponse.headers()[ERROR_HEADER_TAG]}")
 
@@ -112,21 +115,23 @@ class ChatViewModel : ViewModel() {
         }
     }
 
-    private suspend fun fetchPhotos() {
+    private suspend fun fetchPhotosChat() {
 
-        Log.d(TAG, "fetchPhotos starting to fetch photos")
+        Log.d(TAG, "fetchPhotosChat starting to fetch photos")
         for (chat in chatList) {
 
-            loadImage(
-                url = "$BASE_URL$USER_URL${chat.userId}/photo",
-                userId = chat.userId
-            )
+            if(chat.hasImage) {
+                loadImageChat(
+                    url = "$BASE_URL$USER_URL${chat.userId}/photo",
+                    userId = chat.userId
+                )
+            }
         }
 
     }
 
 
-    private suspend fun loadImage(
+    private suspend fun loadImageChat(
         url: String,
         userId: Long,
         picasso: Picasso = Picasso.get()
@@ -192,42 +197,114 @@ class ChatViewModel : ViewModel() {
     }
 
     fun searchUsers(username: String) = viewModelScope.launch {
-        try {
+        if (username.isBlank()) {
+            userList = listOf()
+        } else {
+            try {
 
-            Log.d(TAG, "searchUsers: Ready to search users that start with $username")
+                Log.d(TAG, "searchUsers: Ready to search users that start with $username")
 
-            val webResponse = retrofitService.searchUsers(username)
+                val webResponse = retrofitService.searchUsers(username)
 
-            if (webResponse.isSuccessful) {
-                webResponse.body()?.let { userSnap ->
-                    Log.d(TAG, "searchUsers: Users fetched = $userSnap")
+                if (webResponse.isSuccessful) {
+                    webResponse.body()?.let { userSnap ->
+                        Log.d(TAG, "searchUsers: Users fetched = $userSnap")
 
-                    userList = userSnap.map {
-                        it.toUserSnapImage(null)
+                        userList = userSnap.map {
+                            it.toUserSnapImage(null)
+                        }
+
+                        fetchPhotosUserSnap()
                     }
-
-                    fetchPhotosUserSnap()
                 }
+
+
+            } catch (e: IOException) {
+                Log.e(TAG, "searchUsers: network exception (no network)  --//-- $e")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "searchUsers: general exception  --//-- $e")
             }
-
-
-        } catch (e: IOException) {
-            Log.e(TAG, "searchUsers: network exception (no network)  --//-- $e")
-
-        } catch (e: Exception) {
-            Log.e(TAG, "searchUsers: general exception  --//-- $e")
         }
+
     }
 
     private suspend fun fetchPhotosUserSnap() {
         Log.d(TAG, "fetchPhotosUserSnap starting to fetch photos")
         for (user in userList) {
 
-            loadImage(
-                url = "$BASE_URL$USER_URL${user.userId}/photo",
-                userId = user.userId
-            )
+            if (user.hasImage) {
+                loadImageUser(
+                    url = "$BASE_URL$USER_URL${user.userId}/photo",
+                    userId = user.userId
+                )
+            }
         }
+    }
+
+    private suspend fun loadImageUser(
+        url: String,
+        userId: Long,
+        picasso: Picasso = Picasso.get()
+    ) {
+
+        val target = object : Target {
+            override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+                Log.d(
+                    TAG,
+                    "fetchPhotos: onPrepareLoad: loading image user id $userId"
+                )
+            }
+
+            override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
+                //Handle the exception here
+                Log.d(TAG, "fetchPhotos: onBitmapFailed: error $e")
+                targetList.remove(this)
+            }
+
+            override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+
+
+                //Here we get the loaded image
+                Log.d(
+                    TAG,
+                    "fetchPhotos: onBitmapLoaded: Image fetched size ${bitmap?.byteCount} height ${bitmap?.height}, width ${bitmap?.width}"
+                )
+
+                bitmap?.let { img ->
+                    userList.filter { chat -> chat.userId == userId }.getOrNull(
+                        0
+                    )?.let { user ->
+
+                        // Recomposition is made when the setter of the list is called,
+                        // so we need to delete, edit (adding the picture) and re-add the element
+                        userList = userList.toMutableList().also {
+                            it.remove(user)
+                            user.img = img.asImageAsset()
+
+                        } + listOf(user)
+
+
+
+                        Log.d(
+                            TAG,
+                            "onBitmapLoaded: getting Image user $userId size ${img.byteCount} height ${img.height}, width ${img.width}"
+                        )
+                    }
+                }
+                targetList.remove(this)
+
+
+            }
+        }
+        targetList.add(target)
+
+        picasso
+            .load(url)
+            .resize(250, 250)
+            .centerCrop()
+            .into(target)
+
     }
 
     fun addUser(

@@ -259,10 +259,12 @@ class CalendarViewModel : ViewModel() {
         Log.d(TAG, "fetchPhotosUserSnap starting to fetch photos")
         for (user in userFriends) {
 
-            loadImage(
-                url = "$BASE_URL$USER_URL${user.userId}/photo",
-                userId = user.userId
-            )
+            if (user.hasImage) {
+                loadImage(
+                    url = "$BASE_URL$USER_URL${user.userId}/photo",
+                    userId = user.userId
+                )
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package com.esei.grvidal.nighttime.data
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.ImageAsset
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,49 +17,32 @@ data class UserToken(
 data class UserSnap(
     val userId: Long,
     val username: String,
-    val realname: String
+    val name: String,
+    val image: Boolean
+){
+    fun toUserSnapImage(
+        img: ImageAsset? = null
+    ): UserSnapImage {
+        return UserSnapImage(
+            this.userId,
+            this.username,
+            this.name,
+            this.image,
+            img
+        )
+    }
+}
+
+data class UserSnapImage(
+    val userId: Long,
+    val username: String,
+    val name: String,
+    val hasImage: Boolean,
+    var img: ImageAsset?
 )
 
-//Todo try to use them in the future
 
-class ProfileViewModel : ViewModel() {
 
-    private var userId: Int = 99
-
-    fun setUserId(newUserId: Int?) {
-        if (newUserId != userId) {
-            userId = newUserId ?: meUser.id
-        }
-        _userData.value =
-            if (userId == meUser.id) meUser.toProfileScreenState() else userPreview.toProfileScreenState()
-    }
-
-    private val _userData = MutableLiveData<ProfileScreenState>()
-    val userData: LiveData<ProfileScreenState> = _userData
-}
-
-@Immutable
-data class ProfileScreenState(
-    val id: Int,
-    @DrawableRes val photo: Int?,
-    val name: String,
-    val nickname: String,
-    val status: String,
-    var nextDate: MyDate? = null
-) {
-    fun isMe() = id == meUser.id
-}
-
-fun User.toProfileScreenState(): ProfileScreenState {
-    return ProfileScreenState(
-        id = this.id,
-        name = this.name,
-        nickname = this.nickname,
-        status = this.status,
-        nextDate = this.nextDate,
-        photo = this.photo
-    )
-}
 
 //here ends the copied code
 
