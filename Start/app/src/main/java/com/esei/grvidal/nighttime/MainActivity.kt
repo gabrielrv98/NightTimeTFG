@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private val barVM by viewModels<BarViewModel>()
     private val calendarVM by viewModels<CalendarViewModel>()
     private val userVM by viewModels<UserViewModel>()
+    private val chatVM by viewModels<ChatViewModel>()
 
     /** This ViewModels need arguments in their constructors so we need to
      * use a Fabric to return a lazy initialization of the ViewModel
@@ -106,6 +108,7 @@ class MainActivity : AppCompatActivity() {
 
                         calendarVM.setUserToken(loginVM.loggedUser)
                         userVM.setUserToken(loginVM.loggedUser)
+                        chatVM.setUserToken(loginVM.loggedUser)
 
                         Log.d(TAG, "onCreate: pulling MainScreen")
                         MainScreen(
@@ -114,6 +117,7 @@ class MainActivity : AppCompatActivity() {
                             cityVM,
                             calendarVM,
                             barVM,
+                            chatVM,
                             searchImage = { selectImageLauncher.launch("image/*") }
                         )
 
@@ -130,6 +134,7 @@ class MainActivity : AppCompatActivity() {
                                 cityVM,
                                 calendarVM,
                                 barVM,
+                                chatVM,
                                 searchImage = { selectImageLauncher.launch("image/*") }
                             )
                         } else {
@@ -204,9 +209,8 @@ private fun MainScreen(
     cityVM: CityViewModel,
     calendarVM: CalendarViewModel,
     barVM: BarViewModel,
-    searchImage: () -> Unit,
-    //chat : ChatViewModel,
-    //onAddItem: (Message) -> Unit,
+    chatVM : ChatViewModel,
+    searchImage: () -> Unit
 ) {
 /* Actual Navigation system
         https://proandroiddev.com/implement-bottom-bar-navigation-in-jetpack-compose-b530b1cd9ee2
@@ -296,10 +300,17 @@ Navigation with their own files ( no dependencies )
         composable(BottomNavigationScreens.FriendsNav.route) {
 
             ScreenScaffolded(
-                topBar = { TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) }) },
+                topBar = {
+
+                    TopBarConstructor(
+                        buttonText = "",
+                        icon = Icons.Default.PersonAdd,
+                        action = { chatVM.setDialog(true) },
+                    )
+                     },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                FriendsPageView(navController)
+                FriendsPage(navController,chatVM)
             }
         }
 
