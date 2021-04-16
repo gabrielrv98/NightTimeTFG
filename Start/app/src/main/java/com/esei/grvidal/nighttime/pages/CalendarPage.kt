@@ -140,7 +140,7 @@ private fun CalendarScreen(
                 friends = friends.toString(),
                 showFriends = setShowDialog,
                 OnChooseDateClick = {
-                    if(!userSelectedDates.contains(selectedDate))
+                    if (!userSelectedDates.contains(selectedDate))
                         addUserSelectedDate(selectedDate)
                     else removeUserSelectedDate(selectedDate)
                 },
@@ -153,7 +153,7 @@ private fun CalendarScreen(
                 events = {
 
                     events.forEach { event ->
-                        Event(event.barName,event.description)
+                        Event(event.barName, event.description)
                     }
                 }
             )
@@ -239,18 +239,28 @@ fun CalendarPageView(
 fun FriendlyUsersDialog(
     itemsUser: List<UserSnapImage>,
     modifier: Modifier = Modifier,
-    state: LazyListState =  rememberLazyListState(),
-    buttonRight: (@Composable (Long) -> Unit)? = null
+    state: LazyListState = rememberLazyListState(),
+    onClick: ((Long) -> Unit)? = null
 ) {
+
     //List with the users
     LazyColumnFor(
         items = itemsUser,
         modifier = modifier,
         state = state
-    ) { user->
+    ) { user ->
+
+        val modifierUser = if (onClick != null)
+            Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(onClick = { onClick(user.userId ) } )
+            else Modifier
+
         //Each user
         Row(
-            modifier = Modifier.padding(vertical = 12.dp)
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 14.dp)
+                .then(modifierUser)
         ) {
             //Image
             Surface(
@@ -258,7 +268,7 @@ fun FriendlyUsersDialog(
                 shape = CircleShape,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
             ) {
-                user.img?.let{
+                user.img?.let {
                     Image(asset = it)
                 } ?: Icon(asset = Icons.Default.Person)
 
@@ -270,11 +280,9 @@ fun FriendlyUsersDialog(
                     .padding(start = 8.dp)
                     .align(Alignment.CenterVertically)
             ) {
-                Text(text ="${user.username} - ${user.name}")
+                Text(text = "${user.username} - ${user.name}")
             }
-            if (buttonRight != null) {
-                buttonRight(user.userId)
-            }
+
         }
     }
 
@@ -306,7 +314,7 @@ fun CalendarWindow(
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 6.dp)
-            .animateContentSize() // automatically animate size when it changes
+                .animateContentSize() // automatically animate size when it changes
         ) {
 
             //Header of the Calendar
@@ -408,12 +416,13 @@ fun CalendarWindow(
                             }
 
                             override fun onDrag(dragDistance: Offset): Offset {
-                                Log.d( TAG,
+                                Log.d(
+                                    TAG,
                                     "gesture onDrag: offset { x = ${dragDistance.x} , y = ${dragDistance.y}}"
                                 )
 
                                 var (x, _) = dragDistance
-                                if(value) {
+                                if (value) {
                                     when {
                                         x > sensibility -> {
                                             Log.d(TAG, "gesture previous month")
@@ -826,10 +835,10 @@ fun CalendarWindowPreview() {
                 buttonText = stringResource(id = R.string.elegirDia),
                 events = {
 
-                            Event("bar1", "description 1")
-                            Event("bar2", "description 2")
-                            Event("bar3", "description 3")
-                            Event("bar4", "description 4")
+                    Event("bar1", "description 1")
+                    Event("bar2", "description 2")
+                    Event("bar3", "description 3")
+                    Event("bar4", "description 4")
 
                 },
                 selectDateEnable = true,
@@ -853,32 +862,32 @@ fun CalendarPreview() {
 fun DialogPreview() {
     val userList =
         listOf(
-            UserSnapImage( 1,"Nuria","pinknut",false,null),
-            UserSnapImage( 1,"Miguel","emikepick",false,null),
-            UserSnapImage(1,"Maria","dulceFlor",false,null),
-            UserSnapImage( 1,"Marcos","Tigre",false,null),
-            UserSnapImage( 1,"Laura","laux21",false,null),
-            UserSnapImage( 1,"Sara","saraaldo",false,null),
-            UserSnapImage( 1,"Julio","itsme",false,null),
-            UserSnapImage( 1,"Juan","john32",false,null),
-            UserSnapImage( 1,"Pedro","pcsantiago",false,null),
-            UserSnapImage( 1,"Salva","Salvador",false,null),
-            UserSnapImage( 1,"Gabriel","grvidal",false,null),
-            UserSnapImage( 1,"Jose","JS",false,null),
-            UserSnapImage( 1,"Emma","EmmaSant",false,null),
-            UserSnapImage( 1,"Santi","santii810",false,null),
-            UserSnapImage( 1,"Filo","erfilo",false,null),
-            UserSnapImage( 1,"Nuria","pinknut",false,null),
-            UserSnapImage( 1,"Miguel","emikepick",false,null),
-            UserSnapImage(1,"Maria","dulceFlor",false,null),
-            UserSnapImage( 1,"Marcos","Tigre",false,null),
-            UserSnapImage( 1,"Laura","laux21",false,null),
-            UserSnapImage( 1,"Sara","saraaldo",false,null),
-            UserSnapImage( 1,"Julio","itsme",false,null),
-            UserSnapImage( 1,"Juan","john32",false,null),
-            UserSnapImage( 1,"Pedro","pcsantiago",false,null),
-            UserSnapImage( 1,"Salva","Salvador",false,null),
-            UserSnapImage( 1,"Gabriel","grvidal",false,null),
+            UserSnapImage(1, "Nuria", "pinknut", false, null),
+            UserSnapImage(1, "Miguel", "emikepick", false, null),
+            UserSnapImage(1, "Maria", "dulceFlor", false, null),
+            UserSnapImage(1, "Marcos", "Tigre", false, null),
+            UserSnapImage(1, "Laura", "laux21", false, null),
+            UserSnapImage(1, "Sara", "saraaldo", false, null),
+            UserSnapImage(1, "Julio", "itsme", false, null),
+            UserSnapImage(1, "Juan", "john32", false, null),
+            UserSnapImage(1, "Pedro", "pcsantiago", false, null),
+            UserSnapImage(1, "Salva", "Salvador", false, null),
+            UserSnapImage(1, "Gabriel", "grvidal", false, null),
+            UserSnapImage(1, "Jose", "JS", false, null),
+            UserSnapImage(1, "Emma", "EmmaSant", false, null),
+            UserSnapImage(1, "Santi", "santii810", false, null),
+            UserSnapImage(1, "Filo", "erfilo", false, null),
+            UserSnapImage(1, "Nuria", "pinknut", false, null),
+            UserSnapImage(1, "Miguel", "emikepick", false, null),
+            UserSnapImage(1, "Maria", "dulceFlor", false, null),
+            UserSnapImage(1, "Marcos", "Tigre", false, null),
+            UserSnapImage(1, "Laura", "laux21", false, null),
+            UserSnapImage(1, "Sara", "saraaldo", false, null),
+            UserSnapImage(1, "Julio", "itsme", false, null),
+            UserSnapImage(1, "Juan", "john32", false, null),
+            UserSnapImage(1, "Pedro", "pcsantiago", false, null),
+            UserSnapImage(1, "Salva", "Salvador", false, null),
+            UserSnapImage(1, "Gabriel", "grvidal", false, null),
         )
     NightTimeTheme {
 

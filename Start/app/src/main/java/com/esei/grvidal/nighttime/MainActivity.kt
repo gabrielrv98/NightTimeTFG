@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -297,14 +297,14 @@ Navigation with their own files ( no dependencies )
 
         }
 
-        composable(BottomNavigationScreens.FriendsNav.route) {
+        composable(BottomNavigationScreens.FriendsNav.route) { //Friends
 
             ScreenScaffolded(
                 topBar = {
 
                     TopBarConstructor(
                         buttonText = "",
-                        icon = Icons.Default.PersonAdd,
+                        icon = Icons.Default.PersonSearch,
                         action = { chatVM.setDialog(true) },
                     )
                      },
@@ -315,7 +315,7 @@ Navigation with their own files ( no dependencies )
         }
 
         composable(
-            NavigationScreens.ChatConversation.route + "/{ChatId}",
+            NavigationScreens.ChatConversation.route + "/{ChatId}",  // Specified chat
             arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
         ) { backStackEntry ->
             ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))

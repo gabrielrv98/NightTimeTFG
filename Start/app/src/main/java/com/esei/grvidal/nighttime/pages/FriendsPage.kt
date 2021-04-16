@@ -34,6 +34,7 @@ import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.navigateWithId
+import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 
 
 private const val TAG = "FriendsPage"
@@ -57,8 +58,14 @@ fun FriendsPage(navController: NavHostController, chatVM: ChatViewModel) {
             onClose = { chatVM.setDialog(false) }
         ) {
             FriendsSearch(
-                addUser = chatVM::addUser,
                 onSearch = chatVM::searchUsers,
+                onClick = { userId ->
+                    navController.navigateWithId(
+                        BottomNavigationScreens.ProfileNav.route,
+                        userId
+                    )
+
+                },
                 users = chatVM.userList
             )
         }
@@ -157,8 +164,8 @@ fun ChatEntry(
 
 @Composable
 fun FriendsSearch(
-    addUser: (Long) -> Unit,
     onSearch: (String) -> Unit,
+    onClick: (Long) -> Unit,
     users: List<UserSnapImage>
 ) {
 
@@ -183,19 +190,11 @@ fun FriendsSearch(
 
         FriendlyUsersDialog(
             itemsUser = users,
-            state = state
+            state = state,
+            onClick = onClick
         )
-        /*{ userId ->
-            Icon(
-                asset = Icons.Rounded.PersonAdd,
-                modifier = Modifier
-                    .clickable(onClick = {
-                        addUser(userId)
-                    })
-            )
-        }
-         //todo Composable doesn't show on screen it might be down
-         */
+
+
     }
 }
 
@@ -203,17 +202,17 @@ fun FriendsSearch(
 @Composable
 fun previewSearch() {
     MaterialTheme {
-        FriendsSearch(addUser = {}, onSearch = {}, users = listOf(
-            UserSnapImage(1, "Nuria", "pinknut", false,null),
-            UserSnapImage(1, "Miguel", "emikepick", false,null),
-            UserSnapImage(1, "Maria", "dulceFlor", false,null),
-            UserSnapImage(1, "Marcos", "Tigre", false,null),
-            UserSnapImage(1, "Laura", "laux21", false,null),
-            UserSnapImage(1, "Sara", "saraaldo", false,null),
-            UserSnapImage(1, "Julio", "itsme", false,null),
-            UserSnapImage(1, "Juan", "john32", false,null),
-            UserSnapImage(1, "Pedro", "pcsantiago", false,null),
-            UserSnapImage(1, "Salva", "Salvador", false,null)
+        FriendsSearch(onClick = {}, onSearch = {}, users = listOf(
+            UserSnapImage(1, "Nuria", "pinknut", false, null),
+            UserSnapImage(1, "Miguel", "emikepick", false, null),
+            UserSnapImage(1, "Maria", "dulceFlor", false, null),
+            UserSnapImage(1, "Marcos", "Tigre", false, null),
+            UserSnapImage(1, "Laura", "laux21", false, null),
+            UserSnapImage(1, "Sara", "saraaldo", false, null),
+            UserSnapImage(1, "Julio", "itsme", false, null),
+            UserSnapImage(1, "Juan", "john32", false, null),
+            UserSnapImage(1, "Pedro", "pcsantiago", false, null),
+            UserSnapImage(1, "Salva", "Salvador", false, null)
         )
         )
     }
