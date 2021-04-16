@@ -113,9 +113,10 @@ interface NightTimeService {
         @Path("id") id: Long
     ): Response<BarDetailsDTO>
 
-    @GET("$USER_URL{idUser}")
+    @GET("$USER_URL{idUserDetails}")
     suspend fun getUserDetails(
-        @Path("idUser") id: Long
+        @Path("idUserDetails") id: Long,
+        @HeaderMap headers: Map<String, String>
     ): Response<UserDTO>
 
     @GET("$USER_URL{idUser}/private")
@@ -156,14 +157,19 @@ interface NightTimeService {
         @Query("page") page: Int = 0
     ): Response<List<UserSnap>>
 
-    /*
-    @POST("$USER_URL/{idUser}/friends")
-    suspend fun addUserRequest(
+    @DELETE("$USER_URL{id}/friends/{idFriend}")
+    suspend fun removeFriendship(
+        @Path("id") id: Long,
+        @Header("auth") auth: String,
+        @Path("idFriend") idFriend: Long,
+    ): Response<Any>
+
+    @POST("$USER_URL/{idUser}/friends/{idFriend}")
+    suspend fun addFriendshipRequest(
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
-        @Body friendship : FriendshipInsertRequest
-    ): Response<List<ChatView>>
+        @Path("idFriend") idFriend: Long,
+    ): Response<Any>
 
-     */
 
 }

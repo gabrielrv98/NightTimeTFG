@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.pages
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.*
@@ -8,13 +9,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Chat
-import androidx.compose.material.icons.outlined.Create
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
-import androidx.compose.runtime.onCommit
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.WithConstraints
@@ -33,7 +30,7 @@ import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
-import com.esei.grvidal.nighttime.navigateWithId
+import com.esei.grvidal.nighttime.network.AnswerOptions
 
 
 private const val TAG = "ProfilePage"
@@ -59,6 +56,24 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
 
             }
         }
+        val friendshipState = remember{ mutableStateOf (userVM.user.friendshipState)}
+        val (deleteFriendshipDialog, setDeleteFriendshipDialog) = remember { mutableStateOf(false) }
+
+        val context = ContextAmbient.current.applicationContext
+
+        if (deleteFriendshipDialog) {
+            DialogFriendship(
+                setShowDialog = setDeleteFriendshipDialog,
+                userName = userVM.user.name,
+                context = context,
+                deleteFriendship = {
+                    userVM.removeFriendShip(userId)
+                    friendshipState.value = AnswerOptions.NO
+                }
+            )
+        }
+
+
 
         ProfilePage(
             name = userVM.user.name,
@@ -68,23 +83,88 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
             img = userVM.userPicture,
             photoState = userVM.photoState,
             isMe = userId == userVM.getMyId(),
+            friendshipState = friendshipState.value,
             onClick = if (userId == userVM.getMyId()) {
+
+                //Profile is showing the own client
                 {
                     userVM.lock = true
                     navController.navigate(NavigationScreens.ProfileEditor.route)
                 }
-            } else {
-                {
-                    navController.navigateWithId(
-                        NavigationScreens.ChatConversation.route,
-                        userId
-                    )
-                }
+
+            } // Profile is showing someone else
+             else {
+
+                    // If client user and shown user are friends
+                    //when (userVM.user.friendshipState) {
+                when (friendshipState.value) {
+                        AnswerOptions.YES -> {
+
+                            { setDeleteFriendshipDialog(true) }
+
+                        } // If client user has requested friendship to shown user
+                        AnswerOptions.NOT_ANSWERED -> {
+
+                            { Toast.makeText(context,R.string.friendship_lready_requested,Toast.LENGTH_SHORT).show() }
+
+                        } // If client user and shown user are not friends
+                        AnswerOptions.NO -> {
+
+                            {
+
+                                friendshipState.value = AnswerOptions.NOT_ANSWERED
+                                userVM.requestFriendship(userVM.user.id)
+
+                            }
+                        }
+                    }
+
             }
         )
 
 
     }
+}
+
+@Composable
+private fun DialogFriendship(
+    setShowDialog: (Boolean) -> Unit,
+    userName: String,
+    context: Context?,
+    deleteFriendship: () -> Unit
+) {
+
+    val confirmSentence = stringResource(id = R.string.remove_friendship_confirmation)
+    AlertDialog(
+        onDismissRequest = { setShowDialog(false) },
+        title = { Text(text = stringResource(id = R.string.delete_friendship)) },
+        text = { Text(text = confirmSentence.replace("*", userName)) },
+        confirmButton = {
+
+            //Button confirm
+            Button(
+                onClick = {
+                    Toast.makeText(context, R.string.friendship_deleted_succesfully , Toast.LENGTH_SHORT).show()
+                    setShowDialog(false)
+                    deleteFriendship()
+                }
+            ) {
+                Text(stringResource(id = R.string.delete))
+            }
+        },
+        dismissButton = {
+
+            //Button cancel
+            Button(
+                onClick = {
+                    setShowDialog(false)
+                }
+            ) {
+                Text(stringResource(id = R.string.cancel))
+            }
+        }
+
+    )
 }
 
 
@@ -97,6 +177,7 @@ fun ProfilePage(
     img: ImageAsset?,
     photoState: PhotoState,
     isMe: Boolean,
+    friendshipState : AnswerOptions,
     onClick: () -> Unit
 ) {
 
@@ -127,6 +208,7 @@ fun ProfilePage(
                 ProfileFab(
                     extended = scrollState.value == 0f,
                     userIsMe = isMe,
+                    friendshipState = friendshipState,
                     modifier = Modifier.align(Alignment.BottomEnd),
                     onClick = onClick
                 )
@@ -233,7 +315,12 @@ fun ProfileHeader(
                     }
                     PhotoState.DONE -> {
 
-                        Icon( asset =  Icons.Default.Person.copy(defaultHeight = 500.dp, defaultWidth = 500.dp))
+                        Icon(
+                            asset = Icons.Default.Person.copy(
+                                defaultHeight = 500.dp,
+                                defaultWidth = 500.dp
+                            )
+                        )
 
                     }
                 }
@@ -286,10 +373,12 @@ fun ProfileProperty(label: String, value: String, isLink: Boolean = false) {
 fun ProfileFab(
     extended: Boolean,
     userIsMe: Boolean,
+    friendshipState: AnswerOptions,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    key(userIsMe) { // Prevent multiple invocations to execute during composition
+    key(friendshipState) { // Prevent multiple invocations to execute during composition
+
         FloatingActionButton(
             onClick = onClick,
             modifier = modifier
@@ -302,14 +391,28 @@ fun ProfileFab(
             AnimatingFabContent(
                 icon = {
                     Icon(
-                        asset = if (userIsMe) Icons.Outlined.Create else Icons.Outlined.Chat
+                        asset = if (userIsMe) Icons.Outlined.Create else {
+
+                            when (friendshipState) {
+                                AnswerOptions.YES -> { Icons.Filled.PeopleAlt }
+                                AnswerOptions.NOT_ANSWERED -> { Icons.Filled.Pending }
+                                AnswerOptions.NO -> { Icons.Filled.PersonAdd }
+                            }
+                        }
                     )
                 },
                 text = {
                     Text(
                         text = stringResource(
-                            id = if (userIsMe) R.string.edit_profile else R.string.sed_message
-                        ),
+                            id = if (userIsMe) R.string.edit_profile else {
+
+                                when (friendshipState) {
+                                    AnswerOptions.YES -> { R.string.is_friend }
+                                    AnswerOptions.NOT_ANSWERED -> { R.string.request_sended }
+                                    AnswerOptions.NO -> { R.string.send_request }
+                                }
+                            }
+                        )
                     )
                 },
                 extended = extended
@@ -322,5 +425,5 @@ fun ProfileFab(
 @Preview
 @Composable
 fun ProfileFabPreview() {
-    ProfileFab(extended = true, userIsMe = false)
+    //ProfileFab(extended = true, userIsMe = false)
 }

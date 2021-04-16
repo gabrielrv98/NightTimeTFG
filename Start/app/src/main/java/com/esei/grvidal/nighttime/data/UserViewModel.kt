@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.asImageAsset
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.esei.grvidal.nighttime.network.AnswerOptions
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.esei.grvidal.nighttime.network.USER_URL
@@ -37,7 +38,8 @@ data class UserFull(
     var state: String = "",
     var email: String,
     var nextDate: NextDate? = null,
-    var picture: String? = null
+    var picture: String? = null,
+    var friendshipState: AnswerOptions = AnswerOptions.NO
 )
 
 data class UserViewPrivate(
@@ -61,7 +63,8 @@ data class UserDTO(
     var nickname: String,
     var state: String,
     var nextDate: NextDate? = null,
-    var picture: String? = null
+    var picture: String? = null,
+    var friendshipState: AnswerOptions
 ) {
     fun toUser(): UserFull {
         return UserFull(
@@ -72,6 +75,7 @@ data class UserDTO(
             state = state,
             email = "",
             nextDate = nextDate,
+            friendshipState = friendshipState,
             picture = picture
         )
     }
@@ -116,6 +120,11 @@ enum class PhotoState {
     ERROR,
     DONE
 }
+
+data class FriendshipInsertDTO(
+    var idUserAsk: Long,
+    val userAnswer: String
+)
 
 class UserViewModel : ViewModel() {
 
@@ -188,7 +197,12 @@ class UserViewModel : ViewModel() {
     private suspend fun fetchUser(userId: Long) {
         try {
 
-            val webResponse = NightTimeApi.retrofitService.getUserDetails(userId)
+            val webResponse = NightTimeApi.retrofitService.getUserDetails(
+                id = userId,
+                headers = mapOf("myUser" to userToken.id.toString(),
+                "auth" to userToken.token)
+
+            )
             Log.d(
                 TAG,
                 "fetchUser: call to retrofit done userId $userId"
@@ -208,7 +222,7 @@ class UserViewModel : ViewModel() {
             } else {
                 Log.d(
                     TAG,
-                    "fetchUser: user error  $webResponse"
+                    "fetchUser: user error  $webResponse - ${webResponse.message()}"
                 )
             }
 
@@ -451,6 +465,47 @@ class UserViewModel : ViewModel() {
         return MultipartBody.Part.createFormData("img", file.name, requestFile)
     }
 
+    fun requestFriendship(idFriend: Long) = viewModelScope.launch {
+        try{
+
+            val webResponse = NightTimeApi.retrofitService.addFriendshipRequest(
+                id = userToken.id,
+                auth = userToken.token,
+                idFriend = idFriend
+            )
+
+            Log.d(TAG, "requestFriendship: code Respond ${webResponse.code()}")
+
+
+        } catch (e: IOException) {
+            Log.e(TAG, "requestFriendship: network exception (no network)   --//-- $e")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "requestFriendship: general exception  --//-- $e")
+        }
+    }
+
+    fun removeFriendShip(userId: Long) = viewModelScope.launch {
+        try{
+
+            val webResponse = NightTimeApi.retrofitService.removeFriendship(
+                id = userToken.id,
+                auth = userToken.token,
+                idFriend = userId
+            )
+
+            Log.d(TAG, "removeFriendShip: code Respond ${webResponse.code()}")
+
+        } catch (e: IOException) {
+            Log.e(TAG, "removeFriendShip: network exception (no network)   --//-- $e")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "removeFriendShip: general exception  --//-- $e")
+        }
+    }
+
+
+
 }
 
 object UserEmpty {
@@ -464,6 +519,7 @@ object UserEmpty {
             picture = null,
             password = "",
             email = "",
+            friendshipState = AnswerOptions.NO
         )
     }
 }
