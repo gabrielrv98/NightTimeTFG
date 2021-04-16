@@ -361,10 +361,10 @@ private fun AcceptDeclineButtons(
         IconButtonEditProfile(
             Icons.Outlined.Cancel,
             decline,
-            stringResource(id = R.string.cancelar)
+            stringResource(id = R.string.cancel)
         )
 
-        IconButtonEditProfile(Icons.Outlined.Check, accept, stringResource(id = R.string.aceptar))
+        IconButtonEditProfile(Icons.Outlined.Check, accept, stringResource(id = R.string.accept))
     }
 }
 

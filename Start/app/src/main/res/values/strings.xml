@@ -58,7 +58,7 @@
     <string name="errorChatId">Ha habido un error con el chat seleccionado</string>
     <string name="errorProfileId">Ha habido un error con el usuario seleccionado</string>
     <string name="nextEvents">Proximos eventos:</string>
-    <string name="bajarRapido">Ir al final</string>
+    <string name="jump_to_bottom">Ir al final</string>
     <string name="hoy">Hoy</string>
     <string name="send">Enviar</string>
     <string name="TextFieldHint">Escribe aqui</string>
@@ -68,8 +68,8 @@
     <string name="sed_message">Enviar mensaje</string>
     <string name="nextDate">Proxima fecha marcada</string>
     <string name="ProfileEditor">ProfileEditor</string>
-    <string name="aceptar">Aceptar</string>
-    <string name="cancelar">Cancelar</string>
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
     <string name="cant_be_empty">No puede estar vacio</string>
 
     <!-- Login form -->
@@ -91,4 +91,12 @@
     <string name="errorPhoto">Error cargando la foto</string>
     <string name="confirm">Confirmar</string>
     <string name="search_friend">Buscar amigos:</string>
+    <string name="delete">Eliminar</string>
+    <string name="delete_friendship">Eliminar amistad</string>
+    <string name="remove_friendship_confirmation">Tu y * dejareis de ser amigos.\n¿Estas seguro?</string>
+    <string name="friendship_deleted_succesfully">Amistad eliminada</string>
+    <string name="friendship_lready_requested">Solicitud de amistad ya enviada.</string>
+    <string name="is_friend">Amigo.</string>
+    <string name="request_sended">Solicitud enviada.</string>
+    <string name="send_request">Enviar solicitud.</string>
 </resources>

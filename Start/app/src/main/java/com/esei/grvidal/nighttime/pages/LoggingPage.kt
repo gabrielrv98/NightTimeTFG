@@ -45,8 +45,8 @@ fun LoginArchitecture(
 ){
     val navController = rememberNavController()
 
-    NavHost(navController, startDestination = NavigationScreens.LogginPage.route) {
-        composable(NavigationScreens.LogginPage.route) {// Login
+    NavHost(navController, startDestination = NavigationScreens.LoginPage.route) {
+        composable(NavigationScreens.LoginPage.route) {// Login
             LoginPage(
                 navController = navController,
                 loginVM = loginVM,
