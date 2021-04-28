@@ -76,7 +76,8 @@ interface NightTimeService {
         @Path("day") day: Int,
         @Path("month") month: Int,
         @Path("year") year: Int,
-        @Path("idCity") idCity: Long
+        @Path("idCity") idCity: Long,
+        @Query("page") page: Int = 0
     ) : Response<List<UserSnap>>
 
     @GET("$USER_URL{idUser}/day-list/{idCity}")
@@ -164,12 +165,25 @@ interface NightTimeService {
         @Path("idFriend") idFriend: Long,
     ): Response<Any>
 
-    @POST("$USER_URL/{idUser}/friends/{idFriend}")
+    @POST("$USER_URL{idUser}/friends/{idFriend}")
     suspend fun addFriendshipRequest(
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Path("idFriend") idFriend: Long,
     ): Response<Any>
+
+    @GET("$USER_URL{idUser}/friends")
+    suspend fun getRequestingFriendships(
+        @Path("idUser") id: Long,
+        @Header("auth") auth: String)
+    : Response<List<UserFriendViewAPI>>
+
+    @PATCH("$USER_URL{idUser}/friends")
+    suspend fun answerFriendshipRequest(
+        @Path("idUser")id: Long,
+        @Header("auth")auth: String,
+        @Body friendshipUpdateDTO: FriendshipUpdateDTO
+    ): Response<Boolean>
 
 
 }

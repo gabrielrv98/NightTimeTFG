@@ -1,19 +1,33 @@
 package com.esei.grvidal.nighttime
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.border
+import android.widget.Toast
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.esei.grvidal.nighttime.data.UserFriendView
+import com.esei.grvidal.nighttime.data.UserSnapImage
+import com.esei.grvidal.nighttime.pages.makeLongShort
 
 /**
  * Custom dialog with the formatted shape
@@ -24,11 +38,11 @@ import androidx.compose.ui.window.Dialog
  */
 @Composable
 fun CustomDialog(
-    onClose : () -> Unit,
-    dialogBorder :BorderStroke =  BorderStroke(3.dp, MaterialTheme.colors.primary),
-    dialogShape : Shape = MaterialTheme.shapes.medium,
-    content :@Composable () -> Unit
-){
+    onClose: () -> Unit,
+    dialogBorder: BorderStroke = BorderStroke(3.dp, MaterialTheme.colors.primary),
+    dialogShape: Shape = MaterialTheme.shapes.medium,
+    content: @Composable () -> Unit
+) {
 
     Dialog(onDismissRequest = onClose) {
         //Surface with the shape, border and color
@@ -44,26 +58,28 @@ fun CustomDialog(
             shape = MaterialTheme.shapes.medium,
             elevation = 1.dp
         ) {
-            Column{
+            Column {
 
                 //searchBar()
 
-                 Row(
-                     modifier = Modifier.padding(horizontal = 20.dp)
-                         .padding(top = 20.dp, bottom = 0.dp)
-                 ) {
-                     content()
-                 }
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                        .padding(top = 20.dp, bottom = 0.dp)
+                ) {
+                    Column {
+                        content()
+                    }
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.Bottom
-                ){
+                ) {
                     //Close button
                     Button(
                         modifier = Modifier
-                            .padding(bottom = 18.dp, end = 24.dp, top = 12.dp) ,
+                            .padding(bottom = 18.dp, end = 24.dp, top = 12.dp),
                         onClick = onClose
                     ) {
                         Text(text = stringResource(R.string.cerrar))
@@ -72,28 +88,168 @@ fun CustomDialog(
             }
         }
     }
-
-
-}
-
-//TODO ADD SEARCH BAR
-/*
-@Composable
-fun searchBar(){
-    val text = remember { mutableStateOf(TextFieldValue()) }
-    OutlinedTextField(
-        value = text.value,
-        onValueChange = {
-            text.value = it
-        },
-        label = { Text("Label") }
-    )
-
 }
 
 
+/**
+ * Dialog that shows the friends who are coming out the selected date
+ *
+ * @param modifier custom modifier
+ * @param userList list with the users to show
  */
+@Composable
+fun UsersSnapListDialog(
+    userList: List<UserSnapImage>,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    onItemClick: ((Long) -> Unit)? = null
+) {
 
+    //List with the users
+    LazyColumnFor(
+        items = userList,
+        modifier = modifier,
+        state = listState
+    ) { user ->
+
+        val modifierUser = if (onItemClick != null)
+            Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(onClick = { onItemClick(user.userId) })
+        else Modifier
+
+        //Each user
+        Row(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 14.dp)
+                .then(modifierUser)
+        ) {
+            //Image
+            Surface(
+                modifier = Modifier.preferredSize(40.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
+            ) {
+                user.img?.let {
+                    Image(asset = it)
+                } ?: Icon(asset = Icons.Default.Person)
+
+            }
+
+            //Name
+            Text(
+                text = "${user.username} - ${user.name}",
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
+    }
+
+}
+
+
+/**
+ * Dialog that shows the friends who are coming out the selected date
+ *
+ * @param modifier custom modifier
+ * @param friendshipList list with the users to show
+ */
+@Composable
+fun FriendshipRequestListDialog(
+    friendshipList: List<UserFriendView>,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    onAccept: (Long,String) -> Unit,
+    onDecline: (Long,String) -> Unit,
+    onItemClick: ((Long) -> Unit)? = null
+) {
+
+    //List with the users
+    LazyColumnFor(
+        items = friendshipList,
+        modifier = modifier,
+        state = listState
+    ) { friendship ->
+
+        val modifierUser = if (onItemClick != null)
+            Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(onClick = { onItemClick(friendship.userId) })
+        else Modifier
+
+        //Each user
+        Row(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 8.dp)
+                .then(modifierUser),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            // User Info
+            Row {
+
+                //Image
+                Surface(
+                    modifier = Modifier
+                        .preferredSize(40.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
+                ) {
+                    friendship.image?.let {
+                        Image(asset = it)
+                    } ?: Icon(asset = Icons.Default.Person)
+
+                }
+
+                //Name
+                Text(
+                    text =  makeLongShort(friendship.userNickname, 8) , //TODO ADAPT THIS
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .align(Alignment.CenterVertically)
+                )
+            }
+
+
+            // Accept / Decline buttons
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Surface(
+                    modifier = Modifier
+                        .padding( 6.dp)
+                        .wrapContentSize()
+                        .clip(CircleShape)
+                        .clickable(onClick = { onAccept(friendship.friendshipId,friendship.userNickname) }),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, Color.Black)
+                ) {
+                    Icon(asset = Icons.Filled.Add)
+                }
+
+                Surface(
+                    modifier = Modifier
+                        .padding( 6.dp)
+                        .wrapContentSize()
+                        .clip(CircleShape)
+                        .clickable(onClick = { onDecline(friendship.friendshipId,friendship.userNickname) }),
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, Color.Black)
+                ) {
+                    Icon(asset = Icons.Filled.Close)
+                }
+            }
+
+
+        }
+    }
+
+}
 
 
 

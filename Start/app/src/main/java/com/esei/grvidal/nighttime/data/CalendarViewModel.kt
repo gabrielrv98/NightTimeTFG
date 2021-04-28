@@ -80,62 +80,63 @@ class CalendarViewModel : ViewModel() {
     var userFriends by mutableStateOf(listOf<UserSnapImage>())
         private set
 
-    private fun loadSelectedDate() {
+    private var pageUserFriends by mutableStateOf(0)
+
+    private fun loadSelectedDate() = viewModelScope.launch {
         //call api
         Log.d(TAG, "load: $selectedDate userToken $userToken")
 
-        viewModelScope.launch {
-            try {
+        try {
 
-                val webResponse = retrofitService.getPeopleAndEventsOnDateAsync(
-                    auth = userToken.token,
-                    id = userToken.id,
-                    day = selectedDate.day,
-                    month = selectedDate.month,
-                    year = selectedDate.year,
-                    idCity = cityId
-                )
+            val webResponse = retrofitService.getPeopleAndEventsOnDateAsync(
+                auth = userToken.token,
+                id = userToken.id,
+                day = selectedDate.day,
+                month = selectedDate.month,
+                year = selectedDate.year,
+                idCity = cityId
+            )
+            Log.d(
+                TAG,
+                "call to retrofit done"
+            )
+
+            if (webResponse.isSuccessful) {
+                var eventList: List<EventData> = listOf()
+
+                webResponse.body()?.let { data ->
+                    eventList = data
+
+                }
+                val total = webResponse.headers()["total"]?.toInt() ?: -1
+                val friends = webResponse.headers()["friends"]?.toInt() ?: -1
+
+                dateInformation = CalendarData(total, friends, eventList)
+
                 Log.d(
                     TAG,
-                    "call to retrofit done"
+                    "data fetched $dateInformation"
                 )
-
-                if (webResponse.isSuccessful) {
-                    var eventList: List<EventData> = listOf()
-
-                    webResponse.body()?.let { data ->
-                        eventList = data
-
-                    }
-                    val total = webResponse.headers()["total"]?.toInt() ?: -1
-                    val friends = webResponse.headers()["friends"]?.toInt() ?: -1
-
-                    dateInformation = CalendarData(total, friends, eventList)
-
-                    Log.d(
-                        TAG,
-                        "data fetched $dateInformation"
-                    )
-                } else {
-                    Log.e(
-                        TAG,
-                        "error fetching data from CalendarViewModel load"
-                    )
-                }
-
-            } catch (e: IOException) {
+            } else {
                 Log.e(
                     TAG,
-                    "loadSelectedDate: network exception (no network) ${e.message}  --//-- $e"
+                    "error fetching data from CalendarViewModel load"
                 )
-                dateInformation = CalendarData(-1, -1, listOf())
-
-            } catch (e: Exception) {
-                Log.e(TAG, "loadSelectedDate: general exception ${e.message}  --//-- $e")
-
             }
 
+        } catch (e: IOException) {
+            Log.e(
+                TAG,
+                "loadSelectedDate: network exception (no network) ${e.message}  --//-- $e"
+            )
+            dateInformation = CalendarData(-1, -1, listOf())
+
+        } catch (e: Exception) {
+            Log.e(TAG, "loadSelectedDate: general exception ${e.message}  --//-- $e")
+
         }
+
+
     }
 
 
@@ -204,62 +205,70 @@ class CalendarViewModel : ViewModel() {
         }
     }
 
-    fun getFriends() {
+    fun getFriendsOnSelectedDate() = viewModelScope.launch {
 
-        Log.d(TAG, "getFriends: $selectedDate userToken $userToken")
 
-        viewModelScope.launch {
 
-            try {
+        Log.d(TAG, "getFriendsOnSelectedDate: $selectedDate userToken $userToken")
 
-                val webResponse = retrofitService.getUsersOnDateAsync(
-                    auth = userToken.token,
-                    id = userToken.id,
-                    day = selectedDate.day,
-                    month = selectedDate.month,
-                    year = selectedDate.year,
-                    idCity = cityId
-                )
-                Log.d(
-                    TAG,
-                    "call to retrofit done"
-                )
+        try {
 
-                if (webResponse.isSuccessful) {
+            val webResponse = retrofitService.getUsersOnDateAsync(
+                auth = userToken.token,
+                id = userToken.id,
+                day = selectedDate.day,
+                month = selectedDate.month,
+                year = selectedDate.year,
+                idCity = cityId,
+                page = pageUserFriends
+            )
 
-                    webResponse.body()?.let { data ->
-                        userFriends = data.map { userSnap ->
-                            userSnap.toUserSnapImage(null)
-                        }
-                        fetchPhotosUserSnap()
+            Log.d(
+                TAG,
+                "getFriendsOnSelectedDate: call to retrofit done"
+            )
+            Log.d(TAG, "getFriendsOnSelectedDate: userList size before page $pageUserFriends-> ${userFriends.size}")
+            pageUserFriends += 1
 
+            if (webResponse.isSuccessful) {
+
+                webResponse.body()?.let { data ->
+                    userFriends = userFriends + data.map { userSnap ->
+                        userSnap.toUserSnapImage(null)
                     }
+
                     Log.d(
                         TAG,
-                        "data fetched $userFriends"
+                        "getFriendsOnSelectedDate: data fetched ${data.size}"
                     )
-                } else {
-                    Log.e(
-                        TAG,
-                        "error fetching data from CalendarViewModel getFriends ${webResponse.errorBody()}"
-                    )
+                    fetchPhotosUserSnap()
+
+
                 }
 
-            } catch (e: IOException) {
-                Log.e(TAG, "getFriends: network exception (no network) ${e.message}  --//-- $e")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "getFriends: general exception ${e.message}  --//-- $e")
-
+                Log.d(TAG, "getFriendsOnSelectedDate: userList size after ${userFriends.size}")
+            } else {
+                Log.e(
+                    TAG,
+                    "getFriendsOnSelectedDate: error fetching data from CalendarViewModel getFriends ${webResponse.errorBody()}"
+                )
             }
+
+        } catch (e: IOException) {
+            Log.e(TAG, "getFriendsOnSelectedDate: network exception (no network) ${e.message}  --//-- $e")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "getFriendsOnSelectedDate: general exception ${e.message}  --//-- $e")
+
         }
+
     }
 
     private suspend fun fetchPhotosUserSnap() {
         Log.d(TAG, "fetchPhotosUserSnap starting to fetch photos")
         for (user in userFriends) {
 
-            if (user.hasImage) {
+            if (user.hasImage && user.img == null) {
                 loadImage(
                     url = "$BASE_URL$USER_URL${user.userId}/photo",
                     userId = user.userId
@@ -340,11 +349,15 @@ class CalendarViewModel : ViewModel() {
      */
     fun setDate(myDate: MyDate) {
 
+        Log.d(TAG, "setDate: setting new Date $myDate")
+
         if (selectedDate.month != myDate.month)
             calendar =
                 ChipDayFactory.datesCreator(myDate) //Creates the calendar layout ( days of the week) from a day of a month
 
         selectedDate = myDate
+        userFriends = listOf()
+
         loadSelectedDate()
     }
 

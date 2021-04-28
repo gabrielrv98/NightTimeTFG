@@ -56,7 +56,7 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
 
             }
         }
-        val friendshipState = remember{ mutableStateOf (userVM.user.friendshipState)}
+
         val (deleteFriendshipDialog, setDeleteFriendshipDialog) = remember { mutableStateOf(false) }
 
         val context = ContextAmbient.current.applicationContext
@@ -68,7 +68,7 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
                 context = context,
                 deleteFriendship = {
                     userVM.removeFriendShip(userId)
-                    friendshipState.value = AnswerOptions.NO
+                    userVM.friendshipState = AnswerOptions.NO
                 }
             )
         }
@@ -83,7 +83,7 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
             img = userVM.userPicture,
             photoState = userVM.photoState,
             isMe = userId == userVM.getMyId(),
-            friendshipState = friendshipState.value,
+            friendshipState = userVM.friendshipState,
             onClick = if (userId == userVM.getMyId()) {
 
                 //Profile is showing the own client
@@ -97,7 +97,7 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
 
                     // If client user and shown user are friends
                     //when (userVM.user.friendshipState) {
-                when (friendshipState.value) {
+                when (userVM.friendshipState) {
                         AnswerOptions.YES -> {
 
                             { setDeleteFriendshipDialog(true) }
@@ -105,14 +105,14 @@ fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: Use
                         } // If client user has requested friendship to shown user
                         AnswerOptions.NOT_ANSWERED -> {
 
-                            { Toast.makeText(context,R.string.friendship_lready_requested,Toast.LENGTH_SHORT).show() }
+                            { Toast.makeText(context,R.string.friendship_already_requested,Toast.LENGTH_SHORT).show() }
 
                         } // If client user and shown user are not friends
                         AnswerOptions.NO -> {
 
                             {
 
-                                friendshipState.value = AnswerOptions.NOT_ANSWERED
+                                userVM.friendshipState = AnswerOptions.NOT_ANSWERED
                                 userVM.requestFriendship(userVM.user.id)
 
                             }
@@ -137,7 +137,7 @@ private fun DialogFriendship(
     val confirmSentence = stringResource(id = R.string.remove_friendship_confirmation)
     AlertDialog(
         onDismissRequest = { setShowDialog(false) },
-        title = { Text(text = stringResource(id = R.string.delete_friendship)) },
+        title = { Text(text = stringResource(id = R.string.delete_friendship), style = MaterialTheme.typography.body1) },
         text = { Text(text = confirmSentence.replace("*", userName)) },
         confirmButton = {
 
@@ -378,6 +378,7 @@ fun ProfileFab(
     modifier: Modifier = Modifier
 ) {
     key(friendshipState) { // Prevent multiple invocations to execute during composition
+        Log.d(TAG, "ProfileFab: key = $friendshipState")
 
         FloatingActionButton(
             onClick = onClick,

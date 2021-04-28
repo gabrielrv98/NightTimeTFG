@@ -95,8 +95,12 @@
     <string name="delete_friendship">Eliminar amistad</string>
     <string name="remove_friendship_confirmation">Tu y * dejareis de ser amigos.\n¿Estas seguro?</string>
     <string name="friendship_deleted_succesfully">Amistad eliminada</string>
-    <string name="friendship_lready_requested">Solicitud de amistad ya enviada.</string>
+    <string name="friendship_already_requested">Solicitud de amistad ya enviada.</string>
     <string name="is_friend">Amigo.</string>
     <string name="request_sended">Solicitud enviada.</string>
     <string name="send_request">Enviar solicitud.</string>
+    <string name="chat_title">Chat</string>
+    <string name="friendship_requested_to_you">Solicitudes de amistad:</string>
+    <string name="acceptingUser">"Aceptnado a"</string>
+    <string name="refusingUser">"Rechazando a"</string>
 </resources>

@@ -35,7 +35,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.BarViewModel
-import com.esei.grvidal.nighttime.data.EventFromBar
+import com.esei.grvidal.nighttime.network.EventFromBar
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 
 private const val TAG = "BarDetails"

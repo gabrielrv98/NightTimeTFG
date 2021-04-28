@@ -2,6 +2,7 @@ package com.esei.grvidal.nighttime.pages
 
 import android.util.Log
 import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumnFor
@@ -24,11 +25,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.BarDTO
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.data.BarViewModel
 import com.esei.grvidal.nighttime.navigateWithId
+import com.esei.grvidal.nighttime.network.BarDTO
 
 private const val TAG = "BarPage"
 
@@ -144,26 +145,38 @@ fun Header(
     modifier: Modifier = Modifier,
     text: String,
     border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colors.primary),
-    style: TextStyle = MaterialTheme.typography.h6
+    style: TextStyle = MaterialTheme.typography.h6,
+    icon: (@Composable (Modifier) -> Unit)? = null
 ) {
-
-    Row(
-        modifier = modifier
-            .padding(bottom = 12.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
     ) {
-        Text(
-            modifier = Modifier
-                .padding(6.dp)
-                .border(
-                    border = border,
-                    shape = RoundedCornerShape(15.dp)
-                )
-                .padding(vertical = 6.dp, horizontal = 10.dp),
-            text = text,
-            style = style
-        )
+
+        Row(
+            modifier = modifier
+                .padding(bottom = 12.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(6.dp)
+                    .border(
+                        border = border,
+                        shape = RoundedCornerShape(15.dp)
+                    )
+                    .padding(vertical = 6.dp, horizontal = 10.dp),
+                text = text,
+                style = style
+            )
+
+        }
+
+            icon?.let {
+                it(Modifier.align(Alignment.CenterEnd))
+            }
     }
 }
 
@@ -222,13 +235,34 @@ fun BarChip(
 @Composable
 fun WeekScheduleIcon(schedule: List<String>) {
     Row {
-        DaySchedule(day = stringResource(id = R.string.lunes_abbreviation), schedule[0].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.martes_abbreviation), schedule[1].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.miercoles_abbreviation), schedule[2].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.jueves_abbreviation), schedule[3].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.viernes_abbreviation), schedule[4].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.sabado_abbreviation), schedule[5].isNotEmpty())
-        DaySchedule(day = stringResource(id = R.string.domingo_abbreviation), schedule[6].isNotEmpty())
+        DaySchedule(
+            day = stringResource(id = R.string.lunes_abbreviation),
+            schedule[0].isNotEmpty()
+        )
+        DaySchedule(
+            day = stringResource(id = R.string.martes_abbreviation),
+            schedule[1].isNotEmpty()
+        )
+        DaySchedule(
+            day = stringResource(id = R.string.miercoles_abbreviation),
+            schedule[2].isNotEmpty()
+        )
+        DaySchedule(
+            day = stringResource(id = R.string.jueves_abbreviation),
+            schedule[3].isNotEmpty()
+        )
+        DaySchedule(
+            day = stringResource(id = R.string.viernes_abbreviation),
+            schedule[4].isNotEmpty()
+        )
+        DaySchedule(
+            day = stringResource(id = R.string.sabado_abbreviation),
+            schedule[5].isNotEmpty()
+        )
+        DaySchedule(
+            day = stringResource(id = R.string.domingo_abbreviation),
+            schedule[6].isNotEmpty()
+        )
     }
 }
 
@@ -298,50 +332,6 @@ fun DaySchedule(
             letterSpacing = 0.5.sp,
             color = if (enable) MaterialTheme.colors.onBackground
             else Color.LightGray
-        )
-    }
-}
-
-/**
- * Composable that describes if a day of the week that starts with [day] it's open [enable] or not
- * the day will be in a box with the border [border] and with a shape [shape]
- *
- * @param day Letter with the represented day
- * @param enable boolean to show if its enabled
- * @param border border aground the letter
- * @param shape shape of the border
- */
-@Deprecated("rounded days", ReplaceWith("daySchedule"))
-@Composable
-fun DaySchedule2(
-    day: String,
-    enable: Boolean = false,
-    border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colors.primary),
-    shape: Shape = RoundedCornerShape(50)
-) {
-
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 1.dp)
-            .border(
-                border = border,
-                shape = shape
-            )
-            .preferredWidth(15.dp)
-            .preferredHeight(15.dp)
-            .clip(shape)
-            .background(
-                if (enable) Color.Green
-                else MaterialTheme.colors.background
-            ),
-        alignment = Alignment.Center
-    ) {
-        Text(
-            modifier = Modifier.padding(0.dp),
-            style = MaterialTheme.typography.overline,
-            text = day,
-            fontSize = 9.sp,
-            letterSpacing = 0.5.sp
         )
     }
 }

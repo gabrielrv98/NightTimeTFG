@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.network.AnswerOptions
 import com.esei.grvidal.nighttime.network.BASE_URL
+import com.esei.grvidal.nighttime.network.ERROR_HEADER_TAG
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.esei.grvidal.nighttime.network.USER_URL
 import com.squareup.picasso.Picasso
@@ -38,8 +39,7 @@ data class UserFull(
     var state: String = "",
     var email: String,
     var nextDate: NextDate? = null,
-    var picture: String? = null,
-    var friendshipState: AnswerOptions = AnswerOptions.NO
+    var picture: String? = null
 )
 
 data class UserViewPrivate(
@@ -75,7 +75,6 @@ data class UserDTO(
             state = state,
             email = "",
             nextDate = nextDate,
-            friendshipState = friendshipState,
             picture = picture
         )
     }
@@ -121,11 +120,6 @@ enum class PhotoState {
     DONE
 }
 
-data class FriendshipInsertDTO(
-    var idUserAsk: Long,
-    val userAnswer: String
-)
-
 class UserViewModel : ViewModel() {
 
     private var userToken = UserToken(-1, "")
@@ -151,6 +145,8 @@ class UserViewModel : ViewModel() {
     // User data
     var user by mutableStateOf(UserEmpty.getEmptyUser())
         private set
+
+    var friendshipState by mutableStateOf(AnswerOptions.NO)
 
     var username by mutableStateOf(TextFieldValue())
 
@@ -180,10 +176,10 @@ class UserViewModel : ViewModel() {
         Picasso.get().invalidate("$BASE_URL$USER_URL${userId}/photo")
     }
 
-    fun fetchData(userId: Long) {
+    fun fetchData(userId: Long) = viewModelScope.launch {
         eraseData()
 
-        viewModelScope.launch {
+
             fetchUser(userId) // Get data from new user
 
             if (!user.picture.isNullOrEmpty()) {
@@ -191,7 +187,7 @@ class UserViewModel : ViewModel() {
             }
             delay(500)
             fetchUser(userId) // Get data again from the user in case the edit delayed a bit // todo check if this is ok or is stupid
-        }
+
     }
 
     private suspend fun fetchUser(userId: Long) {
@@ -199,7 +195,7 @@ class UserViewModel : ViewModel() {
 
             val webResponse = NightTimeApi.retrofitService.getUserDetails(
                 id = userId,
-                headers = mapOf("myUser" to userToken.id.toString(),
+                headers = mapOf("clientUser" to userToken.id.toString(),
                 "auth" to userToken.token)
 
             )
@@ -212,6 +208,7 @@ class UserViewModel : ViewModel() {
 
                 webResponse.body()?.let { userDTO ->
                     user = userDTO.toUser()
+                    friendshipState = userDTO.friendshipState
                 }
 
                 Log.d(
@@ -476,6 +473,8 @@ class UserViewModel : ViewModel() {
 
             Log.d(TAG, "requestFriendship: code Respond ${webResponse.code()}")
 
+            if (!webResponse.isSuccessful)
+                Log.d(TAG, "requestFriendship: ${webResponse.headers()[ERROR_HEADER_TAG]}") // TODO: 21/04/2021 add this to every api call
 
         } catch (e: IOException) {
             Log.e(TAG, "requestFriendship: network exception (no network)   --//-- $e")
@@ -518,8 +517,7 @@ object UserEmpty {
             nextDate = null,
             picture = null,
             password = "",
-            email = "",
-            friendshipState = AnswerOptions.NO
+            email = ""
         )
     }
 }

@@ -5,20 +5,15 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.UsersSnapListDialog
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
@@ -56,13 +52,14 @@ fun CalendarPage(calendarVM: CalendarViewModel) {
 
     //If Friendly users Card is touched a dialog with their names should be shown
     if (showDialog)
+        UserListOnDate(
+            userList = calendarVM.userFriends,
+            numberOfFriends = calendarVM.dateInformation.friends,
+            loadMoreFriends = calendarVM::getFriendsOnSelectedDate,
+            closeDialog = { setShowDialog(false) }
+        )
 
-        CustomDialog(onClose = { setShowDialog(false) }) {
-            FriendlyUsersDialog(
-                itemsUser = calendarVM.userFriends,
-                modifier = Modifier.preferredHeight(600.dp)
-            )
-        }
+
 
     CalendarScreen(
         total = calendarVM.dateInformation.total,
@@ -73,12 +70,54 @@ fun CalendarPage(calendarVM: CalendarViewModel) {
         calendar = calendarVM.calendar,
         userSelectedDates = calendarVM.userDays,
         addUserSelectedDate = calendarVM::addDateToUserList,
-        removeUserSelectedDate = calendarVM::removeDateFromUserList
+        removeUserSelectedDate = calendarVM::removeDateFromUserList,
+        userFriendListButton = { setShowDialog(true) }
+    )
+
+}
+
+@Composable
+private fun UserListOnDate(
+    userList: List<UserSnapImage>,
+    numberOfFriends: Int,
+    loadMoreFriends: () -> Unit,
+    closeDialog: () -> Unit
+) {
+
+    val state = rememberLazyListState()
+
+    Log.d(
+        TAG,
+        "UserListOnDate: size: ${userList.size}  state : ${state.firstVisibleItemIndex} "
+    )
+
+
+    /**
+     * [LazyListState.firstVisibleItemIndex] points at the number of items already scrolled
+     *
+     * So if userList is not empty then we check if the remaining users in userList are 15 or less
+     * (Full screen of the app),
+     * if so, more users from API are fetched
+     */
+    if (numberOfFriends > 0 &&
+        userList.size < numberOfFriends &&
+        // total - cursor ( la posicion actual) >= 12  ->( los objetos restantes son 12 ( 9 mostrados en pantalla, 3 restantes por abajo ))
+        ( userList.size - state.firstVisibleItemIndex <= 12 ||
+                userList.isEmpty() )
     ) {
-        calendarVM.getFriends()
-        setShowDialog(true)
+
+        loadMoreFriends()
     }
 
+
+
+    CustomDialog(onClose = closeDialog) {
+        UsersSnapListDialog(
+            userList = userList,
+            modifier = Modifier.preferredHeight(600.dp),
+            listState = state
+        )
+    }
 }
 
 @Composable
@@ -92,7 +131,7 @@ private fun CalendarScreen(
     userSelectedDates: List<MyDate>,
     addUserSelectedDate: (MyDate) -> Unit,
     removeUserSelectedDate: (MyDate) -> Unit,
-    setShowDialog: () -> Unit
+    userFriendListButton: () -> Unit
 ) {
     val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
     CalendarPageView(
@@ -138,7 +177,7 @@ private fun CalendarScreen(
                 formattedDay = selectedDate.toStringFormatted(),
                 totalPeople = total.toString(),
                 friends = friends.toString(),
-                showFriends = setShowDialog,
+                showFriends = userFriendListButton,
                 OnChooseDateClick = {
                     if (!userSelectedDates.contains(selectedDate))
                         addUserSelectedDate(selectedDate)
@@ -229,64 +268,6 @@ fun CalendarPageView(
     }
 }
 
-/**
- * Dialog that shows the friends who are coming out the selected date
- *
- * @param modifier custom modifier
- * @param itemsUser list with the users to show
- */
-@Composable
-fun FriendlyUsersDialog(
-    itemsUser: List<UserSnapImage>,
-    modifier: Modifier = Modifier,
-    state: LazyListState = rememberLazyListState(),
-    onClick: ((Long) -> Unit)? = null
-) {
-
-    //List with the users
-    LazyColumnFor(
-        items = itemsUser,
-        modifier = modifier,
-        state = state
-    ) { user ->
-
-        val modifierUser = if (onClick != null)
-            Modifier
-                .clip(MaterialTheme.shapes.medium)
-                .clickable(onClick = { onClick(user.userId ) } )
-            else Modifier
-
-        //Each user
-        Row(
-            modifier = Modifier
-                .padding(vertical = 12.dp, horizontal = 14.dp)
-                .then(modifierUser)
-        ) {
-            //Image
-            Surface(
-                modifier = Modifier.preferredSize(40.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
-            ) {
-                user.img?.let {
-                    Image(asset = it)
-                } ?: Icon(asset = Icons.Default.Person)
-
-            }
-
-            //Name
-            Column(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Text(text = "${user.username} - ${user.name}")
-            }
-
-        }
-    }
-
-}
 
 /**
  * Top View of the calendar
@@ -892,7 +873,7 @@ fun DialogPreview() {
     NightTimeTheme {
 
         CustomDialog(onClose = {}) {
-            FriendlyUsersDialog(itemsUser = userList, modifier = Modifier)
+            UsersSnapListDialog(userList = userList, modifier = Modifier)
         }
     }
 }

@@ -12,7 +12,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
@@ -248,7 +248,7 @@ Navigation with their own files ( no dependencies )
                 )
 
                 //Setting city to CalendarVM to make calls to api
-                calendarVM.cityId = (cityVM.city.id)
+                calendarVM.cityId = cityVM.city.id
 
                 CalendarPage(calendarVM = calendarVM)
             }
@@ -299,18 +299,44 @@ Navigation with their own files ( no dependencies )
 
         composable(BottomNavigationScreens.FriendsNav.route) { //Friends
 
+            // Dialog to add new friends
+            val showDialog = remember{  mutableStateOf(false) }
+
+
             ScreenScaffolded(
                 topBar = {
 
                     TopBarConstructor(
                         buttonText = "",
                         icon = Icons.Default.PersonSearch,
-                        action = { chatVM.setDialog(true) },
+                        action = { showDialog.value = true },
                     )
                      },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 FriendsPage(navController,chatVM)
+
+                if (showDialog.value) {
+                    CustomDialog(
+                        onClose = { showDialog.value = false }
+                    ) {
+                        FriendsSearch(
+                            onSearch = chatVM::searchUsers,
+                            onClick = { userId ->
+
+                                chatVM.clearSearchedList()
+
+                                navController.navigateWithId(
+                                    BottomNavigationScreens.ProfileNav.route,
+                                    userId
+                                )
+
+                            },
+                            userList = chatVM.searchedUserList
+                        )
+                    }
+                }
+
             }
         }
 

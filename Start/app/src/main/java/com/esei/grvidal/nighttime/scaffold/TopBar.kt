@@ -9,8 +9,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,27 +28,27 @@ fun TopBarConstructor(
     TopAppBar(
         title = { Text(text = title) },
         actions = {
-            CityButton(buttonText, icon ,action)
+            TopRightIconText(buttonText, icon ,action)
         }
     )
 }
 
 @Composable
-fun CityButton(
-    nameCity: String,
+fun TopRightIconText(
+    buttonText: String,
     icon: VectorAsset?,
-    setCityDialog: () -> Unit
+    action: () -> Unit
 ){
     Surface(
         modifier = Modifier
             .clip(RoundedCornerShape(25))
-            .clickable(onClick = setCityDialog),
+            .clickable(onClick = action),
         color = MaterialTheme.colors.primary
     ) {
         Row {
             Text(
                 modifier = Modifier.padding(6.dp),
-                text = nameCity.toUpperCase(Locale.getDefault()),
+                text = buttonText.toUpperCase(Locale.getDefault()),
                 maxLines = 1
             )
 

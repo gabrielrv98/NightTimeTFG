@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.network.BAR_URL
 import com.esei.grvidal.nighttime.network.BASE_URL
+import com.esei.grvidal.nighttime.network.BarDTO
+import com.esei.grvidal.nighttime.network.EventFromBar
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -19,38 +21,6 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 private const val TAG = "BarViewModel"
-
-data class BarDTO(
-    val id: Long,
-    val name: String,
-    val owner: String,
-    val address: String,
-    val description: String,
-
-    val mondaySchedule: String?,
-    val tuesdaySchedule: String?,
-    val wednesdaySchedule: String?,
-    val thursdaySchedule: String?,
-    val fridaySchedule: String?,
-    val saturdaySchedule: String?,
-    val sundaySchedule: String?
-) {
-    val schedule: List<String>
-        get() {
-            return listOf(
-                (mondaySchedule ?: ""),
-                (tuesdaySchedule ?: ""),
-                (wednesdaySchedule ?: ""),
-                (thursdaySchedule ?: ""),
-                (fridaySchedule ?: ""),
-                (saturdaySchedule ?: ""),
-                (sundaySchedule ?: "")
-            )
-        }
-}
-
-data class BarDetailsDTO(val id: Long, val events: List<EventFromBar>, val photos: Int)
-data class EventFromBar(val id: Long, val description: String, val date: String?)
 
 class BarViewModel : ViewModel() {
 
@@ -71,8 +41,6 @@ class BarViewModel : ViewModel() {
         )
     }
 
-    //TODO refactor all this
-
     // List with all the loaded bars
     var barList by mutableStateOf(listOf<BarDTO>())
 
@@ -80,11 +48,13 @@ class BarViewModel : ViewModel() {
         private set
 
     // Total of photos of the bar
-    var totalNPhotos by mutableStateOf(0)
+    //var totalNPhotos by mutableStateOf(0)
+    var totalNPhotos = 0
         private set
 
     // Number of downloaded photos
-    var nPhotos by mutableStateOf(0)
+    //var nPhotos by mutableStateOf(0)
+    var nPhotos  = 0
         private set
 
     // Strong reference point to avoid loosing them
@@ -146,9 +116,10 @@ class BarViewModel : ViewModel() {
 
                 webResponse.body()?.let { bars ->
                     barList = barList + bars
+                    Log.d(TAG, "fetchBars: data fetched $bars")
                 }
 
-                Log.d(TAG, "fetchBars: data fetched $barList")
+
 
             }
 

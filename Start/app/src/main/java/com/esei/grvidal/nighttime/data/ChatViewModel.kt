@@ -55,6 +55,29 @@ data class ChatFullView(
     var img: ImageAsset?
 )
 
+data class UserFriendViewAPI(
+    var friendshipId: Long,
+    var userId: Long,
+    var userNickname: String,
+    var state: String,
+    var image: Boolean
+)
+
+data class UserFriendView(
+    var friendshipId: Long,
+    var userId: Long,
+    var userNickname: String,
+    var state: String,
+    val hasImage: Boolean,
+    var image: ImageAsset? = null
+)
+
+
+data class FriendshipUpdateDTO(
+    val id: Long,
+    val answer: AnswerOptions
+)
+
 private const val TAG = "ChatViewModel"
 
 class ChatViewModel : ViewModel() {
@@ -72,18 +95,33 @@ class ChatViewModel : ViewModel() {
         return userToken.id
     }
 
-    // Dialog to add new friends
-    var showDialog by mutableStateOf(false)
-
-    fun setDialog(b: Boolean) {
-        showDialog = b
-    }
-
+    /**
+     * List of open chats the user has
+     */
     var chatList by mutableStateOf(listOf<ChatFullView>())
         private set
 
-    var userList by mutableStateOf(listOf<UserSnapImage>())
+    private lateinit var searchString: String
+    var searchPage = 0
+    private var totalPeopleSearch = 0
+
+    /**
+     * List of searched users
+     */
+    var searchedUserList by mutableStateOf(listOf<UserSnapImage>())
         private set
+
+    /**
+     * List of users who has requested friendship to the user
+     */
+    var requestingFriendshipUserList by mutableStateOf(listOf<UserFriendView>())
+        private set
+
+    /**
+     * Number of requesting friendships, used for notification
+     */
+    var totalRequestingFriendship by mutableStateOf(0)
+    private set
 
     // Strong reference point to avoid loosing them
     private var targetList = mutableListOf<Target>()
@@ -102,8 +140,41 @@ class ChatViewModel : ViewModel() {
                         it.toFullView()
                     }
 
+                    Log.d(TAG, "fetchPhotosChat starting to fetch photos")
+                    for (chat in chatList) {
+
+                        if (chat.hasImage) {
+                            loadUserImage(
+                                picasso = Picasso.get(),
+                                userId = chat.userId,
+                                action = { img ->
+                                    chatList.filter { chaFilter -> chaFilter.userId == chat.userId }
+                                        .getOrNull(
+                                            0
+                                        )?.let { chatSelected ->
+
+                                            // Recomposition is made when the setter of the list is called,
+                                            // so we need to delete, edit (adding the picture) and re-add the element
+                                            chatList = chatList.toMutableList().also {
+                                                it.remove(chatSelected)
+                                                chatSelected.img = img.asImageAsset()
+
+                                            } + listOf(chatSelected)
+
+
+
+                                            Log.d(
+                                                TAG,
+                                                "onBitmapLoaded: getting Image user ${chatSelected.userId} size ${img.byteCount} height ${img.height}, width ${img.width}"
+                                            )
+                                        }
+                                }
+                            )
+                        }
+                    }
+
                 }
-                fetchPhotosChat()
+
 
             } else Log.d(TAG, "getChats: ${webResponse.headers()[ERROR_HEADER_TAG]}")
 
@@ -115,106 +186,92 @@ class ChatViewModel : ViewModel() {
         }
     }
 
-    private suspend fun fetchPhotosChat() {
 
-        Log.d(TAG, "fetchPhotosChat starting to fetch photos")
-        for (chat in chatList) {
-
-            if(chat.hasImage) {
-                loadImageChat(
-                    url = "$BASE_URL$USER_URL${chat.userId}/photo",
-                    userId = chat.userId
-                )
-            }
-        }
-
+    fun clearSearchedList() {
+        searchedUserList = listOf()
     }
 
-
-    private suspend fun loadImageChat(
-        url: String,
-        userId: Long,
-        picasso: Picasso = Picasso.get()
-    ) {
-
-        val target = object : Target {
-            override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-                Log.d(
-                    TAG,
-                    "fetchPhotos: onPrepareLoad: loading image user id $userId"
-                )
-            }
-
-            override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-                //Handle the exception here
-                Log.d(TAG, "fetchPhotos: onBitmapFailed: error $e")
-                targetList.remove(this)
-            }
-
-            override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-
-
-                //Here we get the loaded image
-                Log.d(
-                    TAG,
-                    "fetchPhotos: onBitmapLoaded: Image fetched size ${bitmap?.byteCount} height ${bitmap?.height}, width ${bitmap?.width}"
-                )
-
-                bitmap?.let { img ->
-                    chatList.filter { chat -> chat.userId == userId }.getOrNull(
-                        0
-                    )?.let { chat ->
-
-                        // Recomposition is made when the setter of the list is called,
-                        // so we need to delete, edit (adding the picture) and re-add the element
-                        chatList = chatList.toMutableList().also {
-                            it.remove(chat)
-                            chat.img = img.asImageAsset()
-
-                        } + listOf(chat)
-
-
-
-                        Log.d(
-                            TAG,
-                            "onBitmapLoaded: getting Image user $userId size ${img.byteCount} height ${img.height}, width ${img.width}"
-                        )
-                    }
-                }
-                targetList.remove(this)
-
-
-            }
-        }
-        targetList.add(target)
-
-        picasso
-            .load(url)
-            .resize(250, 250)
-            .centerCrop()
-            .into(target)
-
-    }
-
+    /**
+     * Calls to api to request a new page (starting in 0) of searched users
+     * and uses Picasso to get their picture if they have one
+     */
     fun searchUsers(username: String) = viewModelScope.launch {
         if (username.isBlank()) {
-            userList = listOf()
+            searchString = ""
+            searchedUserList = listOf()
         } else {
             try {
 
-                Log.d(TAG, "searchUsers: Ready to search users that start with $username")
+                Log.d(
+                    TAG,
+                    "searchUsers: Ready to search users that start with $username ( actual size) ${searchedUserList.size}"
+                )
 
-                val webResponse = retrofitService.searchUsers(username)
+                if (searchString == username) {
+                    searchPage++
+                    Log.d(TAG, "searchUsers: Searching next page $searchPage")
+                } else {
+                    searchString = username
+                    searchPage = 0
+                    searchedUserList = listOf()
+                    Log.d(TAG, "searchUsers: Doing a new search with nickname $username")
+                    totalPeopleSearch = -1
+                }
 
-                if (webResponse.isSuccessful) {
-                    webResponse.body()?.let { userSnap ->
-                        Log.d(TAG, "searchUsers: Users fetched = $userSnap")
+                // If it is a new search or there are users remaining api is called
+                if (totalPeopleSearch == -1 || searchedUserList.size < totalPeopleSearch) {
+                    val webResponse = retrofitService.searchUsers(
+                        username,
+                        searchPage
+                    )
 
-                        userList = userSnap.map {
-                            it.toUserSnapImage(null)
+                    if (webResponse.isSuccessful) {
+                        totalPeopleSearch = webResponse.headers()["total"]?.toInt() ?: 0
+
+                        webResponse.body()?.let { userSnap ->
+                            Log.d(
+                                TAG,
+                                "searchUsers: Users fetched = ${userSnap.size}, total users $totalPeopleSearch"
+                            )
+
+                            searchedUserList = searchedUserList + userSnap.map {
+                                it.toUserSnapImage()
+                            }
+
+                            Log.d(TAG, "SearchUser: Starting to fetch photos")
+                            for (user in searchedUserList) {
+
+                                if (user.hasImage && user.img == null) {
+                                    loadUserImage(
+                                        picasso = Picasso.get(),
+                                        userId = user.userId,
+                                        action = { img ->
+                                            searchedUserList
+                                                .findLast { chat -> chat.userId == user.userId }
+                                                ?.let { user ->
+
+                                                    // Recomposition is made when the setter of the list is called,
+                                                    // so the list need to be edited (add or remove items on the list).
+                                                    // This is done by re-adding the edited element of the list
+                                                    searchedUserList =
+                                                        searchedUserList.toMutableList().also {
+                                                            it.remove(user)
+                                                            user.img = img.asImageAsset()
+
+                                                        } + listOf(user)
+
+
+
+                                                    Log.d(
+                                                        TAG,
+                                                        "onBitmapLoaded: getting Image user $user.userId size ${img.byteCount} height ${img.height}, width ${img.width}"
+                                                    )
+                                                }
+                                        }
+                                    )
+                                }
+                            }
                         }
-
-                        fetchPhotosUserSnap()
                     }
                 }
 
@@ -229,36 +286,95 @@ class ChatViewModel : ViewModel() {
 
     }
 
-    private suspend fun fetchPhotosUserSnap() {
-        Log.d(TAG, "fetchPhotosUserSnap starting to fetch photos")
-        for (user in userList) {
+    fun getRequestingFriendships() = viewModelScope.launch {
 
-            if (user.hasImage) {
-                loadImageUser(
-                    url = "$BASE_URL$USER_URL${user.userId}/photo",
-                    userId = user.userId
-                )
+        try {
+
+            val webResponse = retrofitService.getRequestingFriendships(
+                id = userToken.id,
+                auth = userToken.token
+            )
+
+            if (webResponse.isSuccessful) {
+
+                webResponse.body()?.let {
+
+                    requestingFriendshipUserList = it.map { user ->
+                        UserFriendView(
+                            user.friendshipId,
+                            user.userId,
+                            user.userNickname,
+                            user.state,
+                            user.image
+                        )
+                    }
+
+                    totalRequestingFriendship = webResponse.headers()["total"]?.toInt() ?: requestingFriendshipUserList.size
+
+                    for (user in requestingFriendshipUserList) {
+                        if (user.hasImage) {
+
+                            loadUserImage(
+                                picasso = Picasso.get(),
+                                userId = user.userId,
+                                action = { bitmap ->
+                                    requestingFriendshipUserList
+                                        .findLast { requesters -> requesters.userId == user.userId }
+                                        ?.let { userFriendView ->
+
+                                            // Recomposition is made when the setter of the list is called,
+                                            // so the list need to be edited (add or remove items on the list).
+                                            // This is done by re-adding the edited element of the list
+                                            requestingFriendshipUserList =
+                                                requestingFriendshipUserList.toMutableList()
+                                                    .also { mutableList ->
+                                                        mutableList.remove(userFriendView)
+                                                        userFriendView.image = bitmap.asImageAsset()
+
+                                                    } + listOf(userFriendView)
+
+                                        }
+                                }
+                            )
+                        }
+                    }
+
+                    Log.d(
+                        TAG,
+                        "getRequestingFriendships: fetched users: $requestingFriendshipUserList"
+                    )
+
+                }
             }
+
+        } catch (e: IOException) {
+            Log.e(TAG, "getRequestingFriendships: network exception (no network)  --//-- $e")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "getRequestingFriendships: general exception  --//-- $e")
         }
     }
 
-    private suspend fun loadImageUser(
-        url: String,
+    @Suppress("RedundantSuspendModifier")
+    private suspend fun loadUserImage(
+        targetWidth: Int = 250,
+        targetHeight: Int = 250,
         userId: Long,
-        picasso: Picasso = Picasso.get()
+        action: (Bitmap) -> Unit,
+        picasso: Picasso
     ) {
 
         val target = object : Target {
             override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
                 Log.d(
                     TAG,
-                    "fetchPhotos: onPrepareLoad: loading image user id $userId"
+                    "loadImage: onPrepareLoad: loading image user id $userId"
                 )
             }
 
             override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
                 //Handle the exception here
-                Log.d(TAG, "fetchPhotos: onBitmapFailed: error $e")
+                Log.d(TAG, "loadImage: onBitmapFailed: error $e")
                 targetList.remove(this)
             }
 
@@ -268,29 +384,11 @@ class ChatViewModel : ViewModel() {
                 //Here we get the loaded image
                 Log.d(
                     TAG,
-                    "fetchPhotos: onBitmapLoaded: Image fetched size ${bitmap?.byteCount} height ${bitmap?.height}, width ${bitmap?.width}"
+                    "loadImage: onBitmapLoaded: Image fetched size ${bitmap?.byteCount} height ${bitmap?.height}, width ${bitmap?.width}"
                 )
 
                 bitmap?.let { img ->
-                    userList.filter { chat -> chat.userId == userId }.getOrNull(
-                        0
-                    )?.let { user ->
-
-                        // Recomposition is made when the setter of the list is called,
-                        // so we need to delete, edit (adding the picture) and re-add the element
-                        userList = userList.toMutableList().also {
-                            it.remove(user)
-                            user.img = img.asImageAsset()
-
-                        } + listOf(user)
-
-
-
-                        Log.d(
-                            TAG,
-                            "onBitmapLoaded: getting Image user $userId size ${img.byteCount} height ${img.height}, width ${img.width}"
-                        )
-                    }
+                    action(img)
                 }
                 targetList.remove(this)
 
@@ -300,36 +398,55 @@ class ChatViewModel : ViewModel() {
         targetList.add(target)
 
         picasso
-            .load(url)
-            .resize(250, 250)
+            .load("$BASE_URL$USER_URL$userId/photo")
+            .resize(targetWidth, targetHeight)
             .centerCrop()
             .into(target)
 
     }
 
-    fun addUser(
-        idUserSearch: Long
-    ) = viewModelScope.launch {
-
+    fun answerFriendshipRequest(idFriendship: Long, isAccepted: Boolean) = viewModelScope.launch {
         try {
-            Log.d(TAG, "addUser: Ready to call retrofit")
-            val webResponse = retrofitService.getChats(auth = userToken.token, id = userToken.id)
 
+            Log.d(
+                TAG,
+                "answerFriendshipRequest: ready to send retrofit idFriendship $idFriendship isAccepted $isAccepted "
+            )
+            val webResponse = retrofitService.answerFriendshipRequest(
+                id = userToken.id,
+                auth = userToken.token,
+                friendshipUpdateDTO = FriendshipUpdateDTO(
+                    id = idFriendship,
+                    answer = if (isAccepted) AnswerOptions.YES
+                    else AnswerOptions.NO
+                )
+            )
+
+            Log.d(TAG, "answerFriendshipRequest: Answer code = ${webResponse.code()} ")
             if (webResponse.isSuccessful) {
 
-                webResponse.body()?.let { fetchedList ->
-                    Log.d(TAG, "addUser: fetched data ${chatList.toString()}")
-                    chatList = listOf()
-                }
+                requestingFriendshipUserList.findLast { friend -> friend.friendshipId == idFriendship }
+                    ?.let { userAnswered ->
+                        Log.d(
+                            TAG,
+                            "answerFriendshipRequest: deleting from requestingFriendshipUserList user ${userAnswered.userId} - ${userAnswered.userNickname}"
+                        )
+                        requestingFriendshipUserList =
+                            requestingFriendshipUserList.toMutableList()
+                                .also { mutableList ->
+                                    mutableList.remove(userAnswered)
+                                    totalRequestingFriendship--
 
+                                }
+                    }
+            }
 
-            } else Log.d(TAG, "addUser: ${webResponse.headers()[ERROR_HEADER_TAG]}")
 
         } catch (e: IOException) {
-            Log.d(TAG, "addUser: network exception ${e.message}  --//-- $e")
-        } catch (e: Exception) {
+            Log.e(TAG, "answerFriendshipRequest: network exception (no network)  --//-- $e")
 
-            Log.d(TAG, "addUser: network exception ${e.message}  --//-- $e")
+        } catch (e: Exception) {
+            Log.e(TAG, "answerFriendshipRequest: general exception  --//-- $e")
         }
     }
 
