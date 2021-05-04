@@ -18,7 +18,6 @@ import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.FullChat
-import com.esei.grvidal.nighttime.data.User
 import com.esei.grvidal.nighttime.navigateWithId
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.filled.ArrowBack
@@ -45,7 +44,6 @@ import java.time.LocalDate
  */
 @Composable
 fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
-    val user = User("me")
 
     //Nullable check
     if (chatId == null) {
@@ -53,7 +51,7 @@ fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
     } else {
 
         ConversationContent(
-            actualChat = user.getChatConversation(chatId),
+            actualChat = FullChat(0, "other", 1 ,listOf() ),
             navigateToProfile = { userId ->
                 navController.navigateWithId(
                     BottomNavigationScreens.ProfileNav.route,
@@ -63,8 +61,8 @@ fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
             onBackIconPressed = {
                 navController.popBackStack(navController.graph.startDestination, false)
                 navController.navigate(BottomNavigationScreens.FriendsNav.route)
-            },
-            user = user
+            } ,
+            userId = 3
         )
 
 
@@ -81,7 +79,7 @@ fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
  */
 @Composable
 fun ConversationContent(
-    user: User,
+    userId:Int,
     actualChat: FullChat,
     navigateToProfile: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -101,13 +99,13 @@ fun ConversationContent(
                     messages = actualChat.messages,
                     modifier = Modifier.weight(1f),
                     scrollState = scrollState,
-                    userId = user.id
+                    userId = userId
                 )
 
                 UserInput(
                     onMessageSent = { content ->
                         actualChat.addMessage(
-                            Message(user.id, content.trim(), LocalDate.now().toString())
+                            Message(userId, content.trim(), LocalDate.now().toString())
                         )
                     },
                     scrollState

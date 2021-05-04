@@ -204,7 +204,7 @@ fun FriendshipRequestListDialog(
 
                 //Name
                 Text(
-                    text =  makeLongShort(friendship.userNickname, 8) , //TODO ADAPT THIS
+                    text =  makeLongShort(friendship.userNickname, 8) ,
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .align(Alignment.CenterVertically)

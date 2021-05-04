@@ -49,7 +49,7 @@ private const val TAG = "FriendsPage"
  */
 @Composable
 fun FriendsPage(navController: NavHostController, chatVM: ChatViewModel) {
-
+// TODO: 29/04/2021 Use-Case -> Start a new Chat (floatButton in FriendsScreen)
     // Operator key allow the function to run again if the
     // composable is detached from composition
     onCommit(chatVM.getId()) {
@@ -234,7 +234,7 @@ fun ChatEntry(
             ) {
                 Log.d(
                     TAG,
-                    "ChatEntry, timing: lasRecomposition user $userName, img ${img != null} "
+                    "ChatEntry: lastRecomposition user $userName, hasImg ${img != null} "
                 )
 
                 img?.let {
