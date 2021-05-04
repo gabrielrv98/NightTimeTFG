@@ -52,7 +52,7 @@ interface NightTimeService {
     @POST(USER_URL + "login/")
     suspend fun loginAsync(
         @Header("username") username: String, @Header("password") password: String
-    ) : Response<Any>
+    ) : Response<Boolean>
 
     // City
     @GET(USER_URL + "cities/")
@@ -118,13 +118,13 @@ interface NightTimeService {
     suspend fun getUserDetails(
         @Path("idUserDetails") id: Long,
         @HeaderMap headers: Map<String, String>
-    ): Response<UserDTO>
+    ): Response<UserDTO?>
 
     @GET("$USER_URL{idUser}/private")
     suspend fun getUserPrivate(
         @Header("auth") auth: String,
         @Path("idUser") id: Long
-    ): Response<UserViewPrivate>
+    ): Response<UserViewPrivate?>
 
     @PATCH("$USER_URL{idUser}")
     suspend fun updateUser(
@@ -139,7 +139,7 @@ interface NightTimeService {
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Part img: MultipartBody.Part
-    ): Response<Any>
+    ): Response<Boolean>
 
     @POST(USER_URL)
     suspend fun newUser(
