@@ -22,8 +22,10 @@ import com.squareup.picasso.Target
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.IOException
 
@@ -43,6 +45,7 @@ data class UserFull(
 )
 
 data class UserViewPrivate(
+    val id: Long,
     val name: String,
     val password: String,
     val state: String? = null,
@@ -186,8 +189,7 @@ class UserViewModel : ViewModel() {
                 fetchPhoto(userId)
             }
             delay(500)
-            fetchUser(userId) // Get data again from the user in case the edit delayed a bit // todo check if this is ok or is stupid
-
+            fetchUser(userId) // Get data again from the user in case the edit delayed a bit
     }
 
     private suspend fun fetchUser(userId: Long) {
@@ -456,7 +458,7 @@ class UserViewModel : ViewModel() {
     private fun createMultiPart(file: File): MultipartBody.Part {
         // Create requestFile
         val requestFile: RequestBody =
-            RequestBody.create(MediaType.parse("multipart/form-data"), file)
+            file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
 
         // MultipartBody.Part is used to send also the actual file name
         return MultipartBody.Part.createFormData("img", file.name, requestFile)
