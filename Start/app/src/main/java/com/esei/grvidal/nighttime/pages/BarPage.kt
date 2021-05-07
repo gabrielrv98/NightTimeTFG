@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime.pages
 
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
@@ -40,7 +42,9 @@ private const val TAG = "BarPage"
  * @param barVM ViewModel for Bar page
  */
 @Composable
-fun BarPage(navController: NavHostController, barVM: BarViewModel) {
+fun BarPage(navController: NavHostController, barVM: BarViewModel,
+barVM2 : BarViewModel = viewModel() ) {
+
 
     TitleColumn(title = stringResource(id = R.string.baresZona) + " " + barVM.city.name) {
 
