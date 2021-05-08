@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,7 +16,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.FullChat
 import com.esei.grvidal.nighttime.navigateWithId
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.filled.ArrowBack
@@ -29,40 +27,50 @@ import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.unit.sp
-//import androidx.compose.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
-import com.esei.grvidal.nighttime.data.Message
+import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.pages.ErrorComposable
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 /**
- * Composable that checks if [chatId] is null, if its false it will show the conversation
+ * Composable that checks if [chatVM] has friendshipId as -1, if it's false it will show the conversation
  *
  * @param navController controller of hte navigation, its used to go back or navigate to other views
- * @param chatId Id of the current char
+ * @param [chatVM] Data of the current chat
  */
 @Composable
-fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
+fun ChatConversationPage(
+    navController: NavHostController,
+    chatVM: ChatViewModel
+) {
 
     //Nullable check
-    if (chatId == null) {
+    if (chatVM.friendshipId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorChatId))
     } else {
 
+        onCommit(chatVM.friendshipId) {
+            chatVM.getSelectedChat()
+        }
+
+
         ConversationContent(
-            actualChat = FullChat(0, "other", 1 ,listOf() ),
-            navigateToProfile = { userId ->
+            userId = chatVM.getId(),
+            userNickname = chatVM.userNickname,
+            messages = chatVM.messages,
+            navigateToProfile = {
                 navController.navigateWithId(
                     BottomNavigationScreens.ProfileNav.route,
-                    userId.toLong()
+                    chatVM.otherUserId
                 )
             },
             onBackIconPressed = {
                 navController.popBackStack(navController.graph.startDestination, false)
                 navController.navigate(BottomNavigationScreens.FriendsNav.route)
-            } ,
-            userId = 3
+            },
+            addMessage = chatVM::addMessage
         )
 
 
@@ -72,18 +80,19 @@ fun ChatConversationPage(navController: NavHostController, chatId: Int?) {
 /**
  * Entry point for a conversation screen.
  *
- * @param actualChat [FullChat] that contains messages to display
  * @param navigateToProfile User action when navigation to a profile is requested
  * @param modifier [Modifier] to apply to this layout node
  * @param onBackIconPressed Sends an event up when the user clicks on the menu
  */
 @Composable
 fun ConversationContent(
-    userId:Int,
-    actualChat: FullChat,
-    navigateToProfile: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    onBackIconPressed: () -> Unit = { }
+    userId: Long,
+    userNickname: String,
+    messages: List<MessageView>,
+    navigateToProfile: () -> Unit,
+    addMessage: (String) -> Unit,
+    onBackIconPressed: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
 
@@ -96,7 +105,7 @@ fun ConversationContent(
             Column(Modifier.fillMaxSize()) {
 
                 Messages(
-                    messages = actualChat.messages,
+                    messages = messages,
                     modifier = Modifier.weight(1f),
                     scrollState = scrollState,
                     userId = userId
@@ -104,9 +113,7 @@ fun ConversationContent(
 
                 UserInput(
                     onMessageSent = { content ->
-                        actualChat.addMessage(
-                            Message(userId, content.trim(), LocalDate.now().toString())
-                        )
+                        addMessage(content)
                     },
                     scrollState
                 )
@@ -114,11 +121,12 @@ fun ConversationContent(
 
             // Channel name bar floats above the messages
             ChatNameBar(
-                channelName = actualChat.otherUserName,
+                channelName = userNickname,
                 onBackIconPressed = onBackIconPressed,
-                navigateToProfile = { navigateToProfile(actualChat.otherUserId) },
+                navigateToProfile = { navigateToProfile() },
             )
         }
+
     }
 }
 
@@ -127,11 +135,10 @@ fun ConversationContent(
 fun ChatNameBar(
     modifier: Modifier = Modifier,
     channelName: String,
+    navigateToProfile: () -> Unit,
     image: VectorAsset = Icons.Default.Person,
     onBackIconPressed: () -> Unit = { },
-    navigateToProfile: () -> Unit,
 ) {
-
     TopAppBar(
         modifier = modifier,
         title = {
@@ -170,19 +177,6 @@ fun ChatNameBar(
         backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.95f),
         elevation = 3.dp,
         contentColor = MaterialTheme.colors.onSurface,
-        actions = {
-            ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
-                // Search icon
-                Icon(
-                    asset = Icons.Outlined.Search,
-                    modifier = Modifier
-                        .clickable(onClick = {}) // TODO: Search in the conversation.
-                        .padding(horizontal = 12.dp, vertical = 16.dp)
-                        .preferredHeight(24.dp),
-                    tint = Color.Transparent
-                )
-            }
-        },
         navigationIcon = {
             IconButton(
                 onClick = onBackIconPressed
@@ -197,11 +191,13 @@ fun ChatNameBar(
 
 @Composable
 fun Messages(
-    userId: Int,
-    messages: List<Message>,
+    userId: Long,
+    messages: List<MessageView>,
     scrollState: ScrollState,
     modifier: Modifier = Modifier
 ) {
+
+    val today = LocalDate.now()
     Box(modifier = modifier) {
 
         ScrollableColumn(
@@ -211,22 +207,30 @@ fun Messages(
                 .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.preferredHeight(64.dp))
-            messages.forEachIndexed { index, content ->
-                val prevAuthor = messages.getOrNull(index - 1)?.idUser
-                val nextAuthor = messages.getOrNull(index + 1)?.idUser
-                val isFirstMessageByAuthor = prevAuthor != content.idUser
-                val isLastMessageByAuthor = nextAuthor != content.idUser
 
-                // Hardcode day dividers for simplicity//todo acabar cuando sepa los datos
-                if (index == 0) {
-                    DayHeader("20 Aug")
-                } else if (index == 4) {
-                    DayHeader(stringResource(R.string.hoy))
+            // Always show the date of the first message
+            if (messages.isNotEmpty())
+                DayHeader(dateFormatted(messages[0].date))
+
+            messages.forEachIndexed { index, content ->
+                val prevAuthor = messages.getOrNull(index - 1)?.user
+                val nextAuthor = messages.getOrNull(index + 1)?.user
+                val isFirstMessageByAuthor = prevAuthor != content.user
+                val isLastMessageByAuthor = nextAuthor != content.user
+
+                // If the message has different date than the previous message date is shown
+                if (index > 0 && messages[index].date != messages[index - 1].date) {
+
+                    // If the message is from the actual date a string is shown
+                    if (messages[index].date == today.toString())
+                        DayHeader(stringResource(R.string.hoy))
+
+                    else DayHeader(dateFormatted(content.date))
                 }
 
                 Message(
                     message = content,
-                    isUserMe = content.idUser == userId,
+                    isUserMe = content.user == userId,
                     isFirstMessageByAuthor = isFirstMessageByAuthor,
                     isLastMessageByAuthor = isLastMessageByAuthor
                 )
@@ -254,19 +258,27 @@ fun Messages(
     }
 }
 
+fun dateFormatted(time: String): String {
+    val timeSplit = time.split("-").map { it.toInt() }
+    val date = LocalDate.of(timeSplit[0], timeSplit[1], timeSplit[2])
+    val formatter = DateTimeFormatter.ofPattern("dd-MMMM")
+
+    return date.format(formatter)
+}
+
 @Composable
 fun Message(
-    message: Message,
+    message: MessageView,
     isUserMe: Boolean,
     isFirstMessageByAuthor: Boolean,
     isLastMessageByAuthor: Boolean
 ) {
 
     val spaceBetweenAuthors = if (isFirstMessageByAuthor) Modifier.padding(top = 8.dp) else Modifier
-    val chatArrang = if (isUserMe) Arrangement.End else Arrangement.Start
+    val chatArrangement = if (isUserMe) Arrangement.End else Arrangement.Start
     Row(
         modifier = spaceBetweenAuthors.fillMaxWidth(),
-        horizontalArrangement = chatArrang
+        horizontalArrangement = chatArrangement
     ) {
 
         Column {
@@ -284,7 +296,7 @@ fun Message(
 @Composable
 fun AuthorAndTextMessage(
     isUserMe: Boolean,
-    message: Message,
+    message: MessageView,
     isLastMessageByAuthor: Boolean
 ) {
 
@@ -294,8 +306,8 @@ fun AuthorAndTextMessage(
         //ChatTimestamp(message)
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
             Text(
-                modifier = Modifier.padding( start = if ( isUserMe)  50.dp else 25.dp),
-                text = message.timestamp,
+                modifier = Modifier.padding(start = if (isUserMe) 50.dp else 25.dp),
+                text = message.time,
                 style = MaterialTheme.typography.caption,
                 color = Color.Gray,
             )
@@ -319,7 +331,7 @@ private val LastChatBubbleShapeUser = RoundedCornerShape(8.dp, 0.dp, 8.dp, 8.dp)
 @Composable
 fun ChatItemBubble(
     isUserMe: Boolean,
-    message: Message,
+    message: MessageView,
     lastMessageByAuthor: Boolean
 ) {
 // chat Padding
@@ -389,7 +401,10 @@ private fun RowScope.DayHeaderLine() {
 @Preview("Top bar")
 @Composable
 fun TopBarPreview() {
-    ChatNameBar(channelName ="Nuria Sotelo Domarco", navigateToProfile = {})
+    ChatNameBar(
+        channelName = "Nuria Sotelo Domarco",
+        navigateToProfile = {}
+    )
 }
 
 
