@@ -264,7 +264,7 @@ class CalendarViewModel : ViewModel() {
 
     }
 
-    private suspend fun fetchPhotosUserSnap() {
+    private fun fetchPhotosUserSnap() {
         Log.d(TAG, "fetchPhotosUserSnap starting to fetch photos")
         for (user in userFriends) {
 
@@ -277,7 +277,7 @@ class CalendarViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadImage(
+    private fun loadImage(
         url: String,
         userId: Long,
         picasso: Picasso = Picasso.get()
@@ -357,6 +357,7 @@ class CalendarViewModel : ViewModel() {
 
         selectedDate = myDate
         userFriends = listOf()
+        pageUserFriends = 0
 
         loadSelectedDate()
     }
