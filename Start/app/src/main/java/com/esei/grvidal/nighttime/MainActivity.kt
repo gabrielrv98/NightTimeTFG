@@ -25,15 +25,15 @@ import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
+import com.esei.grvidal.nighttime.network.ChatListener
 import com.esei.grvidal.nighttime.pages.*
 import com.esei.grvidal.nighttime.scaffold.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
-
+import kotlinx.coroutines.CoroutineScope
+import kotlin.coroutines.EmptyCoroutineContext
 
 private const val TAG = "MainActivity"
 
-// Iconos personales
-// https://developer.android.com/studio/write/image-asset-studio?hl=es-419
 class MainActivity : AppCompatActivity() {
 
     /** Using kotlin delegate by viewModels returns an instance of ViewModel by lazy
@@ -41,8 +41,8 @@ class MainActivity : AppCompatActivity() {
      * it will receive the same instance of ViewModel as it had previously
      * */
     private val barVM by viewModels<BarViewModel>()
-    private val calendarVM by viewModels<CalendarViewModel>()
     private val userVM by viewModels<UserViewModel>()
+    private val friendsVM by viewModels<FriendsViewModel>()
     private val chatVM by viewModels<ChatViewModel>()
 
     /** This ViewModels need arguments in their constructors so we need to
@@ -69,6 +69,13 @@ class MainActivity : AppCompatActivity() {
             this,
             CityViewModelFactory(DataStoreManager.getInstance(this))
         ).get(CityViewModel::class.java)
+
+
+        /*
+        Chat initialization
+         */
+
+
 
         setContent {
 
@@ -106,17 +113,17 @@ class MainActivity : AppCompatActivity() {
 
                     LoginState.ACCEPTED -> {
 
-                        calendarVM.setUserToken(loginVM.loggedUser)
                         userVM.setUserToken(loginVM.loggedUser)
+                        friendsVM.setUserToken(loginVM.loggedUser)
                         chatVM.setUserToken(loginVM.loggedUser)
 
                         Log.d(TAG, "onCreate: pulling MainScreen")
-                        MainScreen(
+                        NightTimeApp(
                             loginVM,
                             userVM,
                             cityVM,
-                            calendarVM,
                             barVM,
+                            friendsVM,
                             chatVM,
                             searchImage = { selectImageLauncher.launch("image/*") }
                         )
@@ -128,12 +135,12 @@ class MainActivity : AppCompatActivity() {
                         if (loginVM.credentialsChecked) {
 
                             Log.d(TAG, "onCreate: pulling MainScreen")
-                            MainScreen(
+                            NightTimeApp(
                                 loginVM,
                                 userVM,
                                 cityVM,
-                                calendarVM,
                                 barVM,
+                                friendsVM,
                                 chatVM,
                                 searchImage = { selectImageLauncher.launch("image/*") }
                             )
@@ -203,12 +210,12 @@ class MainActivity : AppCompatActivity() {
  * MainScreen with the function that will allow it to manage the navigation system
  */
 @Composable
-private fun MainScreen(
+private fun NightTimeApp(
     login: LoginViewModel,
     userVM: UserViewModel,
     cityVM: CityViewModel,
-    calendarVM: CalendarViewModel,
     barVM: BarViewModel,
+    friendsVM : FriendsViewModel,
     chatVM : ChatViewModel,
     searchImage: () -> Unit
 ) {
@@ -218,6 +225,13 @@ private fun MainScreen(
 Navigation with their own files ( no dependencies )
     https://medium.com/google-developer-experts/how-to-handle-navigation-in-jetpack-compose-a9ac47f7f975
  */
+
+    val chatListener = remember{ ChatListener(
+        CoroutineScope(context = EmptyCoroutineContext),
+        login.loggedUser
+    ) }
+
+
     val navController = rememberNavController()
 
     val bottomNavigationItems = listOf(
@@ -247,10 +261,8 @@ Navigation with their own files ( no dependencies )
                     setCityId = cityVM::setCity
                 )
 
-                //Setting city to CalendarVM to make calls to api
-                calendarVM.cityId = cityVM.city.id
 
-                CalendarPage(calendarVM = calendarVM)
+                CalendarPage(userToken = login.loggedUser, cityId = cityVM.city.id)
             }
         }
 
@@ -289,9 +301,9 @@ Navigation with their own files ( no dependencies )
                 modifier = Modifier
             ) {
                 BarDetails(
-                    barVM,
-                    backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L,
-                    navController
+                    barVM = barVM,
+                    barId = backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L,
+                    navController = navController
                 )
             }
 
@@ -314,17 +326,18 @@ Navigation with their own files ( no dependencies )
                      },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                FriendsPage(navController,chatVM)
+
+                FriendsPage(navController,friendsVM, chatListener.events)
 
                 if (showDialog.value) {
                     CustomDialog(
                         onClose = { showDialog.value = false }
                     ) {
                         FriendsSearch(
-                            onSearch = chatVM::searchUsers,
+                            onSearch = friendsVM::searchUsers,
                             onClick = { userId ->
 
-                                chatVM.clearSearchedList()
+                                friendsVM.clearSearchedList()
 
                                 navController.navigateWithId(
                                     BottomNavigationScreens.ProfileNav.route,
@@ -332,7 +345,7 @@ Navigation with their own files ( no dependencies )
                                 )
 
                             },
-                            userList = chatVM.searchedUserList
+                            userList = friendsVM.searchedUserList
                         )
                     }
                 }
@@ -341,12 +354,16 @@ Navigation with their own files ( no dependencies )
         }
 
         composable(
-            NavigationScreens.ChatConversation.route + "/{ChatId}",  // Specified chat
+            NavigationScreens.ChatConversation.route + "/{ChatId}",  // Chat
             arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
         ) { backStackEntry ->
-            ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
 
-            //ChatConversationPage(navController, backStackEntry.arguments?.getInt("ChatId"))
+            ChatConversationPage(
+                navController = navController,
+                chatVM = chatVM,
+                flow = chatListener.events,
+                friendshipId = backStackEntry.arguments?.getInt("ChatId")?.toLong() ?: -1L
+            )
 
         }
 
@@ -395,6 +412,16 @@ Navigation with their own files ( no dependencies )
             ) {
                 ProfileEditorPage(navController, searchImage, userVM,login::setPassword)
             }
+        }
+
+        composable("channellist") {
+            //ChannelListScreen(navController = navController)
+        }
+
+        composable(
+            "messagelist/{cid}"
+        ) { _ ->
+            //MessageListScreen( navController = navController, cid = backStackEntry.arguments?.getString("cid")!! )
         }
     }
 }

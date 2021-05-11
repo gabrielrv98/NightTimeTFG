@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.data.ErrorHolder
 import com.esei.grvidal.nighttime.data.LoginViewModel
 import com.esei.grvidal.nighttime.data.PhotoState
 import com.esei.grvidal.nighttime.data.UserViewModel
@@ -134,18 +135,17 @@ fun RegisterPage(
                 //permission already granted
                 pickImageFromGallery(searchImageButton)
             }
-        },
-        register = {
-            // Adding user to server
-            userVM.newUser(
-                userVM.uriPhotoPicasso?.let {
-                    getPathFromURI(context, it)
-                },
-                loginVM::doLoginRefreshed
-            )
-
         }
-    )
+    ) {
+        // Adding user to server
+        userVM.newUser(
+            userVM.uriPhotoPicasso?.let {
+                getPathFromURI(context, it)
+            },
+            loginVM::doLoginRefreshed
+        )
+
+    }
 
 }
 
@@ -165,7 +165,7 @@ fun RegisterScreen(
     setEmail: (TextFieldValue) -> Unit,
     img: ImageAsset?,
     photoState: PhotoState,
-    errorText: String,
+    errorText: ErrorHolder,
     searchImageButton: () -> Unit,
     register: () -> Unit
 ) {
@@ -215,9 +215,14 @@ fun RegisterScreen(
         }
         Spacer(Modifier.preferredHeight(25.dp))
 
-        if (errorText.isNotEmpty()) {
+        if (errorText.errorString != null || errorText.resourceInt != null) {
             Text(
-                text = errorText,
+                text = errorText.resourceInt?.let{
+                    stringResource(id = it)
+                } ?:
+                errorText.errorString ?:
+                stringResource(id = R.string.unexpected_error),
+
                 color = Color.Red,
                 style = MaterialTheme.typography.body1
             )

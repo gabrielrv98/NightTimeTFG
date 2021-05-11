@@ -42,8 +42,7 @@ private const val TAG = "BarPage"
  * @param barVM ViewModel for Bar page
  */
 @Composable
-fun BarPage(navController: NavHostController, barVM: BarViewModel,
-barVM2 : BarViewModel = viewModel() ) {
+fun BarPage(navController: NavHostController, barVM: BarViewModel = viewModel() ) {
 
 
     TitleColumn(title = stringResource(id = R.string.baresZona) + " " + barVM.city.name) {

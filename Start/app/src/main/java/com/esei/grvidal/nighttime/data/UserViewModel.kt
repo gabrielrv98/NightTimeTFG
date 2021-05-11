@@ -12,116 +12,39 @@ import androidx.compose.ui.graphics.asImageAsset
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.network.AnswerOptions
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.ERROR_HEADER_TAG
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.esei.grvidal.nighttime.network.USER_URL
+import com.esei.grvidal.nighttime.network.network_DTOs.UserDTOEdit
+import com.esei.grvidal.nighttime.network.network_DTOs.UserDTOInsert
+import com.esei.grvidal.nighttime.network.network_DTOs.UserFull
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.IOException
 
 
 private const val TAG = "UserViewModel"
 
-
-data class UserFull(
-    var id: Long,//user ID
-    var nickname: String,
-    var name: String,
-    var password: String,
-    var state: String = "",
-    var email: String,
-    var nextDate: NextDate? = null,
-    var picture: String? = null
-)
-
-data class UserViewPrivate(
-    val id: Long,
-    val name: String,
-    val password: String,
-    val state: String? = null,
-    val email: String
-)
-
-data class UserDTOEdit(
-    var id: Long,
-    val name: String?,
-    val password: String?,
-    val state: String? = null,
-    val email: String?
-)
-
-data class UserDTO(
-    var id: Long,//user ID
-    var name: String,
-    var nickname: String,
-    var state: String,
-    var nextDate: NextDate? = null,
-    var picture: String? = null,
-    var friendshipState: AnswerOptions
-) {
-    fun toUser(): UserFull {
-        return UserFull(
-            id = id,
-            nickname = nickname,
-            name = name,
-            password = "",
-            state = state,
-            email = "",
-            nextDate = nextDate,
-            picture = picture
-        )
-    }
-}
-
-data class NextDate(
-    val id: Long,
-    val nextDate: String,
-    val nextCity: CityDTO
-) {
-    override fun toString(): String {
-        val date = nextDate.split("-")
-
-        return StringBuilder()
-            .append(date[2])
-            .append("-")
-            .append(date[1])
-            .append("-")
-            .append(date[0])
-            .append(" : ")
-            .append(nextCity.name)
-            .toString()
-    }
-}
-
-data class CityDTO(
-    val id: Long,
-    val name: String,
-    val country: String
-)
-
-data class UserDTOInsert(
-    val name: String,
-    val nickname: String,
-    var password: String,
-    val state: String? = null,
-    val email: String
-)
-
 enum class PhotoState {
     LOADING,
     ERROR,
     DONE
 }
+
+data class ErrorHolder(
+    val resourceInt : Int? = null,
+    val errorString: String? = null
+)
 
 class UserViewModel : ViewModel() {
 
@@ -161,7 +84,7 @@ class UserViewModel : ViewModel() {
 
     var email by mutableStateOf(TextFieldValue())
 
-    var errorText by mutableStateOf("")
+    var errorText by mutableStateOf(ErrorHolder())
 
     var lock by mutableStateOf(false)
 
@@ -199,7 +122,6 @@ class UserViewModel : ViewModel() {
                 id = userId,
                 headers = mapOf("clientUser" to userToken.id.toString(),
                 "auth" to userToken.token)
-
             )
             Log.d(
                 TAG,
@@ -424,11 +346,11 @@ class UserViewModel : ViewModel() {
 
                 if (id == -1L || token.isBlank()) {
 
-                    errorText = "Unexpected error, contact with admin"
+                    errorText =  ErrorHolder(R.string.unexpected_error)
 
                 } else {
                     userToken = UserToken(id, token)
-                    errorText = ""
+                    errorText = ErrorHolder(-1)
 
                     photoUri?.let {
                         updatePicture(File(it))
@@ -440,11 +362,15 @@ class UserViewModel : ViewModel() {
             } else if (webResponse.code() == 208) { // User nickname repeated
 
                 Log.d(TAG, "newUser: User refused, nickname already in use")
-                errorText = "Nombre de usuario en uso"
+                errorText =  ErrorHolder(R.string.already_used_name)
 
             } else {
                 Log.d(TAG, "newUser: response code ${webResponse.code()}")
-                errorText = webResponse.headers()["error"] ?: "Error desconocido"
+
+                errorText = webResponse.headers()["error"]?.let{
+                      ErrorHolder(null,it)
+                }  ?:   ErrorHolder(R.string.unexpected_error)
+
             }
 
         } catch (e: IOException) {
@@ -458,7 +384,8 @@ class UserViewModel : ViewModel() {
     private fun createMultiPart(file: File): MultipartBody.Part {
         // Create requestFile
         val requestFile: RequestBody =
-            file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+            RequestBody.create(MediaType.parse("multipart/form-data"), file)
+            //file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
 
         // MultipartBody.Part is used to send also the actual file name
         return MultipartBody.Part.createFormData("img", file.name, requestFile)

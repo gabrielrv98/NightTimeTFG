@@ -1,6 +1,5 @@
 package com.esei.grvidal.nighttime
 
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
@@ -21,12 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.esei.grvidal.nighttime.data.UserFriendView
-import com.esei.grvidal.nighttime.data.UserSnapImage
+import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.pages.makeLongShort
 
 /**

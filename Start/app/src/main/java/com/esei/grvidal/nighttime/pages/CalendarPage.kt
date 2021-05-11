@@ -3,9 +3,12 @@ package com.esei.grvidal.nighttime.pages
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.draggable 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.ExperimentalLazyDsl
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState 
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -17,9 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.gesture.DragObserver
-import androidx.compose.ui.gesture.dragGestureFilter
+import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -27,11 +28,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider 
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.UsersSnapListDialog
 import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
 import java.util.*
@@ -45,14 +52,21 @@ private const val TAG = "CalendarPage"
  *
  */
 @Composable
-fun CalendarPage(calendarVM: CalendarViewModel) {
+fun CalendarPage(calendarVM: CalendarViewModel = viewModel(), userToken: UserToken, cityId: Long) {
+
+    onCommit(cityId) {
+        calendarVM.setUserToken(userToken)
+        calendarVM.cityId = cityId
+    }
+    // TODO: 11/05/2021 check if it changes properly
+    //calendarVM.setCityId(cityId)
 
     //Remembered state of a boolean that express if the dialog with the friendly users must be shown
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
 
     //If Friendly users Card is touched a dialog with their names should be shown
     if (showDialog)
-        UserListOnDate(
+        UserSnapList(
             userList = calendarVM.userFriends,
             numberOfFriends = calendarVM.dateInformation.friends,
             loadMoreFriends = calendarVM::getFriendsOnSelectedDate,
@@ -77,11 +91,12 @@ fun CalendarPage(calendarVM: CalendarViewModel) {
 }
 
 @Composable
-private fun UserListOnDate(
+fun UserSnapList(
     userList: List<UserSnapImage>,
     numberOfFriends: Int,
     loadMoreFriends: () -> Unit,
-    closeDialog: () -> Unit
+    closeDialog: () -> Unit,
+    onClick: ((Long) -> Unit)? = null
 ) {
 
     val state = rememberLazyListState()
@@ -102,8 +117,7 @@ private fun UserListOnDate(
     if (numberOfFriends > 0 &&
         userList.size < numberOfFriends &&
         // total - cursor ( la posicion actual) >= 12  ->( los objetos restantes son 12 ( 9 mostrados en pantalla, 3 restantes por abajo ))
-        ( userList.size - state.firstVisibleItemIndex <= 12 ||
-                userList.isEmpty() )
+        (userList.size - state.firstVisibleItemIndex <= 12 || userList.isEmpty())
     ) {
 
         loadMoreFriends()
@@ -120,6 +134,8 @@ private fun UserListOnDate(
     }
 }
 
+
+@OptIn(ExperimentalLazyDsl::class)
 @Composable
 private fun CalendarScreen(
     total: Int,
@@ -142,33 +158,40 @@ private fun CalendarScreen(
                 colorBackground = colorBackground,
                 previousMonthClick = { setDate(selectedDate.previousMonth) },
                 nextMonthClick = { setDate(selectedDate.nextMonth) }
-            ) {
+            ) { modifier ->
 
-                for (week in calendar) {
-                    //Week Row
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        for (days in week) {
+                LazyColumn(
+                    modifier = modifier
+                ) {
 
-                            //Each day in the week
-                            Box(
-                                modifier = Modifier.weight(1f),
-                                alignment = Alignment.Center
-                            ) {
+                    items(calendar) { week ->
+                        //Week Row
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            for (days in week) {
 
-                                DayChip(
-                                    isNextUserDate = userSelectedDates.contains(days),
-                                    date = selectedDate,
-                                    setDate = setDate,
-                                    chipDate = days,
-                                    colorBackground = colorBackground
-                                )
+                                //Each day in the week
+                                Box(
+                                    modifier = Modifier.weight(1f),
+                                    alignment = Alignment.Center
+                                ) {
+
+                                    DayChip(
+                                        isNextUserDate = userSelectedDates.contains(days),
+                                        date = selectedDate,
+                                        setDate = setDate,
+                                        chipDate = days,
+                                        colorBackground = colorBackground
+                                    )
+                                }
                             }
                         }
                     }
+
                 }
+
             }
         },
         bottomInfo = {
@@ -191,9 +214,15 @@ private fun CalendarScreen(
                 } else stringResource(id = R.string.diaPasado),
                 events = {
 
-                    events.forEach { event ->
-                        Event(event.barName, event.description)
+                    LazyColumn(modifier = it) {
+
+                        items(events) { event ->
+                            Event(event.barName, event.description)
+                        }
+
                     }
+
+
                 }
             )
         }
@@ -239,19 +268,19 @@ fun monthName(month: Int): String {
  *
  * @param calendar
  * @param bottomInfo
- * @param modifierParam
+ * @param modifier
  */
 @Composable
 fun CalendarPageView(
+    modifier: Modifier = Modifier,
     calendar: @Composable () -> Unit = {},
     bottomInfo: @Composable () -> Unit = {},
-    modifierParam: Modifier = Modifier
 ) {
-    val modifier = modifierParam.fillMaxWidth().fillMaxHeight()
+    val modifierWeight = modifier.fillMaxWidth().fillMaxHeight()
     Column {
         //Top of the screen
         Row(
-            modifier = modifier.weight(1.5f),
+            modifier = modifierWeight.weight(1.5f),
             horizontalArrangement = Arrangement.Center
         ) {
             //val color = MaterialTheme.colors.background.copy(alpha = 0.2f)
@@ -260,7 +289,7 @@ fun CalendarPageView(
         }
         //Bottom of the screen
         Row(
-            modifier = modifier.weight(1f)
+            modifier = modifierWeight.weight(1f)
         ) {
 
             bottomInfo()
@@ -278,13 +307,14 @@ fun CalendarPageView(
  * @param contentDay Composable with the days to show on the calendar
  * @param colorBackground is the color of the background
  */
+@OptIn(ExperimentalStdlibApi::class)
 @Composable
 fun CalendarWindow(
     monthName: String,
     previousMonthClick: () -> Unit,
     nextMonthClick: () -> Unit,
     colorBackground: Color = MaterialTheme.colors.background,
-    contentDay: @Composable () -> Unit = {}
+    contentDay: @Composable (Modifier) -> Unit
 ) {
 
     Surface(
@@ -314,7 +344,7 @@ fun CalendarWindow(
                 Text(
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.h6,
-                    text = monthName.toUpperCase(Locale.getDefault()),
+                    text = monthName.uppercase(Locale.getDefault()),
                     textAlign = TextAlign.Center
                 )
                 //Button next month
@@ -385,55 +415,75 @@ fun CalendarWindow(
             Box(
                 modifier = Modifier
 
-                    .dragGestureFilter(
-                        dragObserver = object : DragObserver {
-
-                            override fun onStart(downPosition: Offset) {
-                                setValue(true)
-                                Log.d(
-                                    TAG,
-                                    "gesture onStart: offset { x = ${downPosition.x} , y = ${downPosition.y}}"
-                                )
-                            }
-
-                            override fun onDrag(dragDistance: Offset): Offset {
-                                Log.d(
-                                    TAG,
-                                    "gesture onDrag: offset { x = ${dragDistance.x} , y = ${dragDistance.y}}"
-                                )
-
-                                var (x, _) = dragDistance
-                                if (value) {
-                                    when {
-                                        x > sensibility -> {
-                                            Log.d(TAG, "gesture previous month")
-                                            x = 0f
-                                            previousMonthClick()
-                                            setValue(false)
-                                        }
-                                        x < -sensibility -> {
-                                            x = 0f
-                                            Log.d(TAG, "gesture next month")
-                                            nextMonthClick()
-                                            setValue(false)
-                                        }
+                    .draggable(
+                        onDrag ={ x ->
+                            if (value) {
+                                when {
+                                    x > sensibility -> {
+                                        Log.d(TAG, "gesture previous month")
+                                        //x = 0f
+                                        previousMonthClick()
+                                        setValue(false)
+                                    }
+                                    x < -sensibility -> {
+                                        //x = 0f
+                                        Log.d(TAG, "gesture next month")
+                                        nextMonthClick()
+                                        setValue(false)
                                     }
                                 }
-                                return Offset(x, 0f)
                             }
-                        }
+                        },
+                        orientation = Orientation.Horizontal
 
                     )
+                /* todo check if drag still works
+                .dragGestureFilter(
+                    dragObserver = object : DragObserver {
+
+                        override fun onStart(downPosition: Offset) {
+                            setValue(true)
+                            Log.d(
+                                TAG,
+                                "gesture onStart: offset { x = ${downPosition.x} , y = ${downPosition.y}}"
+                            )
+                        }
+
+                        override fun onDrag(dragDistance: Offset): Offset {
+                            Log.d(
+                                TAG,
+                                "gesture onDrag: offset { x = ${dragDistance.x} , y = ${dragDistance.y}}"
+                            )
+
+                            var (x, _) = dragDistance
+                            if (value) {
+                                when {
+                                    x > sensibility -> {
+                                        Log.d(TAG, "gesture previous month")
+                                        x = 0f
+                                        previousMonthClick()
+                                        setValue(false)
+                                    }
+                                    x < -sensibility -> {
+                                        x = 0f
+                                        Log.d(TAG, "gesture next month")
+                                        nextMonthClick()
+                                        setValue(false)
+                                    }
+                                }
+                            }
+                            return Offset(x, 0f)
+                        }
+                    }
+
+                )*/
             ) {
 
-                ScrollableColumn(
-                    modifier = Modifier.padding(top = 0.dp, start = 6.dp, end = 6.dp)
+                contentDay(
+                    Modifier.padding(top = 0.dp, start = 6.dp, end = 6.dp)
                         .padding(bottom = 0.dp)
-                ) {
+                )
 
-                    contentDay()
-
-                }
             }
 
         }
@@ -450,13 +500,13 @@ fun CalendarWindow(
 @Composable
 fun CenteredText(
     text: String,
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
     textStyle: TextStyle = AmbientTextStyle.current
 ) {
     Text(
         text = text,
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         textAlign = textAlign,
         style = textStyle
     )
@@ -471,7 +521,7 @@ fun CenteredText(
  * @param setDate is the setter for the selected date
  * @param chipDate is the date of the chip
  * @param text is the text of the chip, default is the day of chip
- * @param textModifier is the modifier of the text, default has 10.dp of padding
+ * @param modifier is the modifier of the text, default has 10.dp of padding
  * @param textAlign is the Align of the text, default is center
  * @param style is the style of the text, default is h5 of the selected Theme
  * @param fontSize is the size of the font of the text, default is 18
@@ -483,15 +533,15 @@ fun CenteredText(
  */
 @Composable
 private fun DayChip(
-    isNextUserDate: Boolean = false,
     date: MyDate,
     setDate: (MyDate) -> Unit,
     chipDate: MyDate,
+    modifier: Modifier = Modifier,
+    isNextUserDate: Boolean = false,
     text: String = chipDate.day.toString(),
-    textModifier: Modifier = Modifier.padding(10.dp),
     textAlign: TextAlign = TextAlign.Center,
     style: TextStyle = MaterialTheme.typography.h5,
-    fontSize: TextUnit = TextUnit.Sp(18),
+    fontSize: TextUnit = 18.sp,
     colorNotMonth: Color = Color.Gray,
     colorSelected: Color = MaterialTheme.colors.primary,
     colorNotSelected: Color = MaterialTheme.colors.onSurface,
@@ -499,12 +549,11 @@ private fun DayChip(
 ) {
     Surface(
         modifier = Modifier
-            .clip(RoundedCornerShape(25))
-            .preferredWidth(45.dp)
-            .preferredHeight(45.dp)
+            .clip(RoundedCornerShape(50))
+            .width(45.dp)
+            .height(45.dp)
             .clickable(
-                onClick = { setDate(chipDate) },
-                indication = null
+                onClick = { setDate(chipDate) }
             ),
         shape = RoundedCornerShape(50),
         border = when {
@@ -523,7 +572,7 @@ private fun DayChip(
 
         Text(
             text = text,
-            modifier = textModifier,
+            modifier = modifier.padding(10.dp),
             textAlign = textAlign,
             style = style,
             fontSize = fontSize,
@@ -561,7 +610,7 @@ fun DayInformation(
     selectDateEnable: Boolean,
     buttonText: String,
     OnChooseDateClick: () -> Unit,
-    events: @Composable () -> Unit,
+    events: @Composable (Modifier) -> Unit,
 ) {
 
 
@@ -658,7 +707,7 @@ fun DayInformation(
                 //.padding(horizontal = 3.dp)
                 .padding(top = 8.dp)
                 .fillMaxHeight()
-                .preferredWidth(1.dp)
+                .width(1.dp)
                 .background(MaterialTheme.colors.primary)
         )
 
@@ -668,18 +717,15 @@ fun DayInformation(
             modifier = Modifier.weight(1.35f).fillMaxHeight(),
             color = MaterialTheme.colors.background
         ) {
-            ScrollableColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
+
+            events(
+                Modifier.fillMaxHeight()
                     .padding(
                         top = 10.dp,
                         bottom = 0.dp
                     )
                     .padding(horizontal = 10.dp)
-            ) {
-                events()
-            }
-
+            )
         }
     }
 

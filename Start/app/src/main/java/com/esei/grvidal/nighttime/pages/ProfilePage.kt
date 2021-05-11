@@ -31,16 +31,17 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.AnswerOptions
+import com.esei.grvidal.nighttime.network.network_DTOs.NextDate
 
 
 private const val TAG = "ProfilePage"
 
 @Composable
-fun ProfilePageView(navController: NavHostController, userId: Long?, userVM: UserViewModel) {
+fun ProfilePageView(navController: NavHostController, userId: Long, userVM: UserViewModel) {
 
 
     //Nullable check
-    if (userId == null) {
+    if (userId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorProfileId))
 
     } else {

@@ -1,6 +1,7 @@
 package com.esei.grvidal.nighttime.network
 
 import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.squareup.moshi.JsonClass
 import retrofit2.Retrofit
 import com.squareup.moshi.Moshi
@@ -15,6 +16,7 @@ const val BASE_URL = "http://192.168.1.11:8080/api/v1/"
 
 const val USER_URL = "user/"
 const val BAR_URL = "bar/"
+const val MESSAGE_URL = "message/"
 
 const val ERROR_HEADER_TAG = "error"
 
@@ -93,7 +95,7 @@ interface NightTimeService {
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Body dateCity: DateCityDTO
-    ) : Response<Any>
+    ) : Response<Boolean>
 
     //Delete should not have body for Retrofit
     @HTTP(method = "DELETE", path = "$USER_URL{idUser}/date", hasBody = true)
@@ -101,7 +103,7 @@ interface NightTimeService {
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Body dateCity: DateCityDTO
-    ) : Response<Any>
+    ) : Response<Boolean>
 
     @GET(BAR_URL+"byCity/{idCity}")
     suspend fun listByCity(
@@ -131,7 +133,7 @@ interface NightTimeService {
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Body user: UserDTOEdit
-    ): Response<Any>
+    ): Response<Boolean>
 
     @Multipart
     @POST("$USER_URL{idUser}/picture")
@@ -146,12 +148,6 @@ interface NightTimeService {
         @Body user: UserDTOInsert
     ): Response<Boolean>
 
-    @GET("$USER_URL/{idUser}/chat")
-    suspend fun getChats(
-        @Header("auth") auth: String,
-        @Path("idUser") id: Long
-    ): Response<List<ChatView>>
-
     @GET(USER_URL+"search/{userNickname}")
     suspend fun searchUsers(
         @Path("userNickname") string: String,
@@ -163,14 +159,14 @@ interface NightTimeService {
         @Path("id") id: Long,
         @Header("auth") auth: String,
         @Path("idFriend") idFriend: Long,
-    ): Response<Any>
+    ): Response<Boolean>
 
     @POST("$USER_URL{idUser}/friends/{idFriend}")
     suspend fun addFriendshipRequest(
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Path("idFriend") idFriend: Long,
-    ): Response<Any>
+    ): Response<Boolean>
 
     @GET("$USER_URL{idUser}/friends")
     suspend fun getRequestingFriendships(
@@ -185,5 +181,38 @@ interface NightTimeService {
         @Body friendshipUpdateDTO: FriendshipUpdateDTO
     ): Response<Boolean>
 
+    @GET("$USER_URL{idUser}/friends/id")
+    suspend fun getFriendshipsIds(
+        @Header("auth") auth: String,
+        @Path("idUser") idUser: Long
+    ): Response<List<Long>>
+
+    @GET("$USER_URL{idUser}/friends/users")
+    suspend fun getFriendshipsIdsChat(
+        @Header("auth") auth: String,
+        @Path("idUser") id: Long,
+        @Query("page") page: Int = 0
+    ): Response<List<UserSnap>>
+
+    @GET("$USER_URL{idUser}/chat")
+    suspend fun getChatsWithMessages(
+        @Header("auth") auth: String,
+        @Path("idUser") id: Long
+    ): Response<List<ChatView>>
+
+   @GET("$USER_URL{idUser}/chat/{idFriendship}")
+   suspend fun getSelectedChat(
+       @Path("idFriendship") idFriendship: Long,
+       @Header("auth") auth: String,
+       @Path("idUser") idUser: Long
+   ): Response<ChatView?>
+
+
+    @POST(MESSAGE_URL)
+    suspend fun sendMessage(
+        @Header("auth") auth: String,
+        @Header("idUser") idUser: Long,
+        @Body messageForm: MessageForm
+    ): Response<Boolean>
 
 }

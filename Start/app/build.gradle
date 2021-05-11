@@ -76,6 +76,7 @@ dependencies {
     // Activity
     implementation "androidx.activity:activity-ktx:$version_activity"
     //implementation "androidx.activity:activity-compose:1.3.0-alpha03" //todo future update
+    implementation 'androidx.fragment:fragment-ktx:1.3.3'
 
 
     // ViewModel todo future update
@@ -108,6 +109,10 @@ dependencies {
     // Picasso
     implementation "com.squareup.picasso:picasso:$version_picasso"
 
+    // Pusher (chat)
+    implementation "com.pusher:pusher-java-client:$version_pusher"
+
+
     // Compose https://developer.android.com/jetpack/androidx/releases/compose
         // Animation
     implementation "androidx.compose.animation:animation:$version_animation"
@@ -130,9 +135,6 @@ dependencies {
     implementation "androidx.ui:ui-tooling:$version_ui_tooling"
     //implementation "androidx.compose.ui:ui-tooling:$version_ui_tooling"
 
-
-    // Pusher (chat)
-    implementation "com.pusher:pusher-java-client:$version_pusher"
 
 
 

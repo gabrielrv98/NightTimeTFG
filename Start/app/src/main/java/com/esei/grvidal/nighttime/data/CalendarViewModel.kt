@@ -13,6 +13,8 @@ import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.DateCityDTO
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
 import com.esei.grvidal.nighttime.network.USER_URL
+import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.launch
@@ -34,8 +36,6 @@ class CalendarViewModel : ViewModel() {
 
     private var userToken = UserToken(-1, "")
 
-    // Strong reference point to avoid loosing them
-    private var targetList = mutableListOf<Target>()
 
     fun setUserToken(loggedUser: UserToken) {
 
@@ -56,9 +56,12 @@ class CalendarViewModel : ViewModel() {
             }
         }
 
+    // Strong reference point to avoid loosing them
+    private var targetList = mutableListOf<Target>()
 
-    //remember date, it's used to show the selected date and move the calendar to the specified month
-    var selectedDate by mutableStateOf(LocalDate.now()!!.toMyDate())
+
+    // Remembered date, it's used to show the selected date and move the calendar to the specified month
+    var selectedDate by mutableStateOf(LocalDate.now().toMyDate())
         private set
 
     var dateInformation by mutableStateOf(
@@ -480,6 +483,3 @@ class CalendarViewModel : ViewModel() {
 private fun MyDate.toLocalDate(): LocalDate {
     return LocalDate.of(this.year, this.month, this.day)
 }
-
-
-

@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.data
+package com.esei.grvidal.nighttime.network.network_DTOs
 
 import androidx.compose.ui.graphics.ImageAsset
 

@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.chatutil
 
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
@@ -23,16 +24,24 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.VectorAsset
+import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.unit.sp
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.network.MessageListened
+import com.esei.grvidal.nighttime.network.network_DTOs.MessageView
 import com.esei.grvidal.nighttime.pages.ErrorComposable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.SharedFlow
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlin.coroutines.EmptyCoroutineContext
 
+private const val TAG = "ChatConversationPage"
 
 /**
  * Composable that checks if [chatVM] has friendshipId as -1, if it's false it will show the conversation
@@ -43,16 +52,30 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ChatConversationPage(
     navController: NavHostController,
-    chatVM: ChatViewModel
+    chatVM: ChatViewModel,
+    flow: SharedFlow<MessageListened>,
+    friendshipId: Long
 ) {
 
     //Nullable check
-    if (chatVM.friendshipId == -1L) {
+    if (friendshipId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorChatId))
     } else {
 
-        onCommit(chatVM.friendshipId) {
-            chatVM.getSelectedChat()
+//        LaunchedEffect(key1 = chatVM.friendshipId ){
+//            chatVM.setFlow(this, flow)
+//        }
+
+
+        DisposableEffect(chatVM.friendshipId) {
+            val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
+
+            chatVM.getSelectedChat(friendshipId)
+            chatVM.setFlow(coroutineScope, flow)
+            onDispose {
+                coroutineScope.cancel()
+                chatVM.image = null
+            }
         }
 
 
@@ -70,7 +93,8 @@ fun ChatConversationPage(
                 navController.popBackStack(navController.graph.startDestination, false)
                 navController.navigate(BottomNavigationScreens.FriendsNav.route)
             },
-            addMessage = chatVM::addMessage
+            addMessage = chatVM::addMessage,
+            image = chatVM.image
         )
 
 
@@ -92,7 +116,8 @@ fun ConversationContent(
     navigateToProfile: () -> Unit,
     addMessage: (String) -> Unit,
     onBackIconPressed: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    image: ImageAsset? = null,
 ) {
     val scrollState = rememberScrollState()
 
@@ -122,8 +147,9 @@ fun ConversationContent(
             // Channel name bar floats above the messages
             ChatNameBar(
                 channelName = userNickname,
+                navigateToProfile = navigateToProfile,
                 onBackIconPressed = onBackIconPressed,
-                navigateToProfile = { navigateToProfile() },
+                image = image
             )
         }
 
@@ -136,7 +162,7 @@ fun ChatNameBar(
     modifier: Modifier = Modifier,
     channelName: String,
     navigateToProfile: () -> Unit,
-    image: VectorAsset = Icons.Default.Person,
+    image: ImageAsset? = null ,
     onBackIconPressed: () -> Unit = { },
 ) {
     TopAppBar(
@@ -152,16 +178,11 @@ fun ChatNameBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Avatar
-                    Image(
+                    UserImage(
+                        image = image,
                         modifier = Modifier
-                            .padding(end = 8.dp)
-                            .preferredSize(37.dp)//Previous value 42
-                            .border(1.5.dp, MaterialTheme.colors.primary, CircleShape)
-                            .border(3.dp, MaterialTheme.colors.surface, CircleShape)
-                            .clip(CircleShape)
-                            .align(Alignment.Top),
-                        asset = image,
-                        contentScale = ContentScale.Crop
+                            .align(Alignment.Top)
+                            .padding(end = Icons.Default.ArrowBack.defaultWidth)
                     )
 
                     // Channel name
@@ -188,6 +209,35 @@ fun ChatNameBar(
     Divider()
 }
 
+@Composable
+fun UserImage(
+    image: ImageAsset?,
+    modifier: Modifier = Modifier
+){
+    image?.let{
+        Image(
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .size(37.dp)//Previous value 42
+                .border(1.5.dp, MaterialTheme.colors.primary, CircleShape)
+                .border(3.dp, MaterialTheme.colors.surface, CircleShape)
+                .clip(CircleShape),
+            asset = it,
+            contentScale = ContentScale.Crop
+        )
+    } ?: Image(
+        modifier = Modifier
+            .padding(end = 8.dp)
+            .preferredSize(37.dp)//Previous value 42
+            .border(1.5.dp, MaterialTheme.colors.primary, CircleShape)
+            .border(3.dp, MaterialTheme.colors.surface, CircleShape)
+            .clip(CircleShape)
+            .then(modifier),
+        asset = Icons.Default.Person,
+        contentScale = ContentScale.Crop
+    )
+}
+
 
 @Composable
 fun Messages(
@@ -210,7 +260,12 @@ fun Messages(
 
             // Always show the date of the first message
             if (messages.isNotEmpty())
-                DayHeader(dateFormatted(messages[0].date))
+                DayHeader(
+                    dateFormatted(
+                        messages[0].date,
+                        DateTimeFormatter.ofPattern("dd-MMMM")
+                    )
+                )
 
             messages.forEachIndexed { index, content ->
                 val prevAuthor = messages.getOrNull(index - 1)?.user
@@ -219,13 +274,19 @@ fun Messages(
                 val isLastMessageByAuthor = nextAuthor != content.user
 
                 // If the message has different date than the previous message date is shown
-                if (index > 0 && messages[index].date != messages[index - 1].date) {
+                if (index > 0 &&
+                    dateFormatted(messages[index].date) != dateFormatted(messages[index - 1].date)
+                ) {
 
                     // If the message is from the actual date a string is shown
                     if (messages[index].date == today.toString())
                         DayHeader(stringResource(R.string.hoy))
-
-                    else DayHeader(dateFormatted(content.date))
+                    else DayHeader(
+                        dateFormatted(
+                            content.date,
+                            DateTimeFormatter.ofPattern("dd-MMMM")
+                        )
+                    )
                 }
 
                 Message(
@@ -258,13 +319,63 @@ fun Messages(
     }
 }
 
-fun dateFormatted(time: String): String {
-    val timeSplit = time.split("-").map { it.toInt() }
-    val date = LocalDate.of(timeSplit[0], timeSplit[1], timeSplit[2])
-    val formatter = DateTimeFormatter.ofPattern("dd-MMMM")
+/**
+ * Parse function that takes as input a string with pattern
+ * yyyy-mm-dd or
+ * {"year":yyyy,"month":mm,"day":dd}
+ *
+ * @param time unformatted date as String
+ */
+fun dateFormatted(
+    time: String,
+    formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+): String {
+    val timeSplit: List<String>
+    val date: LocalDate
+    Log.d(TAG, "dateFormatted: $time")
+
+    if (Regex("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}").matches(time)) {
+        timeSplit = time.split("-")
+        date = LocalDate.of(timeSplit[0].toInt(), timeSplit[1].toInt(), timeSplit[2].toInt())
+
+    } else {
+        timeSplit = time.split(",")
+        date = LocalDate.of(
+            timeSplit[0].split(":")[1].toInt(),
+            timeSplit[1].split(":")[1].toInt(),
+            timeSplit[2].split(":")[1].dropLastWhile { !it.isDigit() }.toInt()
+        )
+
+    }
 
     return date.format(formatter)
 }
+
+
+/**
+ * Parse function that takes as input a string with pattern
+ * {"hour":hh,"minute":mm,"second":ss,"nanosecond":nn}
+ *
+ * @param time unformatted time as String
+ */
+fun timeFormatted(
+    time: String
+): String {
+    Log.d(TAG, "timeFormatted: $time")
+
+    return if (!Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}").matches(time)) {
+
+        val timeSplit = time.split(",")
+        val localTime = LocalTime.of(
+            timeSplit[0].split(":")[1].toInt(),
+            timeSplit[1].split(":")[1].toInt(),
+            timeSplit[2].split(":")[1].toInt()
+        )
+        localTime.toString()
+
+    } else time
+}
+
 
 @Composable
 fun Message(
@@ -303,14 +414,15 @@ fun AuthorAndTextMessage(
     ChatItemBubble(isUserMe, message, isLastMessageByAuthor)
 
     if (isLastMessageByAuthor) {
-        //ChatTimestamp(message)
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
-            Text(
-                modifier = Modifier.padding(start = if (isUserMe) 50.dp else 25.dp),
-                text = message.time,
-                style = MaterialTheme.typography.caption,
-                color = Color.Gray,
-            )
+
+                Text(
+                    modifier = Modifier.padding(start = if (isUserMe) 50.dp else 25.dp),
+                    text = timeFormatted(message.time),
+                    style = MaterialTheme.typography.caption,
+                    color = Color.Gray,
+                )
+
         }
         // Last bubble before next author
         Spacer(modifier = Modifier.preferredHeight(8.dp))
@@ -359,19 +471,6 @@ fun ChatItemBubble(
             )
         }
     }
-/* //todo send photos
-    message.image?.let {
-        Spacer(modifier = Modifier.height(4.dp))
-        Surface(color = backgroundBubbleColor, shape = bubbleShape) {
-            Image(
-                asset = imageResource(it),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.preferredSize(160.dp)
-            )
-        }
-    }
-
- */
 }
 
 @Composable
@@ -402,7 +501,7 @@ private fun RowScope.DayHeaderLine() {
 @Composable
 fun TopBarPreview() {
     ChatNameBar(
-        channelName = "Nuria Sotelo Domarco",
+        channelName = "Nuria Soto Marco",
         navigateToProfile = {}
     )
 }

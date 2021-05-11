@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.datastore.LoginData
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException

@@ -37,7 +37,15 @@ import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.*
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.network.MessageListened
+import com.esei.grvidal.nighttime.network.network_DTOs.ChatFullView
+import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.SharedFlow
+import kotlin.coroutines.EmptyCoroutineContext
 
 
 private const val TAG = "FriendsPage"
@@ -47,33 +55,44 @@ private const val TAG = "FriendsPage"
  *
  * @param navController  controller of hte navigation, its used to go back or navigate to other views
  */
+
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
-fun FriendsPage(navController: NavHostController, chatVM: ChatViewModel) {
-// TODO: 29/04/2021 Use-Case -> Start a new Chat (floatButton in FriendsScreen)
-    // Operator key allow the function to run again if the
-    // composable is detached from composition
-    onCommit(chatVM.getId()) {
+fun FriendsPage(
+    navController: NavHostController,
+    friendsVM: FriendsViewModel,
+    flow: SharedFlow<MessageListened>
+) {
 
-        chatVM.getChats()
-        chatVM.getRequestingFriendships()
+    onCommit(friendsVM.getId()) {
+        val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
+
+        Log.d(TAG, "FriendsPage: onCommit")
+        friendsVM.getChats()
+        friendsVM.getRequestingFriendships()
+        friendsVM.setFlow(coroutineScope, flow)
+
+        onDispose {
+            coroutineScope.cancel()
+        }
     }
-
 
     var requestFriendshipDialog by remember { mutableStateOf(false) }
 
     // Requesting friendship dialog
     if (requestFriendshipDialog) {
 
-            FriendshipRequestDialog(
-                navController = navController,
-                requestList = chatVM.requestingFriendshipUserList,
-                answerFriendship = chatVM::answerFriendshipRequest,
-                closeRequestFriendshipDialog = { requestFriendshipDialog = false }
-            )
+        FriendshipRequestDialog(
+            navController = navController,
+            requestList = friendsVM.requestingFriendshipUserList,
+            answerFriendship = friendsVM::answerFriendshipRequest,
+            closeRequestFriendshipDialog = { requestFriendshipDialog = false }
+        )
     }
 
+
     FriendsScreen(
-        chatList = chatVM.chatList,
+        chatList = friendsVM.chatList.collectAsState().value,
         onChatClick = { chatId ->
 
             navController.navigateWithId(
@@ -81,8 +100,11 @@ fun FriendsPage(navController: NavHostController, chatVM: ChatViewModel) {
                 chatId
             )
         },
-        numberRequestFriendship = chatVM.totalRequestingFriendship,
-        showDialog = { requestFriendshipDialog = true }
+        numberRequestFriendship = friendsVM.totalRequestingFriendship,
+        showDialog = { requestFriendshipDialog = true },
+        fetchFriendList = friendsVM::getFriendshipsIds,
+        friendsList = friendsVM.friendshipIdList.toList(),
+        numberOfFriends = friendsVM.totalFriends
     )
 
 }
@@ -90,8 +112,8 @@ fun FriendsPage(navController: NavHostController, chatVM: ChatViewModel) {
 @Composable
 private fun FriendshipRequestDialog(
     navController: NavHostController,
-    requestList : List<UserFriendView>,
-    answerFriendship: (Long,Boolean) -> Unit,
+    requestList: List<UserFriendView>,
+    answerFriendship: (Long, Boolean) -> Unit,
     closeRequestFriendshipDialog: () -> Unit
 ) {
     val context = ContextAmbient.current
@@ -104,7 +126,7 @@ private fun FriendshipRequestDialog(
         )
 
         FriendshipRequestListDialog(
-            friendshipList = requestList ,
+            friendshipList = requestList,
             onAccept = { idFriendship, userNickname ->
 
                 answerFriendship(idFriendship, true)
@@ -139,71 +161,120 @@ fun FriendsScreen(
     onChatClick: (Long) -> Unit,
     numberRequestFriendship: Int,
     showDialog: () -> Unit,
+    friendsList: List<UserSnapImage>,
+    fetchFriendList: () -> Unit,
+    numberOfFriends: Int
 ) {
+    for ((i, chatsAux) in chatList.withIndex())
+        Log.d(
+            TAG,
+            "setFlow: $i After all ${chatsAux.userNickname}  - last ${chatsAux.messages[0].text} - unread ${chatsAux.unreadMessages}"
+        )
+
     Log.d(TAG, "FriendsScreen: chatList $chatList")
 
-    Column {
-        Header(
-            text = stringResource(id = R.string.chat_title),
-            modifier = Modifier.padding(top = 24.dp),
-            icon = { iconModifier ->
-                 Box(
-                     modifier = iconModifier
-                         .padding(end = 17.dp, bottom = 15.dp),
-                     alignment = Alignment.Center
+    val (showNewConversationDialog, setNewConversationShowDialog) = remember { mutableStateOf(false) }
 
-                 ) {
-                    Surface(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .clip(shape = CircleShape)
-                            .clickable(onClick = { showDialog() }),
-                        shape = CircleShape,
-                        border = BorderStroke(1.dp, SolidColor(MaterialTheme.colors.primary))
+    if (showNewConversationDialog)
+        UserSnapList(
+            userList = friendsList,
+            numberOfFriends = numberOfFriends,
+            loadMoreFriends = fetchFriendList,
+            closeDialog = { setNewConversationShowDialog(false) },
+            onClick = onChatClick
+        )
+    // TODO: 10/05/2021 show all users to start a new Chat
+
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+    ) {
+
+        Column {
+            Header(
+                text = stringResource(id = R.string.chat_title),
+                modifier = Modifier.padding(top = 24.dp),
+                icon = { iconModifier ->
+                    Box(
+                        modifier = iconModifier
+                            .padding(end = 17.dp, bottom = 15.dp),
+                        alignment = Alignment.Center
+
                     ) {
-                        Icon(
-                            asset = Icons.Default.Add,
-                            modifier = Modifier.padding(3.dp)
-                        )
-                    }
-
-                    if(numberRequestFriendship > 0)
                         Surface(
                             modifier = Modifier
-                                //.wrapContentHeight()
-                                .padding(bottom= 23.dp, start = 26.dp )
-                                //.align(Alignment.TopEnd)
-                                .clip(shape = CircleShape),
-                            color = Color.Red,
-                            shape = CircleShape
+                                .wrapContentSize()
+                                .clip(shape = CircleShape)
+                                .clickable(onClick = { showDialog() }),
+                            shape = CircleShape,
+                            border = BorderStroke(1.dp, SolidColor(MaterialTheme.colors.primary))
                         ) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(horizontal = 5.dp)
-                                    .clip(CircleShape),
-                                text = numberRequestFriendship.toString(),
-                                color = Color.White,
-
+                            Icon(
+                                asset = Icons.Default.Add,
+                                modifier = Modifier.padding(3.dp)
                             )
                         }
 
+                        if (numberRequestFriendship > 0)
+                            Surface(
+                                modifier = Modifier
+                                    //.wrapContentHeight()
+                                    .padding(bottom = 23.dp, start = 26.dp)
+                                    //.align(Alignment.TopEnd)
+                                    .clip(shape = CircleShape),
+                                color = Color.Red,
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(horizontal = 5.dp)
+                                        .clip(CircleShape),
+                                    text = numberRequestFriendship.toString(),
+                                    color = Color.White,
+
+                                    )
+                            }
+
+                    }
+
                 }
+            )
 
-            }
-        )
+            LazyColumnFor(items = chatList) { chatData ->
+                Log.d(TAG, "FriendsScreen: setFlow Recomposing ${chatData.userNickname}")
 
-        LazyColumnFor(items = chatList) { chatData ->
-            key(chatData.friendshipId) {
                 ChatEntry(
                     userName = chatData.userNickname,
                     lastMessage = chatData.messages[0].text,
+                    unreadMessages = chatData.unreadMessages,
                     img = chatData.img,
                     onEntryClick = { onChatClick(chatData.friendshipId) }
                 )
             }
+
         }
 
+        FloatingActionButton(
+            onClick = {
+                setNewConversationShowDialog(true)
+                if (friendsList.isEmpty())
+                    fetchFriendList()
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .preferredHeight(48.dp)
+                .widthIn(min = 48.dp),
+        ) {
+            Icon(asset = Icons.Default.Add)
+        }
+
+
     }
+
+
 }
 
 
@@ -214,6 +285,7 @@ fun FriendsScreen(
 fun ChatEntry(
     userName: String,
     lastMessage: String,
+    unreadMessages: Boolean,
     img: ImageAsset? = null,
     onEntryClick: () -> Unit = {}
 ) {
@@ -255,6 +327,33 @@ fun ChatEntry(
                 )
                 Text(text = lastMessage, style = MaterialTheme.typography.body2, maxLines = 1)
             }
+
+            if (unreadMessages)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .padding(bottom = 23.dp, start = 26.dp)
+                            .clip(shape = MaterialTheme.shapes.medium)
+                            .align(Alignment.End),
+                        color = Color.Red,
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 5.dp)
+                                .clip(MaterialTheme.shapes.medium),
+                            text = stringResource(R.string.new_messages),
+                            color = Color.White
+                        )
+                    }
+                }
+
+
         }
         Divider(startIndent = 25.dp)
     }
@@ -272,7 +371,7 @@ fun FriendsSearch(
     val (nicknameSearch, setNicknameSearch) = remember { mutableStateOf(TextFieldValue()) }
     val state = rememberLazyListState()
 
-    if( userList.size - state.firstVisibleItemIndex <= 12){
+    if (userList.size - state.firstVisibleItemIndex <= 12) {
         Log.d(TAG, "FriendsSearch: userList size = ${userList.size}, calling more pages")
         onSearch(nicknameSearch.text)
 
