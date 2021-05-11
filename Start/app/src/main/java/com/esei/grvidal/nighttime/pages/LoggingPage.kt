@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.LoginViewModel
 import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.scaffold.*
 
 
@@ -41,7 +42,7 @@ fun LoginArchitecture(
     loginVM: LoginViewModel,
     userVM: UserViewModel,
     messageError: String = "",
-    searchImage: () -> Unit,
+    searchImage: () -> Unit
 ){
     val navController = rememberNavController()
 

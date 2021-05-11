@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.esei.grvidal.nighttime.data.UserFriendView
+import com.esei.grvidal.nighttime.network.network_DTOs.UserFriendView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.pages.makeLongShort
 

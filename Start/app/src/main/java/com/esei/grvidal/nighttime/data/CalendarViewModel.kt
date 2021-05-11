@@ -11,8 +11,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.DateCityDTO
+import com.esei.grvidal.nighttime.network.EventData
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
 import com.esei.grvidal.nighttime.network.USER_URL
+import com.esei.grvidal.nighttime.network.network_DTOs.CalendarData
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.squareup.picasso.Picasso
@@ -23,14 +25,6 @@ import java.time.LocalDate
 
 private const val TAG = "CalendarViewModel"
 
-
-data class CalendarData(
-    val total: Int,
-    val friends: Int,
-    val events: List<EventData>
-)
-
-data class EventData(val id: Long, val date: String, val description: String, val barName: String)
 
 class CalendarViewModel : ViewModel() {
 

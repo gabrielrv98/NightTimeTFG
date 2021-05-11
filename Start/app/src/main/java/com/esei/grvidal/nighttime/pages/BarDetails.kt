@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
@@ -47,7 +48,11 @@ private const val TAG = "BarDetails"
  * @param navController navigator with the queue of destinies and it will be used to go back
  */
 @Composable
-fun BarDetails(barVM: BarViewModel, barId: Long, navController: NavHostController) {
+fun BarDetails(
+    navController: NavHostController,
+    barId: Long,
+    barVM: BarViewModel,
+) {
     //Null Check
     if (barId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorBarId))

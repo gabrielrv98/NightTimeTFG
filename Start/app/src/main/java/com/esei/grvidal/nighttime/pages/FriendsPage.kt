@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.viewModel
 import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
@@ -39,7 +40,9 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.MessageListened
 import com.esei.grvidal.nighttime.network.network_DTOs.ChatFullView
+import com.esei.grvidal.nighttime.network.network_DTOs.UserFriendView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,12 +63,15 @@ private const val TAG = "FriendsPage"
 @Composable
 fun FriendsPage(
     navController: NavHostController,
-    friendsVM: FriendsViewModel,
-    flow: SharedFlow<MessageListened>
+    userToken: UserToken,
+    flow: SharedFlow<MessageListened>,
+    showDialog: MutableState<Boolean>,
+    friendsVM: FriendsViewModel = viewModel(),
 ) {
 
     onCommit(friendsVM.getId()) {
         val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
+        friendsVM.setUserToken(userToken)
 
         Log.d(TAG, "FriendsPage: onCommit")
         friendsVM.getChats()
@@ -78,6 +84,27 @@ fun FriendsPage(
     }
 
     var requestFriendshipDialog by remember { mutableStateOf(false) }
+
+    if (showDialog.value) {
+        CustomDialog(
+            onClose = { showDialog.value = false }
+        ) {
+            FriendsSearch(
+                onSearch = friendsVM::searchUsers,
+                onClick = { userId ->
+
+                    friendsVM.clearSearchedList()
+
+                    navController.navigateWithId(
+                        BottomNavigationScreens.ProfileNav.route,
+                        userId
+                    )
+
+                },
+                userList = friendsVM.searchedUserList
+            )
+        }
+    }
 
     // Requesting friendship dialog
     if (requestFriendshipDialog) {
@@ -183,7 +210,6 @@ fun FriendsScreen(
             closeDialog = { setNewConversationShowDialog(false) },
             onClick = onChatClick
         )
-    // TODO: 10/05/2021 show all users to start a new Chat
 
 
 

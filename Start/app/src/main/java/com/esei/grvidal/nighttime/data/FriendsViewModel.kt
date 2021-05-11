@@ -11,10 +11,7 @@ import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.*
 import com.esei.grvidal.nighttime.network.*
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
-import com.esei.grvidal.nighttime.network.network_DTOs.ChatFullView
-import com.esei.grvidal.nighttime.network.network_DTOs.ChatView
-import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.*
@@ -34,29 +31,6 @@ fun ChatView.toFullView(
         img
     )
 }
-
-data class UserFriendViewAPI(
-    var friendshipId: Long,
-    var userId: Long,
-    var userNickname: String,
-    var state: String,
-    var image: Boolean
-)
-
-data class UserFriendView(
-    var friendshipId: Long,
-    var userId: Long,
-    var userNickname: String,
-    var state: String,
-    val hasImage: Boolean,
-    var image: ImageAsset? = null
-)
-
-
-data class FriendshipUpdateDTO(
-    val id: Long,
-    val answer: AnswerOptions
-)
 
 
 private const val TAG = "FriendsViewModel"
@@ -167,8 +141,8 @@ class FriendsViewModel : ViewModel() {
                                         viewModelScope.launch {
                                             _chatList.emit(
                                                 chatListHolder
-                                                .sortedBy { list -> list.messages[0].date }
-                                                .sortedBy { list -> list.messages[0].time }
+                                                .sortedByDescending { list -> list.messages[0].time }
+                                                .sortedByDescending { list -> list.messages[0].date }
                                             )
                                         }
 
@@ -183,8 +157,8 @@ class FriendsViewModel : ViewModel() {
                     }
                     _chatList.emit(
                         chatListHolder
-                            .sortedBy { list -> list.messages[0].date }
-                            .sortedBy { list -> list.messages[0].time }
+                            .sortedByDescending { list -> list.messages[0].time }
+                            .sortedByDescending { list -> list.messages[0].date }
                     )
 
                 }

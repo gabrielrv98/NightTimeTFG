@@ -35,3 +35,4 @@ data class BarDTO(
 
 data class BarDetailsDTO(val id: Long, val events: List<EventFromBar>, val photos: Int)
 data class EventFromBar(val id: Long, val description: String, val date: String?)
+data class EventData(val id: Long, val date: String, val description: String, val barName: String)

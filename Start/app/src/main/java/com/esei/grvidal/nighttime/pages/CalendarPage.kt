@@ -3,7 +3,6 @@ package com.esei.grvidal.nighttime.pages
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.draggable 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.ExperimentalLazyDsl
@@ -20,7 +19,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.gesture.DragObserver
+import androidx.compose.ui.gesture.dragGestureFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -30,13 +31,13 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider 
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.UsersSnapListDialog
 import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.network.EventData
+import com.esei.grvidal.nighttime.network.network_DTOs.EventData
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
@@ -129,7 +130,8 @@ fun UserSnapList(
         UsersSnapListDialog(
             userList = userList,
             modifier = Modifier.preferredHeight(600.dp),
-            listState = state
+            listState = state,
+            onItemClick = onClick
         )
     }
 }
@@ -149,7 +151,7 @@ private fun CalendarScreen(
     removeUserSelectedDate: (MyDate) -> Unit,
     userFriendListButton: () -> Unit
 ) {
-    val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
+    val colorBackground = MaterialTheme.colors.background
     CalendarPageView(
         calendar = {
             CalendarWindow(
@@ -414,30 +416,6 @@ fun CalendarWindow(
             //Calendar indeed
             Box(
                 modifier = Modifier
-
-                    .draggable(
-                        onDrag ={ x ->
-                            if (value) {
-                                when {
-                                    x > sensibility -> {
-                                        Log.d(TAG, "gesture previous month")
-                                        //x = 0f
-                                        previousMonthClick()
-                                        setValue(false)
-                                    }
-                                    x < -sensibility -> {
-                                        //x = 0f
-                                        Log.d(TAG, "gesture next month")
-                                        nextMonthClick()
-                                        setValue(false)
-                                    }
-                                }
-                            }
-                        },
-                        orientation = Orientation.Horizontal
-
-                    )
-                /* todo check if drag still works
                 .dragGestureFilter(
                     dragObserver = object : DragObserver {
 
@@ -476,7 +454,7 @@ fun CalendarWindow(
                         }
                     }
 
-                )*/
+                )
             ) {
 
                 contentDay(

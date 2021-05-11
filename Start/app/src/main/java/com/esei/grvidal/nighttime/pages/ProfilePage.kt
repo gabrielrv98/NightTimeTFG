@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import androidx.ui.tooling.preview.Preview
@@ -32,12 +33,17 @@ import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.AnswerOptions
 import com.esei.grvidal.nighttime.network.network_DTOs.NextDate
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 
 
 private const val TAG = "ProfilePage"
 
 @Composable
-fun ProfilePageView(navController: NavHostController, userId: Long, userVM: UserViewModel) {
+fun ProfilePageView(
+    navController: NavHostController,
+    userId: Long,
+    userVM: UserViewModel,
+) {
 
 
     //Nullable check

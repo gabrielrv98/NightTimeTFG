@@ -1,7 +1,6 @@
 package com.esei.grvidal.nighttime.pages
 
 import android.util.Log
-import androidx.activity.viewModels
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.*
@@ -12,7 +11,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,15 +27,79 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
+import androidx.navigation.compose.rememberNavController
 import androidx.ui.tooling.preview.Preview
+import com.esei.grvidal.nighttime.BottomBarNavConstructor
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
-import com.esei.grvidal.nighttime.scaffold.NavigationScreens
-import com.esei.grvidal.nighttime.data.BarViewModel
 import com.esei.grvidal.nighttime.navigateWithId
 import com.esei.grvidal.nighttime.network.BarDTO
+import com.esei.grvidal.nighttime.scaffold.*
 
 private const val TAG = "BarPage"
+
+
+@Composable
+fun BarArchitecture(
+    cityVM: CityViewModel,
+    bottomNavigationItems : List<BottomNavigationScreens>,
+    barVM: BarViewModel = viewModel(),
+){
+    SideEffect{
+        barVM.city = cityVM.city
+    }
+
+    val navController = rememberNavController()
+
+    NavHost(navController, startDestination = BottomNavigationScreens.BarNav.route) {
+        composable(BottomNavigationScreens.BarNav.route) {// Login
+            ScreenScaffolded(
+                topBar = {
+                    TopBarConstructor(
+                        action = { cityVM.setDialog(true) },
+                        icon = Icons.Default.Search,
+                        buttonText = cityVM.city.name
+                    )
+                },
+                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                CityDialogConstructor(
+                    cityDialog = cityVM.showDialog,
+                    items = cityVM.allCities,
+                    setCityDialog = cityVM::setDialog,
+                    setCityId = cityVM::setCity
+                )
+                BarPage(navController, barVM)
+            }
+        }
+
+        composable(  // Bar details
+            NavigationScreens.BarDetails.route + "/{barId}",
+            arguments = listOf(navArgument("barId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            //Sometimes Android would reorganize backStackEntry.arguments?.getLong  as an int and showing
+            // W/Bundle: Key barId expected Long but value was a java.lang.Integer.  The default value 0 was returned.
+            // So we send an int then transform it to long
+            Log.d(TAG, "MainScreen: Pulling BarDetails")
+
+            ScreenScaffolded(
+                modifier = Modifier
+            ) {
+                BarDetails(
+                    barVM = barVM,
+                    barId = backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L,
+                    navController = navController
+                )
+            }
+
+        }
+    }
+}
 
 /**
  * StateFull composable that manage the main composition of the BarPAge view
@@ -42,7 +108,11 @@ private const val TAG = "BarPage"
  * @param barVM ViewModel for Bar page
  */
 @Composable
-fun BarPage(navController: NavHostController, barVM: BarViewModel = viewModel() ) {
+fun BarPage(
+    navController: NavHostController,
+    barVM: BarViewModel,
+) {
+
 
 
     TitleColumn(title = stringResource(id = R.string.baresZona) + " " + barVM.city.name) {

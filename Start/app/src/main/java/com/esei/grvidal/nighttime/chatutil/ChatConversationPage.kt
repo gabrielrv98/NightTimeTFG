@@ -28,10 +28,12 @@ import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.MessageListened
 import com.esei.grvidal.nighttime.network.network_DTOs.MessageView
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.pages.ErrorComposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -52,9 +54,10 @@ private const val TAG = "ChatConversationPage"
 @Composable
 fun ChatConversationPage(
     navController: NavHostController,
-    chatVM: ChatViewModel,
     flow: SharedFlow<MessageListened>,
-    friendshipId: Long
+    friendshipId: Long,
+    userToken: UserToken,
+    chatVM: ChatViewModel = viewModel(),
 ) {
 
     //Nullable check
@@ -62,14 +65,10 @@ fun ChatConversationPage(
         ErrorComposable(errorText = stringResource(id = R.string.errorChatId))
     } else {
 
-//        LaunchedEffect(key1 = chatVM.friendshipId ){
-//            chatVM.setFlow(this, flow)
-//        }
-
-
         DisposableEffect(chatVM.friendshipId) {
             val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
 
+            chatVM.setUserToken(userToken)
             chatVM.getSelectedChat(friendshipId)
             chatVM.setFlow(coroutineScope, flow)
             onDispose {

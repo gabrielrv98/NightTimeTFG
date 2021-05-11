@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -40,16 +39,11 @@ class MainActivity : AppCompatActivity() {
      * so the object don't initialize until needed and if the Activity is destroyed and recreated afterwards
      * it will receive the same instance of ViewModel as it had previously
      * */
-    private val barVM by viewModels<BarViewModel>()
     private val userVM by viewModels<UserViewModel>()
-    private val friendsVM by viewModels<FriendsViewModel>()
-    private val chatVM by viewModels<ChatViewModel>()
 
     /** This ViewModels need arguments in their constructors so we need to
      * use a Fabric to return a lazy initialization of the ViewModel
      */
-    private lateinit var loginVM: LoginViewModel
-    private lateinit var cityVM: CityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,21 +54,15 @@ class MainActivity : AppCompatActivity() {
          * [LoginViewModel] and [CityViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
          * Factory [LoginViewModelFactory] and [CityViewModelFactory] respectively to return a ViewModel by lazy
          */
-        loginVM = ViewModelProvider(
+        val loginVM = ViewModelProvider(
             this,
             LoginViewModelFactory(DataStoreManager.getInstance(this))
         ).get(LoginViewModel::class.java)
 
-        cityVM = ViewModelProvider(
+        val cityVM = ViewModelProvider(
             this,
             CityViewModelFactory(DataStoreManager.getInstance(this))
         ).get(CityViewModel::class.java)
-
-
-        /*
-        Chat initialization
-         */
-
 
 
         setContent {
@@ -114,17 +102,12 @@ class MainActivity : AppCompatActivity() {
                     LoginState.ACCEPTED -> {
 
                         userVM.setUserToken(loginVM.loggedUser)
-                        friendsVM.setUserToken(loginVM.loggedUser)
-                        chatVM.setUserToken(loginVM.loggedUser)
 
                         Log.d(TAG, "onCreate: pulling MainScreen")
                         NightTimeApp(
                             loginVM,
                             userVM,
                             cityVM,
-                            barVM,
-                            friendsVM,
-                            chatVM,
                             searchImage = { selectImageLauncher.launch("image/*") }
                         )
 
@@ -139,9 +122,6 @@ class MainActivity : AppCompatActivity() {
                                 loginVM,
                                 userVM,
                                 cityVM,
-                                barVM,
-                                friendsVM,
-                                chatVM,
                                 searchImage = { selectImageLauncher.launch("image/*") }
                             )
                         } else {
@@ -214,9 +194,6 @@ private fun NightTimeApp(
     login: LoginViewModel,
     userVM: UserViewModel,
     cityVM: CityViewModel,
-    barVM: BarViewModel,
-    friendsVM : FriendsViewModel,
-    chatVM : ChatViewModel,
     searchImage: () -> Unit
 ) {
 /* Actual Navigation system
@@ -234,7 +211,7 @@ Navigation with their own files ( no dependencies )
 
     val navController = rememberNavController()
 
-    val bottomNavigationItems = listOf(
+    val bottomNavigationItems  = listOf(
         BottomNavigationScreens.BarNav,
         BottomNavigationScreens.CalendarNav,
         BottomNavigationScreens.FriendsNav,
@@ -267,45 +244,7 @@ Navigation with their own files ( no dependencies )
         }
 
         composable(BottomNavigationScreens.BarNav.route) {// Bar
-            ScreenScaffolded(
-                topBar = {
-                    TopBarConstructor(
-                        action = { cityVM.setDialog(true) },
-                        icon = Icons.Default.Search,
-                        buttonText = cityVM.city.name
-                    )
-                },
-                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
-            ) {
-                CityDialogConstructor(
-                    cityDialog = cityVM.showDialog,
-                    items = cityVM.allCities,
-                    setCityDialog = cityVM::setDialog,
-                    setCityId = cityVM::setCity
-                )
-                barVM.city = cityVM.city
-                BarPage(navController, barVM)
-            }
-
-        }
-        composable(  // Bar details
-            NavigationScreens.BarDetails.route + "/{barId}",
-            arguments = listOf(navArgument("barId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            //Sometimes Android would reorganize backStackEntry.arguments?.getLong  as an int and showing
-            // W/Bundle: Key barId expected Long but value was a java.lang.Integer.  The default value 0 was returned.
-            // So we send an int then transform it to long
-            Log.d(TAG, "MainScreen: Pulling BarDetails")
-
-            ScreenScaffolded(
-                modifier = Modifier
-            ) {
-                BarDetails(
-                    barVM = barVM,
-                    barId = backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L,
-                    navController = navController
-                )
-            }
+            BarArchitecture(cityVM = cityVM, bottomNavigationItems = bottomNavigationItems)
 
         }
 
@@ -327,28 +266,9 @@ Navigation with their own files ( no dependencies )
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
 
-                FriendsPage(navController,friendsVM, chatListener.events)
+                FriendsPage(navController, login.loggedUser,chatListener.events,showDialog)
 
-                if (showDialog.value) {
-                    CustomDialog(
-                        onClose = { showDialog.value = false }
-                    ) {
-                        FriendsSearch(
-                            onSearch = friendsVM::searchUsers,
-                            onClick = { userId ->
 
-                                friendsVM.clearSearchedList()
-
-                                navController.navigateWithId(
-                                    BottomNavigationScreens.ProfileNav.route,
-                                    userId
-                                )
-
-                            },
-                            userList = friendsVM.searchedUserList
-                        )
-                    }
-                }
 
             }
         }
@@ -360,9 +280,9 @@ Navigation with their own files ( no dependencies )
 
             ChatConversationPage(
                 navController = navController,
-                chatVM = chatVM,
                 flow = chatListener.events,
-                friendshipId = backStackEntry.arguments?.getInt("ChatId")?.toLong() ?: -1L
+                friendshipId = backStackEntry.arguments?.getInt("ChatId")?.toLong() ?: -1L,
+                userToken = login.loggedUser
             )
 
         }
@@ -380,7 +300,10 @@ Navigation with their own files ( no dependencies )
                 },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
-                ProfilePageView(navController, login.loggedUser.id, userVM
+                ProfilePageView(
+                    navController = navController,
+                    userId = login.loggedUser.id,
+                    userVM = userVM
                 )
             }
         }
@@ -410,18 +333,13 @@ Navigation with their own files ( no dependencies )
                 topBar = { TopAppBar(title = { Text(text =  stringResource(R.string.edit_profile)) }) },
                 bottomBar = {},
             ) {
-                ProfileEditorPage(navController, searchImage, userVM,login::setPassword)
+                ProfileEditorPage(
+                    navController = navController,
+                    searchImage = searchImage,
+                    setLoginCredentials = login::setPassword,
+                    user = userVM
+                )
             }
-        }
-
-        composable("channellist") {
-            //ChannelListScreen(navController = navController)
-        }
-
-        composable(
-            "messagelist/{cid}"
-        ) { _ ->
-            //MessageListScreen( navController = navController, cid = backStackEntry.arguments?.getString("cid")!! )
         }
     }
 }

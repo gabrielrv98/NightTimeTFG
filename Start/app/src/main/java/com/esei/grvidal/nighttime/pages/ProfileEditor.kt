@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
@@ -44,6 +45,7 @@ import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.PhotoState
 import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -57,8 +59,8 @@ const val PERMISSION_CODE = 1001
 fun ProfileEditorPage(
     navController: NavHostController,
     searchImage: () -> Unit,
-    user: UserViewModel,
-    setLoginCredentials: (String) -> Unit
+    setLoginCredentials: (String) -> Unit,
+    user: UserViewModel
 ) {
 
 
