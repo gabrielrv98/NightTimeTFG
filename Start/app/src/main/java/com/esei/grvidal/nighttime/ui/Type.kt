@@ -15,9 +15,15 @@ val typography = Typography(
         fontSize = 16.sp
     ),
     body2 = TextStyle(
-        fontFamily = FontFamily.Serif,
+       // fontFamily = FontFamily.Serif,
+        fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp
+    ),
+    h4 = TextStyle(
+        fontFamily = FontFamily.Serif,
+        fontWeight = FontWeight.Normal,
+        fontSize = 34.sp
     ),
     h5 = TextStyle(
         fontFamily = FontFamily.Serif,

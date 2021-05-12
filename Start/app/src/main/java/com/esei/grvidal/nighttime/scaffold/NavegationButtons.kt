@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime
+package com.esei.grvidal.nighttime.scaffold
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -17,36 +17,36 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.KEY_ROUTE
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.navigate
 import androidx.ui.tooling.preview.Preview
+import com.esei.grvidal.nighttime.R
 
 /**
  * Bottom navigation icons with their route to the view
  *
  * @param route String that represents the route of the View
  * @param resourceId String from resources used to backtrack the users view
- * @param icon VectorAsset of the representeted icon
+ * @param icon VectorAsset of the represented icon
  */
 sealed class BottomNavigationScreens(
     val route: String,
     @StringRes val resourceId: Int,
     val icon: VectorAsset
 ) {
-    object Calendar :
+    object CalendarNav :
         BottomNavigationScreens("Calendar", R.string.calendar_route, Icons.Default.Today)
 
-    object Bar :
+    object BarNav :
         BottomNavigationScreens("Bar", R.string.bar_route, Icons.Default.LocalBar)
 
-    object Friends :
+    object FriendsNav :
         BottomNavigationScreens("Friends", R.string.friends_route, Icons.Default.People)
 
-    object Profile :
+    object ProfileNav :
         BottomNavigationScreens("Profile", R.string.profile_route, Icons.Default.Person)
 }
 
 /**
- * Screens of the App
+ * Sub screens of the App
  *
  * @param route String that represents the route of the View
  * @param resourceId String from resources used to backtrack the users view
@@ -55,23 +55,29 @@ sealed class NavigationScreens(
     val route: String,
     @StringRes val resourceId: Int
 ) {
+    object LoginPage:
+            NavigationScreens("Logging",R.string.login)
+    object RegisterPage:
+        NavigationScreens("Register",R.string.register)
     object BarDetails :
-        NavigationScreens("BarDetails", R.string.barDetails_route )
+        NavigationScreens("BarDetails", R.string.barDetails_route)
+    object ChatConversation :
+        NavigationScreens("ChatConversation", R.string.ChatConversation)
+    object ProfileEditor :
+        NavigationScreens("ProfileEditor", R.string.ProfileEditor)
 
 }
 
 
 /**
- *  Formated view of the BottomBar
+ *  Formatted view of the BottomBar
  *
- *  @param navController controller of the navigation
- *  @param items list of the bottom buttons
+ *  @param content Content of the bottom Row
  *
  */
 @Composable
-fun bottomBarNavigation(
-    navController: NavHostController,
-    items: List<BottomNavigationScreens>
+fun BottomBarNavigation(
+    content : @Composable () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -90,29 +96,13 @@ fun bottomBarNavigation(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                val currentRoute = currentRoute(navController)
-                items.forEach {screen ->
-                    SelectableIconButton(
-                        icon = screen.icon,
-                        isSelected = currentRoute == screen.route,
-                        onIconSelected = {
-                            // This is the equivalent to popUpTo the start destination
-                            navController.popBackStack(navController.graph.startDestination, false)
-
-                            // This if check gives us a "singleTop" behavior where we do not create a
-                            // second instance of the composable if we are already on that destination
-                            if (currentRoute != screen.route) {
-                                navController.navigate(screen.route)
-                            }
-                        }
-                    )
-                }
+                content()
             }
         }
     }
 
 }
+
 
 /**
  * Method to recover the navigation's backtrack and return it as a string
@@ -120,7 +110,7 @@ fun bottomBarNavigation(
  * @param navController controller to be analyzed
  */
 @Composable
-private fun currentRoute(navController: NavHostController): String? {
+fun currentRoute(navController: NavHostController): String? {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     return navBackStackEntry?.arguments?.getString(KEY_ROUTE)
 }
@@ -178,6 +168,6 @@ fun SelectableIconButton(
 @Preview("bottomBar")
 @Composable
 fun bottomBarPreview() {
-    SelectableIconButton(Icons.Default.LocalBar,{},true)
+    SelectableIconButton(Icons.Default.LocalBar, {}, true)
 
 }
