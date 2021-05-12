@@ -1,7 +1,6 @@
 package com.esei.grvidal.nighttime.network.network_DTOs
 
 import androidx.compose.ui.graphics.ImageAsset
-import com.esei.grvidal.nighttime.network.AnswerOptions
 
 data class UserFriendViewAPI(
     var friendshipId: Long,
@@ -24,3 +23,12 @@ data class FriendshipUpdateDTO(
     val id: Long,
     val answer: AnswerOptions
 )
+
+/**
+ * Enum with the option to answer a friendship request
+ */
+enum class AnswerOptions {
+    NOT_ANSWERED,
+    YES,
+    NO
+}

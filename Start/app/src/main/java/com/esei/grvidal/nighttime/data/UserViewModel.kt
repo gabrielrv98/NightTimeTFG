@@ -13,7 +13,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.network.AnswerOptions
+import com.esei.grvidal.nighttime.network.network_DTOs.AnswerOptions
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.ERROR_HEADER_TAG
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi

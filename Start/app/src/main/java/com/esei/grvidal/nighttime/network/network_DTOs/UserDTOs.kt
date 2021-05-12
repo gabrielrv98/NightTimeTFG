@@ -1,7 +1,6 @@
 package com.esei.grvidal.nighttime.network.network_DTOs
 
-import com.esei.grvidal.nighttime.network.AnswerOptions
-
+import androidx.compose.ui.graphics.ImageAsset
 
 
 data class UserFull(
@@ -11,7 +10,7 @@ data class UserFull(
     var password: String,
     var state: String = "",
     var email: String,
-    var nextDate: NextDate? = null,
+    var nextDate: NextDateDTO? = null,
     var picture: String? = null
 )
 
@@ -23,20 +22,13 @@ data class UserViewPrivate(
     val email: String
 )
 
-data class UserDTOEdit(
-    var id: Long,
-    val name: String?,
-    val password: String?,
-    val state: String? = null,
-    val email: String?
-)
 
 data class UserDTO(
     var id: Long,//user ID
     var name: String,
     var nickname: String,
     var state: String,
-    var nextDate: NextDate? = null,
+    var nextDate: NextDateDTO? = null,
     var picture: String? = null,
     var friendshipState: AnswerOptions
 ) {
@@ -54,32 +46,6 @@ data class UserDTO(
     }
 }
 
-data class NextDate(
-    val id: Long,
-    val nextDate: String,
-    val nextCity: CityDTO
-) {
-    override fun toString(): String {
-        val date = nextDate.split("-")
-
-        return StringBuilder()
-            .append(date[2])
-            .append("-")
-            .append(date[1])
-            .append("-")
-            .append(date[0])
-            .append(" : ")
-            .append(nextCity.name)
-            .toString()
-    }
-}
-
-data class CityDTO(
-    val id: Long,
-    val name: String,
-    val country: String
-)
-
 data class UserDTOInsert(
     val name: String,
     val nickname: String,
@@ -88,3 +54,43 @@ data class UserDTOInsert(
     val email: String
 )
 
+
+data class UserDTOEdit(
+    var id: Long,
+    val name: String?,
+    val password: String?,
+    val state: String? = null,
+    val email: String?
+)
+
+data class UserToken(
+    val id: Long,
+    val token: String
+)
+
+data class UserSnap(
+    val userId: Long,
+    val username: String,
+    val name: String,
+    val image: Boolean
+){
+    fun toUserSnapImage(
+        img: ImageAsset? = null
+    ): UserSnapImage {
+        return UserSnapImage(
+            this.userId,
+            this.username,
+            this.name,
+            this.image,
+            img
+        )
+    }
+}
+
+data class UserSnapImage(
+    val userId: Long,
+    val username: String,
+    val name: String,
+    val hasImage: Boolean,
+    var img: ImageAsset?
+)
