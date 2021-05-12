@@ -23,7 +23,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.ui.tooling.preview.Preview
-import com.esei.grvidal.nighttime.chatutil.ChatConversationPage
+import com.esei.grvidal.nighttime.chatutil.ChatConversationInit
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.network.ChatListener
@@ -328,7 +328,7 @@ val barVM : BarViewModel =viewModel()
             arguments = listOf(navArgument("ChatId") { type = NavType.IntType })
         ) { backStackEntry ->
 
-            ChatConversationPage(
+            ChatConversationInit(
                 navController = navController,
                 flow = chatListener.events,
                 friendshipId = backStackEntry.arguments?.getInt("ChatId")?.toLong() ?: -1L,

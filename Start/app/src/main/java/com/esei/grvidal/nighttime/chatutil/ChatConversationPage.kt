@@ -29,6 +29,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.MessageListened
@@ -45,6 +47,51 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 private const val TAG = "ChatConversationPage"
 
+
+@Composable
+fun ChatConversationInit(
+    navController: NavHostController,
+    userToken: UserToken,
+    flow: SharedFlow<MessageListened>,
+    friendshipId: Long,
+) {
+
+    Log.d(TAG, "ChatConversationInit: chatSend friendshipId $friendshipId")
+
+    val chatVM: ChatViewModel = viewModel( factory = object : ViewModelProvider.Factory {
+
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+
+            if (modelClass.isAssignableFrom(ChatViewModel::class.java)) {
+
+                @Suppress("UNCHECKED_CAST")
+                return ChatViewModel(userToken,friendshipId) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+
+    })
+
+    onCommit(friendshipId) {
+        val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
+
+        chatVM.getSelectedChat()
+        chatVM.setFlow(coroutineScope, flow)
+
+        onDispose {
+            coroutineScope.cancel()
+            chatVM.image = null
+        }
+    }
+
+    ChatConversationPage(
+        navController = navController,
+        chatVM = chatVM
+    )
+
+
+}
+
 /**
  * Composable that checks if [chatVM] has friendshipId as -1, if it's false it will show the conversation
  *
@@ -54,28 +101,14 @@ private const val TAG = "ChatConversationPage"
 @Composable
 fun ChatConversationPage(
     navController: NavHostController,
-    flow: SharedFlow<MessageListened>,
-    friendshipId: Long,
-    userToken: UserToken,
-    chatVM: ChatViewModel = viewModel(),
+    chatVM: ChatViewModel,
 ) {
 
+    Log.d(TAG, "ChatConversationPage: friendshipId = ${chatVM.friendshipId}")
     //Nullable check
-    if (friendshipId == -1L) {
+    if (chatVM.friendshipId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorChatId))
     } else {
-
-        DisposableEffect(chatVM.friendshipId) {
-            val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
-
-            chatVM.setUserToken(userToken)
-            chatVM.getSelectedChat(friendshipId)
-            chatVM.setFlow(coroutineScope, flow)
-            onDispose {
-                coroutineScope.cancel()
-                chatVM.image = null
-            }
-        }
 
 
         ConversationContent(
@@ -161,7 +194,7 @@ fun ChatNameBar(
     modifier: Modifier = Modifier,
     channelName: String,
     navigateToProfile: () -> Unit,
-    image: ImageAsset? = null ,
+    image: ImageAsset? = null,
     onBackIconPressed: () -> Unit = { },
 ) {
     TopAppBar(
@@ -212,8 +245,8 @@ fun ChatNameBar(
 fun UserImage(
     image: ImageAsset?,
     modifier: Modifier = Modifier
-){
-    image?.let{
+) {
+    image?.let {
         Image(
             modifier = Modifier
                 .padding(end = 8.dp)
@@ -415,12 +448,12 @@ fun AuthorAndTextMessage(
     if (isLastMessageByAuthor) {
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
 
-                Text(
-                    modifier = Modifier.padding(start = if (isUserMe) 50.dp else 25.dp),
-                    text = timeFormatted(message.time),
-                    style = MaterialTheme.typography.caption,
-                    color = Color.Gray,
-                )
+            Text(
+                modifier = Modifier.padding(start = if (isUserMe) 50.dp else 25.dp),
+                text = timeFormatted(message.time),
+                style = MaterialTheme.typography.caption,
+                color = Color.Gray,
+            )
 
         }
         // Last bubble before next author

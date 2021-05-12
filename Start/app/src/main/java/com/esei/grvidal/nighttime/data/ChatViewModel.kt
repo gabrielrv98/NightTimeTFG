@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.network.*
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
-import com.esei.grvidal.nighttime.network.network_DTOs.ChatFullView
 import com.esei.grvidal.nighttime.network.network_DTOs.MessageView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.squareup.picasso.Picasso
@@ -27,36 +26,28 @@ import java.io.IOException
 
 private const val TAG = "ChatViewModel"
 
-class ChatViewModel : ViewModel() {
+class ChatViewModel(
 
     // User token to call api
-    private var userToken = UserToken(-1, "")
+    private var userToken : UserToken,
+    var friendshipId: Long
 
-    fun setUserToken(loggedUser: UserToken) {
-
-        Log.d(TAG, "setUserToken: old token = $userToken, new $loggedUser")
-        userToken = loggedUser
-    }
+) : ViewModel() {
 
     fun getId(): Long {
         return userToken.id
     }
 
-
-    var friendshipId = -1L
     var otherUserId = -1L
     var userNickname by mutableStateOf("ERROR")
     var image  by mutableStateOf<ImageAsset?>(null)
     var messages by mutableStateOf(listOf<MessageView>())
 
 
-    fun getSelectedChat(
-        friendshipIdSelected: Long
-    ) = viewModelScope.launch {
+    fun getSelectedChat() = viewModelScope.launch {
 
         try {
 
-            friendshipId = friendshipIdSelected
             val webResponse = retrofitService.getSelectedChat(
                 idUser = userToken.id,
                 auth = userToken.token,
