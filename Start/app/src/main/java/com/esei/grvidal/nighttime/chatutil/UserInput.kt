@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -96,7 +97,8 @@ fun UserInput(
                     }
                     textFieldFocusState = focused
                 },
-                focusState = textFieldFocusState
+                focusState = textFieldFocusState,
+                textStyle = MaterialTheme.typography.body2
             )
             UserInputSelector(
                 onSelectorChange = { currentInputSelector = it },
@@ -243,7 +245,8 @@ private fun UserInputText(
     textFieldValue: TextFieldValue,
     keyboardShown: Boolean,
     onTextFieldFocused: (Boolean) -> Unit,
-    focusState: Boolean
+    focusState: Boolean,
+    textStyle: TextStyle
 ) {
     // Grab a reference to the keyboard controller whenever text input starts
     var keyboardController by remember { mutableStateOf<SoftwareKeyboardController?>(null) }
@@ -280,7 +283,8 @@ private fun UserInputText(
                     },
                 keyboardType = keyboardType,
                 imeAction = ImeAction.Send,
-                onTextInputStarted = { controller -> keyboardController = controller }
+                onTextInputStarted = { controller -> keyboardController = controller },
+                textStyle = textStyle
             )
 
             val disableContentColor =
