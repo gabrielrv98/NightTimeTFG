@@ -11,60 +11,66 @@ import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.network.*
-import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
-import com.esei.grvidal.nighttime.network.network_DTOs.MessageView
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import com.esei.grvidal.nighttime.network.network_DTOs.*
+import com.esei.grvidal.nighttime.repository.interface_repository.IRepositoryChat
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.io.IOException
+import java.time.LocalDate
+import java.time.LocalTime
 
 
 private const val TAG = "ChatViewModel"
 
 class ChatViewModel(
 
-    // User token to call api
-    private var userToken : UserToken,
-    var friendshipId: Long
+    val friendshipId: Long,
+    private val chatRepository: IRepositoryChat
 
 ) : ViewModel() {
 
     fun getId(): Long {
-        return userToken.id
+        return chatRepository.getId()
     }
 
-    var otherUserId = -1L
-    var userNickname by mutableStateOf("ERROR")
-    var image  by mutableStateOf<ImageAsset?>(null)
-    var messages by mutableStateOf(listOf<MessageView>())
+    // Backing property to avoid state updates from other classes
+    private val _actualChat = MutableStateFlow(
+        ChatView(
+            friendshipId = friendshipId,
+            userId = -1,
+            userNickname = "",
+            hasImage = false,
+            messages = emptyList(),
+            unreadMessages = 0
+        )
+    )
 
+    // The UI collects from this StateFlow to get its state updates
+    val actualChat: StateFlow<ChatView> = _actualChat
+    var image by mutableStateOf<ImageAsset?>(null)
 
     fun getSelectedChat() = viewModelScope.launch {
 
-        try {
+        chatRepository
+            .getChatDataRepository(friendshipId)
+            .collect { fetchedChatNullable ->
+                fetchedChatNullable?.let { fetchedChat ->
 
-            val webResponse = retrofitService.getSelectedChat(
-                idUser = userToken.id,
-                auth = userToken.token,
-                idFriendship = friendshipId
-            )
+                    _actualChat.value = fetchedChat
 
-            if (webResponse.isSuccessful) {
-                webResponse.body()?.let { fetchedChat ->
-                    messages = fetchedChat.messages
-                    userNickname = fetchedChat.userNickname
-                    otherUserId = fetchedChat.userId
+                    Log.d(TAG, "getSelectedChat: fetchedData -> $fetchedChat")
 
-                    if(fetchedChat.hasImage){
+                    if (fetchedChat.hasImage) {
 
                         Picasso
                             .get()
-                            .load("$BASE_URL$USER_URL$otherUserId/photo")
+                            .load("$BASE_URL$USER_URL${fetchedChat.userId}/photo")
                             .resize(50, 50)
                             .centerCrop()
 
@@ -72,16 +78,22 @@ class ChatViewModel(
                                 override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
                                     Log.d(
                                         TAG,
-                                        "loadImage: onPrepareLoad: loading image user id $otherUserId"
+                                        "loadImage: onPrepareLoad: loading image user id ${fetchedChat.userId}"
                                     )
                                 }
 
-                                override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
+                                override fun onBitmapFailed(
+                                    e: Exception?,
+                                    errorDrawable: Drawable?
+                                ) {
                                     //Handle the exception here
                                     Log.d(TAG, "loadImage: onBitmapFailed: error $e")
                                 }
 
-                                override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                                override fun onBitmapLoaded(
+                                    bitmap: Bitmap?,
+                                    from: Picasso.LoadedFrom?
+                                ) {
 
                                     //Here we get the loaded image
                                     Log.d(
@@ -95,45 +107,30 @@ class ChatViewModel(
                                 }
                             })
                     }
-
                     Log.d(
                         TAG,
                         "getSelectedChat: messages fetched for friendship $friendshipId, fetched ${fetchedChat.messages.size} messages"
                     )
+                } ?: Log.d(TAG, "getSelectedChat: getChat Flow was null")
 
-                }
             }
-
-        } catch (e: IOException) {
-            Log.e(TAG, "getSelectedChat: network exception (no network)  --//-- $e")
-
-        } catch (e: Exception) {
-            Log.e(TAG, "getSelectedChat: general exception  --//-- $e")
-        }
     }
 
-    fun addMessage(msg: String) = viewModelScope.launch {
-        try {
 
-            val webResponse = retrofitService.sendMessage(
-                auth = userToken.token,
-                idUser = getId(),
-                messageForm = MessageForm(
-                    friendshipId = friendshipId,
-                    text = msg
-                )
+    fun addMessage(msg: String){
+
+        updateChat(
+            MessageView(
+                messageId = -1,
+                text = msg,
+                date = LocalDate.now().toString(),
+                time = LocalTime.now().toString(),
+                user = getId()
             )
+        )
 
-            Log.d(
-                TAG,
-                "addMessage: response ${webResponse.body()} - code ${webResponse.code()} - header error ${webResponse.headers()[ERROR_HEADER_TAG]}"
-            )
-
-        } catch (e: IOException) {
-            Log.d(TAG, "addMessage: network exception ${e.message}  --//-- $e")
-        } catch (e: Exception) {
-
-            Log.d(TAG, "addMessage: network exception ${e.message}  --//-- $e")
+        viewModelScope.launch {
+            chatRepository.addMessageRepository(friendshipId, msg)
         }
     }
 
@@ -149,7 +146,9 @@ class ChatViewModel(
 
                 Log.d(TAG, "setFlow: message arrived ${msg.messageView.text}")
 
-                if (msg.channel == friendshipId) {
+                if (msg.messageView.user != getId() &&
+                    msg.channel == friendshipId
+                ) {
                     updateChat(msg.messageView)
                 }
 
@@ -157,11 +156,15 @@ class ChatViewModel(
         }
     }
 
-    private fun updateChat(msg: MessageView) = viewModelScope.launch {
+    private fun updateChat(msg: MessageView) {
 
-        messages = messages.toMutableList().apply {
-            add(msg)
-        }
+        _actualChat.value = _actualChat.value.copy(
+            messages = _actualChat.value.messages
+                .toMutableList()
+                .also { msgListMutable ->
+                    msgListMutable.add(msg)
+                }
+        )
     }
 
 }

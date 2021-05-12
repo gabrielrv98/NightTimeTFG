@@ -34,10 +34,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.MessageListened
+import com.esei.grvidal.nighttime.network.NightTimeService
+import com.esei.grvidal.nighttime.network.network_DTOs.ChatView
 import com.esei.grvidal.nighttime.network.network_DTOs.MessageView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.pages.ErrorComposable
+import com.esei.grvidal.nighttime.repository.repository_implementation.RepositoryChat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharedFlow
 import java.time.LocalDate
@@ -48,6 +52,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 private const val TAG = "ChatConversationPage"
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun ChatConversationInit(
     navController: NavHostController,
@@ -65,7 +70,13 @@ fun ChatConversationInit(
             if (modelClass.isAssignableFrom(ChatViewModel::class.java)) {
 
                 @Suppress("UNCHECKED_CAST")
-                return ChatViewModel(userToken,friendshipId) as T
+                return ChatViewModel(
+                    friendshipId = friendshipId,
+                    chatRepository = RepositoryChat(
+                        userToken = userToken,
+                        apiService = NightTimeService.NightTimeApi.retrofitService
+                    )
+                ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
@@ -86,47 +97,53 @@ fun ChatConversationInit(
 
     ChatConversationPage(
         navController = navController,
-        chatVM = chatVM
+        userId = chatVM.getId(),
+        addMessage = chatVM::addMessage,
+        userImage = chatVM.image,
+        chatData = chatVM.actualChat.collectAsState().value
     )
 
 
 }
 
 /**
- * Composable that checks if [chatVM] has friendshipId as -1, if it's false it will show the conversation
+ * Composable that checks if [chatData] has friendshipId as -1, if it's false it will show the conversation
  *
  * @param navController controller of hte navigation, its used to go back or navigate to other views
- * @param [chatVM] Data of the current chat
+ * @param [chatData] Data of the current chat
  */
 @Composable
 fun ChatConversationPage(
     navController: NavHostController,
-    chatVM: ChatViewModel,
+    userId: Long,
+    addMessage: (String) -> Unit,
+    userImage: ImageAsset?,
+    chatData: ChatView,
 ) {
 
-    Log.d(TAG, "ChatConversationPage: friendshipId = ${chatVM.friendshipId}")
+    Log.d(TAG, "ChatConversationPage: friendshipId = ${chatData.friendshipId}")
     //Nullable check
-    if (chatVM.friendshipId == -1L) {
+    if (chatData.friendshipId == -1L) {
         ErrorComposable(errorText = stringResource(id = R.string.errorChatId))
     } else {
 
 
         ConversationContent(
-            userId = chatVM.getId(),
-            userNickname = chatVM.userNickname,
-            messages = chatVM.messages,
+            userId = userId,
+            userNickname = chatData.userNickname,
+            messages = chatData.messages,
             navigateToProfile = {
                 navController.navigateWithId(
                     BottomNavigationScreens.ProfileNav.route,
-                    chatVM.otherUserId
+                    chatData.userId
                 )
             },
             onBackIconPressed = {
                 navController.popBackStack(navController.graph.startDestination, false)
                 navController.navigate(BottomNavigationScreens.FriendsNav.route)
             },
-            addMessage = chatVM::addMessage,
-            image = chatVM.image
+            addMessage = addMessage,
+            image = userImage
         )
 
 
@@ -214,7 +231,6 @@ fun ChatNameBar(
                         image = image,
                         modifier = Modifier
                             .align(Alignment.Top)
-                            .padding(end = Icons.Default.ArrowBack.defaultWidth)
                     )
 
                     // Channel name
@@ -385,8 +401,9 @@ fun dateFormatted(
 
 
 /**
- * Parse function that takes as input a string with pattern
- * {"hour":hh,"minute":mm,"second":ss,"nanosecond":nn}
+ * Parse function that takes as input a string with pattern :
+ * {"hour":hh,"minute":mm,"second":ss,"nanosecond":nn} or
+ *  hh:mm:ss.nn
  *
  * @param time unformatted time as String
  */
@@ -395,7 +412,11 @@ fun timeFormatted(
 ): String {
     Log.d(TAG, "timeFormatted: $time")
 
-    return if (!Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}").matches(time)) {
+    return if (Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.[0-9]*").matches(time)){
+
+        time.split(".")[0]
+
+    }else if (!Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}").matches(time)) {
 
         val timeSplit = time.split(",")
         val localTime = LocalTime.of(
