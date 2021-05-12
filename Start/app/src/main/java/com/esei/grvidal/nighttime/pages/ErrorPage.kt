@@ -14,7 +14,7 @@ fun ErrorPage(message: String) {
     Box(
         modifier = Modifier.fillMaxSize(),
         alignment = Alignment.Center
-    ){
+    ) {
         Text(text = message)
     }
 }

@@ -51,6 +51,7 @@ class FriendsViewModel(
 
     // Backing property to avoid state updates from other classes
     private val _chatList = MutableStateFlow(listOf<ChatFullView>())
+
     // The UI collects from this StateFlow to get its state updates
     val chatList: StateFlow<List<ChatFullView>> = _chatList
 
@@ -179,10 +180,11 @@ class FriendsViewModel(
                         )
                         friendListPage++
 
-                        friendshipIdList = friendshipIdList + fetchedList.map{ it.toFriendshipSnapImage() }
+                        friendshipIdList =
+                            friendshipIdList + fetchedList.map { it.toFriendshipSnapImage() }
 
                         val userWithImages = fetchedList.filter { it.image }
-                        for (user in userWithImages){
+                        for (user in userWithImages) {
                             loadUserImage(
                                 picasso = Picasso.get(),
                                 userId = user.userId,
@@ -567,7 +569,12 @@ class FriendsViewModel(
     ) = viewModelScope.launch {
 
         chatListHolder.remove(chat)
-        chatListHolder.add(chat.copy(messages = listOf(msg.messageView), unreadMessages = chat.unreadMessages+1))
+        chatListHolder.add(
+            chat.copy(
+                messages = listOf(msg.messageView),
+                unreadMessages = chat.unreadMessages + 1
+            )
+        )
         // Flow will update if .equals returns false,
         // for some reason if [chat] is not .copy it will return false
 

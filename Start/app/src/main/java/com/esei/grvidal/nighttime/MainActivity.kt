@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity() {
                     PackageManager.PERMISSION_GRANTED
                 ) {
                     //permission from popup granted
-                    pickImageFromGallery{selectImageLauncher.launch("image/*")}
+                    pickImageFromGallery { selectImageLauncher.launch("image/*") }
 
                 } else {
                     //permission from popup denied
@@ -209,16 +209,18 @@ Navigation with their own files ( no dependencies )
     https://medium.com/google-developer-experts/how-to-handle-navigation-in-jetpack-compose-a9ac47f7f975
  */
 
-    val chatListener = remember{ ChatListener(
-        CoroutineScope(context = EmptyCoroutineContext),
-        login.loggedUser
-    ) }
+    val chatListener = remember {
+        ChatListener(
+            CoroutineScope(context = EmptyCoroutineContext),
+            login.loggedUser
+        )
+    }
 
-val barVM : BarViewModel =viewModel()
+    val barVM: BarViewModel = viewModel()
 
     val navController = rememberNavController()
 
-    val bottomNavigationItems  = listOf(
+    val bottomNavigationItems = listOf(
         BottomNavigationScreens.BarNav,
         BottomNavigationScreens.CalendarNav,
         BottomNavigationScreens.FriendsNav,
@@ -300,7 +302,7 @@ val barVM : BarViewModel =viewModel()
         composable(BottomNavigationScreens.FriendsNav.route) { //Friends
 
             // Dialog to add new friends
-            val showDialog = remember{  mutableStateOf(false) }
+            val showDialog = remember { mutableStateOf(false) }
 
 
             ScreenScaffolded(
@@ -311,7 +313,7 @@ val barVM : BarViewModel =viewModel()
                         icon = Icons.Default.PersonSearch,
                         action = { showDialog.value = true },
                     )
-                     },
+                },
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
 
@@ -321,7 +323,6 @@ val barVM : BarViewModel =viewModel()
                     flow = chatListener.events,
                     showDialog = showDialog
                 )
-
 
 
             }
@@ -385,7 +386,7 @@ val barVM : BarViewModel =viewModel()
         ) {
 
             ScreenScaffolded(
-                topBar = { TopAppBar(title = { Text(text =  stringResource(R.string.edit_profile)) }) },
+                topBar = { TopAppBar(title = { Text(text = stringResource(R.string.edit_profile)) }) },
                 bottomBar = {},
             ) {
                 ProfileEditorPage(

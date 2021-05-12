@@ -26,11 +26,11 @@ data class FriendshipUpdateDTO(
 
 data class FriendshipSnap(
     val userId: Long,
-    val friendshipId :Long,
+    val friendshipId: Long,
     var username: String,
     val name: String,
     val image: Boolean
-){
+) {
     fun toFriendshipSnapImage(
         image: ImageAsset? = null
     ): FriendshipSnapImage {
@@ -47,7 +47,7 @@ data class FriendshipSnap(
 
 data class FriendshipSnapImage(
     val userId: Long,
-    val friendshipId :Long,
+    val friendshipId: Long,
     var username: String,
     val name: String,
     val hasImage: Boolean,

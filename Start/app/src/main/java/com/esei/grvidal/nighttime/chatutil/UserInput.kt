@@ -82,7 +82,7 @@ fun UserInput(
 
     Column {
         Divider()
-        Row{
+        Row {
             UserInputText(
                 modifier = Modifier.preferredWidth(200.dp).weight(1f),
                 textFieldValue = textState,
@@ -171,45 +171,45 @@ private fun UserInputSelector(
     onMessageSent: () -> Unit,
     currentInputSelector: InputSelector,
 ) {
-        InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.EMOJI) },
-            icon = Icons.Outlined.Mood,
-            selected = currentInputSelector == InputSelector.EMOJI
+    InputSelectorButton(
+        onClick = { onSelectorChange(InputSelector.EMOJI) },
+        icon = Icons.Outlined.Mood,
+        selected = currentInputSelector == InputSelector.EMOJI
+    )
+    val border = if (!sendMessageEnabled) {
+        BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
         )
-        val border = if (!sendMessageEnabled) {
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
-            )
-        } else {
-            null
-        }
+    } else {
+        null
+    }
 
-        val disabledContentColor =
-            AmbientEmphasisLevels.current.disabled.applyEmphasis(MaterialTheme.colors.onSurface)
+    val disabledContentColor =
+        AmbientEmphasisLevels.current.disabled.applyEmphasis(MaterialTheme.colors.onSurface)
 
-        val buttonColors = ButtonConstants.defaultButtonColors(
-            disabledBackgroundColor = MaterialTheme.colors.surface,
-            disabledContentColor = disabledContentColor
+    val buttonColors = ButtonConstants.defaultButtonColors(
+        disabledBackgroundColor = MaterialTheme.colors.surface,
+        disabledContentColor = disabledContentColor
+    )
+
+    // Send button
+    Button(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .preferredHeight(36.dp)
+            .padding(top = 6.dp),
+        enabled = sendMessageEnabled,
+        onClick = onMessageSent,
+        colors = buttonColors,
+        border = border,
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(
+            stringResource(R.string.send),
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
-
-        // Send button
-        Button(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .preferredHeight(36.dp)
-                .padding(top = 6.dp),
-            enabled = sendMessageEnabled,
-            onClick = onMessageSent,
-            colors = buttonColors,
-            border = border,
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Text(
-                stringResource(R.string.send),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-        }
+    }
 }
 
 @Composable
@@ -227,7 +227,7 @@ private fun InputSelectorButton(
                 icon,
                 tint = tint,
                 modifier = Modifier.padding(vertical = 12.dp)
-                    .padding( start = 12.dp, end = 0.dp)
+                    .padding(start = 12.dp, end = 0.dp)
                     .preferredSize(20.dp)
             )
         }

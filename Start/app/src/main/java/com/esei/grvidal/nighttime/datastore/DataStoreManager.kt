@@ -38,7 +38,7 @@ class DataStoreManager private constructor(context: Context) {
             val password = preferences[PreferencesKeys.PASSWORD_CREDENTIALS] ?: ""
             val checked = preferences[PreferencesKeys.CONFIRMATION_CREDENTIALS] ?: false
 
-            LoginData(login, password,checked)
+            LoginData(login, password, checked)
         }
 
     val cityPreferences: Flow<City> = dataStore.data
@@ -69,7 +69,11 @@ class DataStoreManager private constructor(context: Context) {
      * Async updates credentials in the DataStore, every time data is changed,
      * [PreferencesKeys.CONFIRMATION_CREDENTIALS] is set to false to avoid false logins
      */
-    suspend fun updateLoginCredentials(login: String? = null, password: String? = null, isChecked: Boolean? = null) {
+    suspend fun updateLoginCredentials(
+        login: String? = null,
+        password: String? = null,
+        isChecked: Boolean? = null
+    ) {
 
         Log.d(TAG, "updateLoginCredentials: new credentials \"$login\", \"$password\"")
 
@@ -80,13 +84,13 @@ class DataStoreManager private constructor(context: Context) {
         }
     }
 
-    suspend fun credentialsChecked(){
+    suspend fun credentialsChecked() {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.CONFIRMATION_CREDENTIALS] = true
         }
     }
 
-    suspend fun credentialsFailed(){
+    suspend fun credentialsFailed() {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.CONFIRMATION_CREDENTIALS] = false
         }

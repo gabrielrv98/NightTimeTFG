@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -48,20 +48,21 @@ private const val TAG = "CalendarPage"
 
 
 @Composable
-fun CalendarInit(userToken: UserToken, cityId: Long){
-    val calendarVM : CalendarViewModel = viewModel("calendar", factory = object : ViewModelProvider.Factory {
+fun CalendarInit(userToken: UserToken, cityId: Long) {
+    val calendarVM: CalendarViewModel =
+        viewModel("calendar", factory = object : ViewModelProvider.Factory {
 
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-            if (modelClass.isAssignableFrom(CalendarViewModel::class.java)) {
+                if (modelClass.isAssignableFrom(CalendarViewModel::class.java)) {
 
-                @Suppress("UNCHECKED_CAST")
-                return CalendarViewModel(userToken,cityId) as T
+                    @Suppress("UNCHECKED_CAST")
+                    return CalendarViewModel(userToken, cityId) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
             }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
 
-    })
+        })
     calendarVM.setCityId(cityId)
 
     CalendarPage(calendarVM)
@@ -436,45 +437,45 @@ fun CalendarWindow(
             //Calendar indeed
             Box(
                 modifier = Modifier
-                .dragGestureFilter(
-                    dragObserver = object : DragObserver {
+                    .dragGestureFilter(
+                        dragObserver = object : DragObserver {
 
-                        override fun onStart(downPosition: Offset) {
-                            setValue(true)
-                            Log.d(
-                                TAG,
-                                "gesture onStart: offset { x = ${downPosition.x} , y = ${downPosition.y}}"
-                            )
-                        }
+                            override fun onStart(downPosition: Offset) {
+                                setValue(true)
+                                Log.d(
+                                    TAG,
+                                    "gesture onStart: offset { x = ${downPosition.x} , y = ${downPosition.y}}"
+                                )
+                            }
 
-                        override fun onDrag(dragDistance: Offset): Offset {
-                            Log.d(
-                                TAG,
-                                "gesture onDrag: offset { x = ${dragDistance.x} , y = ${dragDistance.y}}"
-                            )
+                            override fun onDrag(dragDistance: Offset): Offset {
+                                Log.d(
+                                    TAG,
+                                    "gesture onDrag: offset { x = ${dragDistance.x} , y = ${dragDistance.y}}"
+                                )
 
-                            var (x, _) = dragDistance
-                            if (value) {
-                                when {
-                                    x > sensibility -> {
-                                        Log.d(TAG, "gesture previous month")
-                                        x = 0f
-                                        previousMonthClick()
-                                        setValue(false)
-                                    }
-                                    x < -sensibility -> {
-                                        x = 0f
-                                        Log.d(TAG, "gesture next month")
-                                        nextMonthClick()
-                                        setValue(false)
+                                var (x, _) = dragDistance
+                                if (value) {
+                                    when {
+                                        x > sensibility -> {
+                                            Log.d(TAG, "gesture previous month")
+                                            x = 0f
+                                            previousMonthClick()
+                                            setValue(false)
+                                        }
+                                        x < -sensibility -> {
+                                            x = 0f
+                                            Log.d(TAG, "gesture next month")
+                                            nextMonthClick()
+                                            setValue(false)
+                                        }
                                     }
                                 }
+                                return Offset(x, 0f)
                             }
-                            return Offset(x, 0f)
                         }
-                    }
 
-                )
+                    )
             ) {
 
                 contentDay(

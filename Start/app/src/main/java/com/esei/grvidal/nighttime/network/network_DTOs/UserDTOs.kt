@@ -73,7 +73,7 @@ data class UserSnap(
     val username: String,
     val name: String,
     val image: Boolean
-){
+) {
     fun toUserSnapImage(
         img: ImageAsset? = null
     ): UserSnapImage {

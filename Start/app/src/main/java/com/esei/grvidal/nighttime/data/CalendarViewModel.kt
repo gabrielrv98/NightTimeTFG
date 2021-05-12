@@ -73,7 +73,7 @@ class CalendarViewModel(
 
     private var pageUserFriends by mutableStateOf(0)
 
-    init{
+    init {
         loadSelectedDate()//Loading the actual day
         getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
     }

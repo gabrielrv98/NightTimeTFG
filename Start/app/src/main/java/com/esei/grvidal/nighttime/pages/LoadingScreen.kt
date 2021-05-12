@@ -33,7 +33,12 @@ fun LoadingScreen() {
         ) {
 
 
-            Text(text = stringResource(id = R.string.loading), style = MaterialTheme.typography.h4, fontSize = 28.sp , color= Color.Gray)
+            Text(
+                text = stringResource(id = R.string.loading),
+                style = MaterialTheme.typography.h4,
+                fontSize = 28.sp,
+                color = Color.Gray
+            )
 
             Spacer(modifier = Modifier.size(15.dp))
 

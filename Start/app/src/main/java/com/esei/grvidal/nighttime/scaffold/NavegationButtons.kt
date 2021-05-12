@@ -55,14 +55,18 @@ sealed class NavigationScreens(
     val route: String,
     @StringRes val resourceId: Int
 ) {
-    object LoginPage:
-            NavigationScreens("Logging",R.string.login)
-    object RegisterPage:
-        NavigationScreens("Register",R.string.register)
+    object LoginPage :
+        NavigationScreens("Logging", R.string.login)
+
+    object RegisterPage :
+        NavigationScreens("Register", R.string.register)
+
     object BarDetails :
         NavigationScreens("BarDetails", R.string.barDetails_route)
+
     object ChatConversation :
         NavigationScreens("ChatConversation", R.string.ChatConversation)
+
     object ProfileEditor :
         NavigationScreens("ProfileEditor", R.string.ProfileEditor)
 
@@ -77,7 +81,7 @@ sealed class NavigationScreens(
  */
 @Composable
 fun BottomBarNavigation(
-    content : @Composable () -> Unit
+    content: @Composable () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),

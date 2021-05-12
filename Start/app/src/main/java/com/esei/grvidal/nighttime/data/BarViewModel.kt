@@ -54,7 +54,7 @@ class BarViewModel : ViewModel() {
 
     // Number of downloaded photos
     //var nPhotos by mutableStateOf(0)
-    var nPhotos  = 0
+    var nPhotos = 0
         private set
 
     // Strong reference point to avoid loosing them
@@ -118,7 +118,6 @@ class BarViewModel : ViewModel() {
                     barList = barList + bars
                     Log.d(TAG, "fetchBars: data fetched $bars")
                 }
-
 
 
             }
@@ -199,7 +198,6 @@ class BarViewModel : ViewModel() {
     }
 
 
-
     fun eraseSelectedBar() {
         barSelectedEvents = listOf()
         barSelectedPhotos = listOf()
@@ -235,7 +233,7 @@ class BarViewModel : ViewModel() {
         }
     }
 
-    private fun loadImage(url: String ){
+    private fun loadImage(url: String) {
         val picasso = Picasso.get()
 
         val target = object : Target {
@@ -255,10 +253,10 @@ class BarViewModel : ViewModel() {
 
                 //Here we get the loaded image
 
-                bitmap?.let { img->
+                bitmap?.let { img ->
                     Log.d(
                         TAG,
-                        "fetchPhotos: onBitmapLoaded: Image fetched size ${barSelectedPhotos.size }, size ${img.byteCount} height ${img.height}, width ${img.width}"
+                        "fetchPhotos: onBitmapLoaded: Image fetched size ${barSelectedPhotos.size}, size ${img.byteCount} height ${img.height}, width ${img.width}"
                     )
                     barSelectedPhotos = barSelectedPhotos + listOf(img.asImageAsset())
                 }
@@ -277,9 +275,6 @@ class BarViewModel : ViewModel() {
 
 
     }
-
-
-
 
 
 }

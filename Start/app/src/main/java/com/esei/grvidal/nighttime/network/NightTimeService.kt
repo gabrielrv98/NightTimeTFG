@@ -35,7 +35,7 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .build()
 
-data class FutureDates( val nextDate: String)
+data class FutureDates(val nextDate: String)
 
 @Suppress("unused")
 interface NightTimeService {
@@ -54,11 +54,11 @@ interface NightTimeService {
     @POST(USER_URL + "login/")
     suspend fun loginAsync(
         @Header("username") username: String, @Header("password") password: String
-    ) : Response<Boolean>
+    ): Response<Boolean>
 
     // City
     @GET(USER_URL + "cities/")
-    suspend fun getAllCitiesAsync() : Response<List<City>>
+    suspend fun getAllCitiesAsync(): Response<List<City>>
 
     // Calendar
     @GET("$USER_URL{idUser}/{day}-{month}-{year}/{idCity}")
@@ -69,7 +69,7 @@ interface NightTimeService {
         @Path("month") month: Int,
         @Path("year") year: Int,
         @Path("idCity") idCity: Long
-    ) : Response<List<EventData>>
+    ): Response<List<EventData>>
 
     @GET("$USER_URL{idUser}/{day}-{month}-{year}/{idCity}/users")
     suspend fun getUsersOnDateAsync(
@@ -80,7 +80,7 @@ interface NightTimeService {
         @Path("year") year: Int,
         @Path("idCity") idCity: Long,
         @Query("page") page: Int = 0
-    ) : Response<List<UserSnap>>
+    ): Response<List<UserSnap>>
 
     @GET("$USER_URL{idUser}/day-list/{idCity}")
     suspend fun getFutureUsersDateList(
@@ -95,7 +95,7 @@ interface NightTimeService {
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Body dateCity: DateCityDTO
-    ) : Response<Boolean>
+    ): Response<Boolean>
 
     //Delete should not have body for Retrofit
     @HTTP(method = "DELETE", path = "$USER_URL{idUser}/date", hasBody = true)
@@ -103,13 +103,13 @@ interface NightTimeService {
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Body dateCity: DateCityDTO
-    ) : Response<Boolean>
+    ): Response<Boolean>
 
-    @GET(BAR_URL+"byCity/{idCity}")
+    @GET(BAR_URL + "byCity/{idCity}")
     suspend fun listByCity(
         @Path("idCity") idCity: Long,
         @Query("page") page: Int = 0
-    ) : Response<List<BarDTO>>
+    ): Response<List<BarDTO>>
 
     @GET("$BAR_URL{id}/details")
     suspend fun getBarDetails(
@@ -148,7 +148,7 @@ interface NightTimeService {
         @Body user: UserDTOInsert
     ): Response<Boolean>
 
-    @GET(USER_URL+"search/{userNickname}")
+    @GET(USER_URL + "search/{userNickname}")
     suspend fun searchUsers(
         @Path("userNickname") string: String,
         @Query("page") page: Int = 0
@@ -171,13 +171,14 @@ interface NightTimeService {
     @GET("$USER_URL{idUser}/friends")
     suspend fun getRequestingFriendships(
         @Path("idUser") id: Long,
-        @Header("auth") auth: String)
-    : Response<List<UserFriendViewAPI>>
+        @Header("auth") auth: String
+    )
+            : Response<List<UserFriendViewAPI>>
 
     @PATCH("$USER_URL{idUser}/friends")
     suspend fun answerFriendshipRequest(
-        @Path("idUser")id: Long,
-        @Header("auth")auth: String,
+        @Path("idUser") id: Long,
+        @Header("auth") auth: String,
         @Body friendshipUpdateDTO: FriendshipUpdateDTO
     ): Response<Boolean>
 
@@ -200,12 +201,12 @@ interface NightTimeService {
         @Path("idUser") id: Long
     ): Response<List<ChatView>>
 
-   @GET("$USER_URL{idUser}/chat/{idFriendship}")
-   suspend fun getSelectedChat(
-       @Path("idFriendship") idFriendship: Long,
-       @Header("auth") auth: String,
-       @Path("idUser") idUser: Long
-   ): Response<ChatView?>
+    @GET("$USER_URL{idUser}/chat/{idFriendship}")
+    suspend fun getSelectedChat(
+        @Path("idFriendship") idFriendship: Long,
+        @Header("auth") auth: String,
+        @Path("idUser") idUser: Long
+    ): Response<ChatView?>
 
 
     @POST(MESSAGE_URL)

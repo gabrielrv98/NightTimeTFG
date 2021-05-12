@@ -134,10 +134,10 @@ fun ProfileEditorPage(
         photoState = user.photoState,
         saveData = {
             user.saveData(
-            setLoginCredentials,
-            user.uriPhotoPicasso?.let { getPathFromURI(context, it) }
+                setLoginCredentials,
+                user.uriPhotoPicasso?.let { getPathFromURI(context, it) }
             )
-                   },
+        },
         searchImageButton = {
 
             if (checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) ==
@@ -393,7 +393,7 @@ fun TextChanger(
         Row {
             Text(text = title)
             if (!canBeEmpty) {
-                Advert(value.text.isBlank(),Modifier.align(Alignment.Bottom))
+                Advert(value.text.isBlank(), Modifier.align(Alignment.Bottom))
             }
         }
 
@@ -472,7 +472,7 @@ fun TextWithInputPassword(
                     interactionState = interactionState
                 ),
             asset = if (showPassword) Icons.Default.Visibility
-                else Icons.Default.VisibilityOff,
+            else Icons.Default.VisibilityOff,
         )
     }
 }
@@ -487,7 +487,7 @@ fun Advert(isBlank: Boolean, modifier: Modifier) {
             fontSize = 12.sp,
             text = "*" + stringResource(id = R.string.cant_be_empty),
             color = if (isBlank) MaterialTheme.colors.error
-                else MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
+            else MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
         )
     }
 }

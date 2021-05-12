@@ -53,27 +53,29 @@ import kotlin.coroutines.EmptyCoroutineContext
 private const val TAG = "FriendsPage"
 
 @Composable
-fun FriendsInit(navController: NavHostController,
-                userToken: UserToken,
-                flow: SharedFlow<MessageListened>,
-                showDialog: MutableState<Boolean>,
-){
-    val friendsVM : FriendsViewModel = viewModel("friendsVM", factory = object : ViewModelProvider.Factory {
+fun FriendsInit(
+    navController: NavHostController,
+    userToken: UserToken,
+    flow: SharedFlow<MessageListened>,
+    showDialog: MutableState<Boolean>,
+) {
+    val friendsVM: FriendsViewModel =
+        viewModel("friendsVM", factory = object : ViewModelProvider.Factory {
 
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-            if (modelClass.isAssignableFrom(FriendsViewModel::class.java)) {
+                if (modelClass.isAssignableFrom(FriendsViewModel::class.java)) {
 
-                @Suppress("UNCHECKED_CAST")
-                return FriendsViewModel(userToken) as T
+                    @Suppress("UNCHECKED_CAST")
+                    return FriendsViewModel(userToken) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
             }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
 
-    })
+        })
 
     onCommit(friendsVM.getId()) {
-        val coroutineScope =  CoroutineScope(context = EmptyCoroutineContext)
+        val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
 
         Log.d(TAG, "FriendsPage: onCommit")
         friendsVM.getChats()
@@ -299,7 +301,8 @@ fun FriendsScreen(
                     img = chatData.img,
                     onEntryClick = {
                         Log.d(TAG, "FriendsScreen: chatSend - clicking on ${chatData.friendshipId}")
-                        onChatClick(chatData.friendshipId) }
+                        onChatClick(chatData.friendshipId)
+                    }
                 )
             }
 
@@ -319,11 +322,7 @@ fun FriendsScreen(
         ) {
             Icon(asset = Icons.Default.Add)
         }
-
-
     }
-
-
 }
 
 
@@ -346,12 +345,13 @@ fun ChatEntry(
     ) {
         Row(
             modifier = Modifier
-                .padding(vertical = 6.dp)
+                .padding(vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 modifier = Modifier
                     .preferredSize(45.dp)
-                    .align(Alignment.CenterVertically) ,
+                    .align(Alignment.CenterVertically),
                 shape = RoundedCornerShape(50),
                 color = Color.Gray
             ) {
@@ -366,12 +366,14 @@ fun ChatEntry(
                         contentScale = ContentScale.Crop
                     )
                 } ?: Icon(
-                    asset = Icons.Default.Person)
+                    asset = Icons.Default.Person
+                )
             }
 
             Column(
                 modifier = Modifier
                     .padding(start = 6.dp)
+                    .fillMaxHeight(),
             ) {
                 Text(
                     text = userName,
@@ -379,7 +381,7 @@ fun ChatEntry(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text =  makeLongShort(lastMessage,30),
+                    text = makeLongShort(lastMessage, 30),
                     style = MaterialTheme.typography.body2,
                     maxLines = 1
                 )
@@ -388,8 +390,7 @@ fun ChatEntry(
             if (unreadMessages > 0)
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
+                        .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Surface(

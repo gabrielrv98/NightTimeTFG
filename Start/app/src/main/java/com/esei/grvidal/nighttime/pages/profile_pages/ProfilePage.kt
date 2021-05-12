@@ -99,31 +99,37 @@ fun ProfilePageView(
                 }
 
             } // Profile is showing someone else
-             else {
+            else {
 
-                    // If client user and shown user are friends
-                    //when (userVM.user.friendshipState) {
+                // If client user and shown user are friends
+                //when (userVM.user.friendshipState) {
                 when (userVM.friendshipState) {
-                        AnswerOptions.YES -> {
+                    AnswerOptions.YES -> {
 
-                            { setDeleteFriendshipDialog(true) }
+                        { setDeleteFriendshipDialog(true) }
 
-                        } // If client user has requested friendship to shown user
-                        AnswerOptions.NOT_ANSWERED -> {
+                    } // If client user has requested friendship to shown user
+                    AnswerOptions.NOT_ANSWERED -> {
 
-                            { Toast.makeText(context,R.string.friendship_already_requested,Toast.LENGTH_SHORT).show() }
+                        {
+                            Toast.makeText(
+                                context,
+                                R.string.friendship_already_requested,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
 
-                        } // If client user and shown user are not friends
-                        AnswerOptions.NO -> {
+                    } // If client user and shown user are not friends
+                    AnswerOptions.NO -> {
 
-                            {
+                        {
 
-                                userVM.friendshipState = AnswerOptions.NOT_ANSWERED
-                                userVM.requestFriendship(userVM.user.id)
+                            userVM.friendshipState = AnswerOptions.NOT_ANSWERED
+                            userVM.requestFriendship(userVM.user.id)
 
-                            }
                         }
                     }
+                }
 
             }
         )
@@ -143,14 +149,23 @@ private fun DialogFriendship(
     val confirmSentence = stringResource(id = R.string.remove_friendship_confirmation)
     AlertDialog(
         onDismissRequest = { setShowDialog(false) },
-        title = { Text(text = stringResource(id = R.string.delete_friendship), style = MaterialTheme.typography.body1) },
+        title = {
+            Text(
+                text = stringResource(id = R.string.delete_friendship),
+                style = MaterialTheme.typography.body1
+            )
+        },
         text = { Text(text = confirmSentence.replace("*", userName)) },
         confirmButton = {
 
             //Button confirm
             Button(
                 onClick = {
-                    Toast.makeText(context, R.string.friendship_deleted_succesfully , Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        R.string.friendship_deleted_succesfully,
+                        Toast.LENGTH_SHORT
+                    ).show()
                     setShowDialog(false)
                     deleteFriendship()
                 }
@@ -183,7 +198,7 @@ fun ProfilePage(
     img: ImageAsset?,
     photoState: PhotoState,
     isMe: Boolean,
-    friendshipState : AnswerOptions,
+    friendshipState: AnswerOptions,
     onClick: () -> Unit
 ) {
 
@@ -401,9 +416,15 @@ fun ProfileFab(
                         asset = if (userIsMe) Icons.Outlined.Create else {
 
                             when (friendshipState) {
-                                AnswerOptions.YES -> { Icons.Filled.PeopleAlt }
-                                AnswerOptions.NOT_ANSWERED -> { Icons.Filled.Pending }
-                                AnswerOptions.NO -> { Icons.Filled.PersonAdd }
+                                AnswerOptions.YES -> {
+                                    Icons.Filled.PeopleAlt
+                                }
+                                AnswerOptions.NOT_ANSWERED -> {
+                                    Icons.Filled.Pending
+                                }
+                                AnswerOptions.NO -> {
+                                    Icons.Filled.PersonAdd
+                                }
                             }
                         }
                     )
@@ -414,9 +435,15 @@ fun ProfileFab(
                             id = if (userIsMe) R.string.edit_profile else {
 
                                 when (friendshipState) {
-                                    AnswerOptions.YES -> { R.string.is_friend }
-                                    AnswerOptions.NOT_ANSWERED -> { R.string.request_sended }
-                                    AnswerOptions.NO -> { R.string.send_request }
+                                    AnswerOptions.YES -> {
+                                        R.string.is_friend
+                                    }
+                                    AnswerOptions.NOT_ANSWERED -> {
+                                        R.string.request_sended
+                                    }
+                                    AnswerOptions.NO -> {
+                                        R.string.send_request
+                                    }
                                 }
                             }
                         )

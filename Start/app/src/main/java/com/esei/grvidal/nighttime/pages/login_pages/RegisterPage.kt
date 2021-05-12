@@ -218,11 +218,9 @@ fun RegisterScreen(
 
         if (errorText.errorString != null || errorText.resourceInt != null) {
             Text(
-                text = errorText.resourceInt?.let{
+                text = errorText.resourceInt?.let {
                     stringResource(id = it)
-                } ?:
-                errorText.errorString ?:
-                stringResource(id = R.string.unexpected_error),
+                } ?: errorText.errorString ?: stringResource(id = R.string.unexpected_error),
 
                 color = Color.Red,
                 style = MaterialTheme.typography.body1

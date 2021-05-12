@@ -117,7 +117,7 @@ class ChatViewModel(
     }
 
 
-    fun addMessage(msg: String){
+    fun addMessage(msg: String) {
 
         updateChat(
             MessageView(

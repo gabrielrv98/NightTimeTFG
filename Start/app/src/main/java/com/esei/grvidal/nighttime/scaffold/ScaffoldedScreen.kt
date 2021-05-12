@@ -22,7 +22,7 @@ import com.esei.grvidal.nighttime.data.City
  */
 @Composable
 fun ScreenScaffolded(
-    modifier : Modifier = Modifier.padding(bottom = 57.dp),
+    modifier: Modifier = Modifier.padding(bottom = 57.dp),
     bottomBar: @Composable () -> Unit = { },
     topBar: @Composable () -> Unit = { },
     content: @Composable () -> Unit,
@@ -54,16 +54,16 @@ fun ScreenScaffolded(
 @Composable
 fun CityDialogConstructor(
     cityDialog: Boolean,
-    items: List<City> ,
+    items: List<City>,
     setCityDialog: (Boolean) -> Unit,
-    setCityId: (Long,String) -> Unit
+    setCityId: (Long, String) -> Unit
 ) {
     if (cityDialog) {
         CustomDialog(onClose = { setCityDialog(false) }) {
             CityDialog(
                 items = items,
                 onItemClick = { city ->
-                    setCityId(city.id,city.name)
+                    setCityId(city.id, city.name)
                     setCityDialog(false)
                 }
             )
@@ -90,7 +90,7 @@ fun CityDialog(
             Surface(
                 modifier = Modifier
                     .preferredWidth(120.dp)
-                    .clickable(onClick = { onItemClick(it) } ),
+                    .clickable(onClick = { onItemClick(it) }),
                 color = MaterialTheme.colors.background
             ) {
                 Text(

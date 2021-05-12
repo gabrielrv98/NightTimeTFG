@@ -158,8 +158,8 @@ fun FriendshipRequestListDialog(
     friendshipList: List<UserFriendView>,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    onAccept: (Long,String) -> Unit,
-    onDecline: (Long,String) -> Unit,
+    onAccept: (Long, String) -> Unit,
+    onDecline: (Long, String) -> Unit,
     onItemClick: ((Long) -> Unit)? = null
 ) {
 
@@ -202,7 +202,7 @@ fun FriendshipRequestListDialog(
 
                 //Name
                 Text(
-                    text =  makeLongShort(friendship.userNickname, 8) ,
+                    text = makeLongShort(friendship.userNickname, 8),
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .align(Alignment.CenterVertically)
@@ -220,10 +220,15 @@ fun FriendshipRequestListDialog(
 
                 Surface(
                     modifier = Modifier
-                        .padding( 6.dp)
+                        .padding(6.dp)
                         .wrapContentSize()
                         .clip(CircleShape)
-                        .clickable(onClick = { onAccept(friendship.friendshipId,friendship.userNickname) }),
+                        .clickable(onClick = {
+                            onAccept(
+                                friendship.friendshipId,
+                                friendship.userNickname
+                            )
+                        }),
                     shape = CircleShape,
                     border = BorderStroke(1.dp, Color.Black)
                 ) {
@@ -232,10 +237,15 @@ fun FriendshipRequestListDialog(
 
                 Surface(
                     modifier = Modifier
-                        .padding( 6.dp)
+                        .padding(6.dp)
                         .wrapContentSize()
                         .clip(CircleShape)
-                        .clickable(onClick = { onDecline(friendship.friendshipId,friendship.userNickname) }),
+                        .clickable(onClick = {
+                            onDecline(
+                                friendship.friendshipId,
+                                friendship.userNickname
+                            )
+                        }),
                     shape = CircleShape,
                     border = BorderStroke(1.dp, Color.Black)
                 ) {

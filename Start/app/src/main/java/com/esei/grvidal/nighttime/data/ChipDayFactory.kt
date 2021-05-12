@@ -4,7 +4,7 @@ import java.lang.StringBuilder
 import java.time.LocalDate
 
 
-fun LocalDate.toMyDate(): MyDate{
+fun LocalDate.toMyDate(): MyDate {
     return MyDate(
         this.dayOfMonth,
         this.monthValue,
@@ -12,19 +12,19 @@ fun LocalDate.toMyDate(): MyDate{
     )
 }
 
-data class MyDate(val day: Int, val month: Int, val year: Int){
+data class MyDate(val day: Int, val month: Int, val year: Int) {
 
     val previousMonth: MyDate
-    get() {
-        return LocalDate.of(year, month, day).minusMonths(1).toMyDate()
-    }
+        get() {
+            return LocalDate.of(year, month, day).minusMonths(1).toMyDate()
+        }
 
     val nextMonth: MyDate
         get() {
-            return LocalDate.of(year,month,day).plusMonths(1).toMyDate()
+            return LocalDate.of(year, month, day).plusMonths(1).toMyDate()
         }
 
-    fun toStringFormatted() : String{
+    fun toStringFormatted(): String {
         return StringBuilder().append(day)
             .append("/")
             .append(month)
@@ -88,10 +88,10 @@ class ChipDayFactory {
                 val previousMonthYear = localDateLastMonth.year
 
                 //Last day of the previous month
-                val previousMonthDay = localDateLastMonth.lengthOfMonth() - daysOff +1
+                val previousMonthDay = localDateLastMonth.lengthOfMonth() - daysOff + 1
 
                 //Loop to create the previous days
-                for (day in previousMonthDay .. localDateLastMonth.lengthOfMonth()) {
+                for (day in previousMonthDay..localDateLastMonth.lengthOfMonth()) {
                     monthArray.add(
                         MyDate(
                             day,
@@ -106,7 +106,7 @@ class ChipDayFactory {
             val maxDaysActualMonth = localDate.lengthOfMonth()
 
             //Loop to create the days of the month
-            for(day in 1 .. maxDaysActualMonth){
+            for (day in 1..maxDaysActualMonth) {
                 monthArray.add(
                     MyDate(
                         day,
@@ -118,7 +118,7 @@ class ChipDayFactory {
 
             val lastDay = LocalDate.of(selectedDate.year, selectedDate.month, monthArray.last().day)
             // if the last day is not Sunday
-            if( lastDay.dayOfWeek.value != 7){
+            if (lastDay.dayOfWeek.value != 7) {
 
                 //Next month is calculated
                 val localDateNextMonth = localDate.plusMonths(1)
@@ -130,7 +130,7 @@ class ChipDayFactory {
                 val nextMonthYear = localDateNextMonth.year
 
                 //Loop to create the previous days
-                for (day in 1 .. ( 7 - lastDay.dayOfWeek.value) ){
+                for (day in 1..(7 - lastDay.dayOfWeek.value)) {
                     monthArray.add(
                         MyDate(
                             day,

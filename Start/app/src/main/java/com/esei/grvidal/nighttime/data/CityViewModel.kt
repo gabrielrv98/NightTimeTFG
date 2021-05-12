@@ -17,22 +17,24 @@ import java.io.IOException
 private const val TAG = "CityViewModel"
 
 
-data class City(val id:Long, val name:String)
+data class City(val id: Long, val name: String)
 
 class CityViewModel(
     private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
     var city by mutableStateOf(City(-1, "Ourense"))
-    private set
+        private set
 
     var allCities by mutableStateOf(listOf<City>())
-    private set
+        private set
 
     var showDialog by mutableStateOf(false)
         private set
 
-    fun setDialog(state: Boolean){ showDialog = state }
+    fun setDialog(state: Boolean) {
+        showDialog = state
+    }
 
     /**
      * Call getCityFromPreferences() on init so we can display the last city used
@@ -67,7 +69,7 @@ class CityViewModel(
         }
     }
 
-    private suspend fun fetchCitiesFromApi(){
+    private suspend fun fetchCitiesFromApi() {
         try {
             val webResponse = NightTimeApi.retrofitService.getAllCitiesAsync()
             Log.e(
@@ -97,15 +99,15 @@ class CityViewModel(
     }
 }
 
-object CitiesNoInternet{
+object CitiesNoInternet {
     val cities = listOf(
-        City(1,"Ourense"),
-        City(2,"Vigo"),
-        City(3,"Pontevedra"),
-        City(4,"Coruña"),
-        City(5,"Allariz"),
-        City(6,"Lugo"),
-        City(7,"Rivadavia"),
+        City(1, "Ourense"),
+        City(2, "Vigo"),
+        City(3, "Pontevedra"),
+        City(4, "Coruña"),
+        City(5, "Allariz"),
+        City(6, "Lugo"),
+        City(7, "Rivadavia"),
     )
 }
 

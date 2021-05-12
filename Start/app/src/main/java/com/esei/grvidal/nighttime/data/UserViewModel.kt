@@ -42,7 +42,7 @@ enum class PhotoState {
 }
 
 data class ErrorHolder(
-    val resourceInt : Int? = null,
+    val resourceInt: Int? = null,
     val errorString: String? = null
 )
 
@@ -106,13 +106,13 @@ class UserViewModel : ViewModel() {
         eraseData()
 
 
-            fetchUser(userId) // Get data from new user
+        fetchUser(userId) // Get data from new user
 
-            if (!user.picture.isNullOrEmpty()) {
-                fetchPhoto(userId)
-            }
-            delay(500)
-            fetchUser(userId) // Get data again from the user in case the edit delayed a bit
+        if (!user.picture.isNullOrEmpty()) {
+            fetchPhoto(userId)
+        }
+        delay(500)
+        fetchUser(userId) // Get data again from the user in case the edit delayed a bit
     }
 
     private suspend fun fetchUser(userId: Long) {
@@ -120,8 +120,10 @@ class UserViewModel : ViewModel() {
 
             val webResponse = NightTimeApi.retrofitService.getUserDetails(
                 id = userId,
-                headers = mapOf("clientUser" to userToken.id.toString(),
-                "auth" to userToken.token)
+                headers = mapOf(
+                    "clientUser" to userToken.id.toString(),
+                    "auth" to userToken.token
+                )
             )
             Log.d(
                 TAG,
@@ -346,7 +348,7 @@ class UserViewModel : ViewModel() {
 
                 if (id == -1L || token.isBlank()) {
 
-                    errorText =  ErrorHolder(R.string.unexpected_error)
+                    errorText = ErrorHolder(R.string.unexpected_error)
 
                 } else {
                     userToken = UserToken(id, token)
@@ -362,14 +364,14 @@ class UserViewModel : ViewModel() {
             } else if (webResponse.code() == 208) { // User nickname repeated
 
                 Log.d(TAG, "newUser: User refused, nickname already in use")
-                errorText =  ErrorHolder(R.string.already_used_name)
+                errorText = ErrorHolder(R.string.already_used_name)
 
             } else {
                 Log.d(TAG, "newUser: response code ${webResponse.code()}")
 
-                errorText = webResponse.headers()["error"]?.let{
-                      ErrorHolder(null,it)
-                }  ?:   ErrorHolder(R.string.unexpected_error)
+                errorText = webResponse.headers()["error"]?.let {
+                    ErrorHolder(null, it)
+                } ?: ErrorHolder(R.string.unexpected_error)
 
             }
 
@@ -385,14 +387,14 @@ class UserViewModel : ViewModel() {
         // Create requestFile
         val requestFile: RequestBody =
             RequestBody.create(MediaType.parse("multipart/form-data"), file)
-            //file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+        //file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
 
         // MultipartBody.Part is used to send also the actual file name
         return MultipartBody.Part.createFormData("img", file.name, requestFile)
     }
 
     fun requestFriendship(idFriend: Long) = viewModelScope.launch {
-        try{
+        try {
 
             val webResponse = NightTimeApi.retrofitService.addFriendshipRequest(
                 id = userToken.id,
@@ -414,7 +416,7 @@ class UserViewModel : ViewModel() {
     }
 
     fun removeFriendShip(userId: Long) = viewModelScope.launch {
-        try{
+        try {
 
             val webResponse = NightTimeApi.retrofitService.removeFriendship(
                 id = userToken.id,
@@ -431,7 +433,6 @@ class UserViewModel : ViewModel() {
             Log.e(TAG, "removeFriendShip: general exception  --//-- $e")
         }
     }
-
 
 
 }

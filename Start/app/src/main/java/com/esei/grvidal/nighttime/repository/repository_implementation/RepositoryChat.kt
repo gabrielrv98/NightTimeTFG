@@ -16,7 +16,7 @@ private const val TAG = "RepositoryChat"
 class RepositoryChat(
     private val userToken: UserToken,
     private val apiService: NightTimeService
-): IRepositoryChat {
+) : IRepositoryChat {
 
     override fun getId(): Long {
         return userToken.id

@@ -35,7 +35,6 @@ import com.esei.grvidal.nighttime.scaffold.*
 private const val TAG = "BarPage"
 
 
-
 /**
  * StateFull composable that manage the main composition of the BarPAge view
  *
@@ -48,7 +47,7 @@ fun BarPage(
     barVM: BarViewModel,
     city: City
 ) {
-    SideEffect{
+    SideEffect {
         barVM.city = city
     }
 
@@ -185,9 +184,9 @@ fun Header(
 
         }
 
-            icon?.let {
-                it(Modifier.align(Alignment.CenterEnd))
-            }
+        icon?.let {
+            it(Modifier.align(Alignment.CenterEnd))
+        }
     }
 }
 

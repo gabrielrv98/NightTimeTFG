@@ -63,7 +63,7 @@ fun ChatConversationInit(
 
     Log.d(TAG, "ChatConversationInit: chatSend friendshipId $friendshipId")
 
-    val chatVM: ChatViewModel = viewModel( factory = object : ViewModelProvider.Factory {
+    val chatVM: ChatViewModel = viewModel(factory = object : ViewModelProvider.Factory {
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
@@ -412,11 +412,11 @@ fun timeFormatted(
 ): String {
     Log.d(TAG, "timeFormatted: $time")
 
-    return if (Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.[0-9]*").matches(time)){
+    return if (Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.[0-9]*").matches(time)) {
 
         time.split(".")[0]
 
-    }else if (!Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}").matches(time)) {
+    } else if (!Regex("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}").matches(time)) {
 
         val timeSplit = time.split(",")
         val localTime = LocalTime.of(

@@ -20,15 +20,15 @@ import java.util.*
 
 @Composable
 fun TopBarConstructor(
-    buttonText : String,
-    title : String = stringResource(id = R.string.app_name),
+    buttonText: String,
+    title: String = stringResource(id = R.string.app_name),
     icon: VectorAsset? = null,
-    action : () -> Unit = {}
-){
+    action: () -> Unit = {}
+) {
     TopAppBar(
         title = { Text(text = title) },
         actions = {
-            TopRightIconText(buttonText, icon ,action)
+            TopRightIconText(buttonText, icon, action)
         }
     )
 }
@@ -38,7 +38,7 @@ fun TopRightIconText(
     buttonText: String,
     icon: VectorAsset?,
     action: () -> Unit
-){
+) {
     Surface(
         modifier = Modifier
             .clip(RoundedCornerShape(25))
@@ -52,7 +52,7 @@ fun TopRightIconText(
                 maxLines = 1
             )
 
-            icon?.let{
+            icon?.let {
                 Icon(
                     modifier = Modifier.padding(6.dp),
                     asset = it

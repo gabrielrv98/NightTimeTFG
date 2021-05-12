@@ -37,7 +37,7 @@ class LoginViewModel(
     var loggingState by mutableStateOf(LoginState.LOADING)
         private set
 
-    var credentialsChecked  = false
+    var credentialsChecked = false
         private set
 
 
@@ -178,20 +178,21 @@ class LoginViewModel(
     }
 
 }
-    class LoginViewModelFactory(
-        private val dataStoreManager: DataStoreManager
-    ) : ViewModelProvider.Factory {
 
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+class LoginViewModelFactory(
+    private val dataStoreManager: DataStoreManager
+) : ViewModelProvider.Factory {
 
-            if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-                @Suppress("UNCHECKED_CAST")
-                return LoginViewModel(dataStoreManager) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
+        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+
+            @Suppress("UNCHECKED_CAST")
+            return LoginViewModel(dataStoreManager) as T
         }
-
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
+
+}
 
 
