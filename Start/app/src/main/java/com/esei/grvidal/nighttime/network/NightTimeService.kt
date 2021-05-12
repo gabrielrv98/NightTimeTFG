@@ -192,7 +192,7 @@ interface NightTimeService {
         @Header("auth") auth: String,
         @Path("idUser") id: Long,
         @Query("page") page: Int = 0
-    ): Response<List<UserSnap>>
+    ): Response<List<FriendshipSnap>>
 
     @GET("$USER_URL{idUser}/chat")
     suspend fun getChatsWithMessages(

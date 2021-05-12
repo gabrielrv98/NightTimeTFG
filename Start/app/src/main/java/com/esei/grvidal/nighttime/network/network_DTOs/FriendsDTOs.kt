@@ -24,6 +24,36 @@ data class FriendshipUpdateDTO(
     val answer: AnswerOptions
 )
 
+data class FriendshipSnap(
+    val userId: Long,
+    val friendshipId :Long,
+    var username: String,
+    val name: String,
+    val image: Boolean
+){
+    fun toFriendshipSnapImage(
+        image: ImageAsset? = null
+    ): FriendshipSnapImage {
+        return FriendshipSnapImage(
+            userId = this.userId,
+            friendshipId = this.friendshipId,
+            username = this.username,
+            name = this.name,
+            hasImage = this.image,
+            image = image
+        )
+    }
+}
+
+data class FriendshipSnapImage(
+    val userId: Long,
+    val friendshipId :Long,
+    var username: String,
+    val name: String,
+    val hasImage: Boolean,
+    var image: ImageAsset?
+)
+
 /**
  * Enum with the option to answer a friendship request
  */

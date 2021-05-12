@@ -56,7 +56,7 @@ class FriendsViewModel(
 
 
     // List of friendships to start a new chat
-    var friendshipIdList by mutableStateOf(setOf<UserSnapImage>()) // TODO: 12/05/2021 fix this by adding idFriendship variable in the DTO and sending it by API
+    var friendshipIdList by mutableStateOf(setOf<FriendshipSnapImage>()) // TODO: 12/05/2021 fix this by adding idFriendship variable in the DTO and sending it by API
 
     private var friendListPage = 0
     var totalFriends = -1
@@ -179,9 +179,36 @@ class FriendsViewModel(
                         )
                         friendListPage++
 
-                        friendshipIdList = friendshipIdList + fetchedList.map {
-                            it.toUserSnapImage()
+                        friendshipIdList = friendshipIdList + fetchedList.map{ it.toFriendshipSnapImage() }
 
+                        val userWithImages = fetchedList.filter { it.image }
+                        for (user in userWithImages){
+                            loadUserImage(
+                                picasso = Picasso.get(),
+                                userId = user.userId,
+                                action = { img ->
+                                    friendshipIdList
+                                        .findLast { chat -> chat.userId == user.userId }
+                                        ?.let { user ->
+
+                                            // Recomposition is made when the setter of the list is called,
+                                            // so the list need to be edited (add or remove items on the list).
+                                            // This is done by re-adding the edited element of the list
+                                            friendshipIdList =
+                                                friendshipIdList.toMutableSet().also {
+                                                    it.remove(user)
+                                                    user.image = img.asImageAsset()
+
+                                                } + setOf(user)
+
+
+                                            Log.d(
+                                                TAG,
+                                                "onBitmapLoaded: getting Image user ${user.userId} size ${img.byteCount} height ${img.height}, width ${img.width}"
+                                            )
+                                        }
+                                }
+                            )
                         }
                     }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,10 +42,7 @@ import com.esei.grvidal.nighttime.*
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.MessageListened
-import com.esei.grvidal.nighttime.network.network_DTOs.ChatFullView
-import com.esei.grvidal.nighttime.network.network_DTOs.UserFriendView
-import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.SharedFlow
@@ -212,7 +210,7 @@ fun FriendsScreen(
     onChatClick: (Long) -> Unit,
     numberRequestFriendship: Int,
     showDialog: () -> Unit,
-    friendsList: List<UserSnapImage>,
+    friendsList: List<FriendshipSnapImage>,
     fetchFriendList: () -> Unit,
     numberOfFriends: Int
 ) {
@@ -227,8 +225,8 @@ fun FriendsScreen(
     val (showNewConversationDialog, setNewConversationShowDialog) = remember { mutableStateOf(false) }
 
     if (showNewConversationDialog)
-        UserSnapList(
-            userList = friendsList,
+        FriendSnapList(
+            friendList = friendsList,
             numberOfFriends = numberOfFriends,
             loadMoreFriends = fetchFriendList,
             closeDialog = { setNewConversationShowDialog(false) },
@@ -445,7 +443,109 @@ fun FriendsSearch(
         listState = state,
         onItemClick = onClick
     )
+}
 
+
+@Composable
+fun FriendSnapList(
+    friendList: List<FriendshipSnapImage>,
+    numberOfFriends: Int,
+    loadMoreFriends: () -> Unit,
+    closeDialog: () -> Unit,
+    onClick: ((Long) -> Unit)? = null
+) {
+
+    val state = rememberLazyListState()
+
+    Log.d(
+        TAG,
+        "UserListOnDate: size: ${friendList.size}  state : ${state.firstVisibleItemIndex} "
+    )
+
+
+    /**
+     * [LazyListState.firstVisibleItemIndex] points at the number of items already scrolled
+     *
+     * So if userList is not empty then we check if the remaining users in userList are 15 or less
+     * (Full screen of the app),
+     * if so, more users from API are fetched
+     */
+    if (numberOfFriends > 0 &&
+        friendList.size < numberOfFriends &&
+        // total - cursor ( la posicion actual) >= 12  ->( los objetos restantes son 12 ( 9 mostrados en pantalla, 3 restantes por abajo ))
+        (friendList.size - state.firstVisibleItemIndex <= 12 || friendList.isEmpty())
+    ) {
+
+        loadMoreFriends()
+    }
+
+
+
+    CustomDialog(onClose = closeDialog) {
+        FriendSnapListDialog(
+            userList = friendList,
+            modifier = Modifier.preferredHeight(600.dp),
+            listState = state,
+            onItemClick = onClick
+        )
+    }
+}
+
+
+/**
+ * Dialog that shows the friends who are coming out the selected date
+ *
+ * @param modifier custom modifier
+ * @param userList list with the users to show
+ */
+@Composable
+fun FriendSnapListDialog(
+    userList: List<FriendshipSnapImage>,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    onItemClick: ((Long) -> Unit)? = null
+) {
+
+    //List with the users
+    LazyColumnFor(
+        items = userList,
+        modifier = modifier,
+        state = listState
+    ) { user ->
+
+        val modifierUser = if (onItemClick != null)
+            Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(onClick = { onItemClick(user.friendshipId) })
+        else Modifier
+
+        //Each user
+        Row(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 14.dp)
+                .then(modifierUser)
+        ) {
+            //Image
+            Surface(
+                modifier = Modifier.preferredSize(40.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
+            ) {
+                user.image?.let {
+                    Image(asset = it)
+                } ?: Icon(asset = Icons.Default.Person)
+
+            }
+
+            //Name
+            Text(
+                text = "${user.username} - ${user.name}",
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
+    }
 
 }
 
