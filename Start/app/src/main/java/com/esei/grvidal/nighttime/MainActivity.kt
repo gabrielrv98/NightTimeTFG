@@ -13,9 +13,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -208,6 +210,7 @@ Navigation with their own files ( no dependencies )
         login.loggedUser
     ) }
 
+val barVM : BarViewModel =viewModel()
 
     val navController = rememberNavController()
 
@@ -238,13 +241,52 @@ Navigation with their own files ( no dependencies )
                     setCityId = cityVM::setCity
                 )
 
-
-                CalendarPage(userToken = login.loggedUser, cityId = cityVM.city.id)
+                CalendarInit(userToken = login.loggedUser, cityId = cityVM.city.id)
             }
         }
 
         composable(BottomNavigationScreens.BarNav.route) {// Bar
-            BarArchitecture(cityVM = cityVM, bottomNavigationItems = bottomNavigationItems)
+            ScreenScaffolded(
+                topBar = {
+                    TopBarConstructor(
+                        action = { cityVM.setDialog(true) },
+                        icon = Icons.Default.Search,
+                        buttonText = cityVM.city.name
+                    )
+                },
+                bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
+            ) {
+                CityDialogConstructor(
+                    cityDialog = cityVM.showDialog,
+                    items = cityVM.allCities,
+                    setCityDialog = cityVM::setDialog,
+                    setCityId = cityVM::setCity
+                )
+
+                BarPage(navController, barVM,cityVM.city)
+            }
+
+        }
+
+
+        composable(  // Bar details
+            NavigationScreens.BarDetails.route + "/{barId}",
+            arguments = listOf(navArgument("barId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            //Sometimes Android would reorganize backStackEntry.arguments?.getLong  as an int and showing
+            // W/Bundle: Key barId expected Long but value was a java.lang.Integer.  The default value 0 was returned.
+            // So we send an int then transform it to long
+            Log.d(TAG, "MainScreen: Pulling BarDetails")
+
+            ScreenScaffolded(
+                modifier = Modifier
+            ) {
+                BarDetails(
+                    barVM = barVM,
+                    barId = backStackEntry.arguments?.getInt("barId")?.toLong() ?: -1L,
+                    navController = navController
+                )
+            }
 
         }
 
