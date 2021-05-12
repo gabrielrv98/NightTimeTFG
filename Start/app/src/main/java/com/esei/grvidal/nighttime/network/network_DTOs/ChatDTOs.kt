@@ -19,13 +19,7 @@ data class MessageView(
     val date: String,
     val time: String,
     val user: Long
-){
-    companion object {
-        fun emptyMessageView(): MessageView{
-            return MessageView(-1,"","","",-1)
-        }
-    }
-}
+)
 
 @Immutable
 data class ChatFullView(

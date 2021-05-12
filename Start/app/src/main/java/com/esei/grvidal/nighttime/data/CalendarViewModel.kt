@@ -31,12 +31,6 @@ class CalendarViewModel(
     var cityId: Long
 ) : ViewModel() {
 
-    fun setUserToken(loggedUser: UserToken) {
-
-        Log.d(TAG, "setUserToken: old token = $userToken, new $loggedUser")
-        //userToken = loggedUser
-    }
-
     @JvmName("setCityId1")
     fun setCityId(id: Long) {
         Log.d(TAG, "setCityId: old id = $cityId, new $id")
@@ -165,7 +159,6 @@ class CalendarViewModel(
                     webResponse.body()?.let { data ->
 
                         userDays = data.map { futureDates ->
-                            // val fields = futureDates.nextDate.split("-")
 
                             val fields = futureDates.nextDate.split("-")
                             try {
