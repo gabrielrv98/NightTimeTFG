@@ -28,6 +28,10 @@ import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.network.ChatListener
 import com.esei.grvidal.nighttime.pages.*
+import com.esei.grvidal.nighttime.pages.profile_pages.PERMISSION_CODE
+import com.esei.grvidal.nighttime.pages.profile_pages.ProfileEditorPage
+import com.esei.grvidal.nighttime.pages.profile_pages.ProfilePageView
+import com.esei.grvidal.nighttime.pages.profile_pages.pickImageFromGallery
 import com.esei.grvidal.nighttime.scaffold.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import kotlinx.coroutines.CoroutineScope

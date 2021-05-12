@@ -101,12 +101,11 @@
     <string name="send_request">Enviar solicitud.</string>
     <string name="chat_title">Chat</string>
     <string name="friendship_requested_to_you">Solicitudes de amistad:</string>
-    <string name="acceptingUser">"Aceptnado a"</string>
+    <string name="acceptingUser">"Aceptando a"</string>
     <string name="refusingUser">"Rechazando a"</string>
     <string name="cd_button_send">Enviar</string>
     <string name="unexpected_error">Unexpected error, contact with admin</string>
     <string name="already_used_name">Nombre de usuario en uso</string>
-    <string name="new_messages">Nuevos mensajes</string>
     <string name="previousMonth">Mes anterior</string>
     <string name="nextMonth">Mes siguiente</string>
 </resources>

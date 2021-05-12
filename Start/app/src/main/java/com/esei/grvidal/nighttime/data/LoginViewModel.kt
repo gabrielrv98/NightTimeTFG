@@ -177,13 +177,6 @@ class LoginViewModel(
         }
     }
 
-    fun jumpHack() {
-        viewModelScope.launch {
-            loggingState = LoginState.ACCEPTED
-            credentialsChecked = true
-        }
-    }
-
 }
     class LoginViewModelFactory(
         private val dataStoreManager: DataStoreManager

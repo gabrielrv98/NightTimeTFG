@@ -14,7 +14,7 @@ val grayWhite = Color(0xFFF7F7F7)
 val grayBlue = Color(0xFFB9E1E1) //primary variant
 
 /**
- * Return the fully opaque color that results from compositing [onSurface] atop [surface] with the
+ * Return the fully opaque color that results from compositing [Colors.onSurface] on top [Colors.surface] with the
  * given [alpha]. Useful for situations where semi-transparent colors are undesirable.
  */
 @Composable

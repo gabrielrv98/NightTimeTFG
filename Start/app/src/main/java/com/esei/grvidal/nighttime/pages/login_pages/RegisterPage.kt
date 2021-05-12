@@ -39,6 +39,7 @@ import com.esei.grvidal.nighttime.data.ErrorHolder
 import com.esei.grvidal.nighttime.data.LoginViewModel
 import com.esei.grvidal.nighttime.data.PhotoState
 import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.pages.profile_pages.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 

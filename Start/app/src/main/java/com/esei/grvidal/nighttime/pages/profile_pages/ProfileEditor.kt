@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.pages
+package com.esei.grvidal.nighttime.pages.profile_pages
 
 import android.Manifest
 import android.app.Activity
@@ -36,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.viewModel
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
@@ -45,7 +44,7 @@ import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.PhotoState
 import com.esei.grvidal.nighttime.data.UserViewModel
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import com.esei.grvidal.nighttime.pages.TextWithInput
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -324,32 +323,6 @@ fun pickImageFromGallery(searchImage: () -> Unit) {
     searchImage()
 }
 
-/*
-// todo mejora de codigo
-    https://developer.android.com/training/basics/intents/result?hl=es-419#kotlin
-https://www.youtube.com/watch?v=kZKL_JvPDG0
-@Composable
-fun pickImageFromGallery( ) {
-    Log.d(TAG, "pickImageFromGallery: starting")
-
-    val launcher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-        result.value = it
-    }
-
-    Button(onClick = { launcher.launch() }) {
-        Text(text = "Take a picture")
-    }
-
-    val selectImageLauncher =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            Log.d(TAG, "settingNewURi:  uri = $uri")
-            userVM.uriPhoto = uri
-        }
-
-}
- */
-
-
 @Composable
 private fun AcceptDeclineButtons(
     accept: () -> Unit,
@@ -475,20 +448,11 @@ fun TextWithInputPassword(
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit
 ) {
-    /**
-     * Beta versions
-     * todo update for greater than beta01
-     * https://stackoverflow.com/questions/66376112/hoist-pressed-state-in-jetpack-compose-beta-1-after-interactionstate-was-removed
-     */
+
     val interactionState =
         remember { InteractionState() } // remember { MutableInteractionSource() }
     val showPassword =
         interactionState.contains(Interaction.Pressed)// interactionSource.collectIsPressedAsState()
-    /*
-        .clickable(
-        interactionSource = interactionSource,
-        indication = LocalIndication.current
-         */
 
     TextChanger(
         modifier = Modifier,

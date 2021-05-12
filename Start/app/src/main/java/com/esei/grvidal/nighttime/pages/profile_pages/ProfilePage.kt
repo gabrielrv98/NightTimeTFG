@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.pages
+package com.esei.grvidal.nighttime.pages.profile_pages
 
 import android.content.Context
 import android.util.Log
@@ -32,6 +32,7 @@ import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.network_DTOs.AnswerOptions
 import com.esei.grvidal.nighttime.network.network_DTOs.NextDateDTO
+import com.esei.grvidal.nighttime.pages.ErrorComposable
 
 
 private const val TAG = "ProfilePage"
