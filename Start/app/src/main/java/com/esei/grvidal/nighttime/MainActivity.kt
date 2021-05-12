@@ -263,9 +263,12 @@ val barVM : BarViewModel =viewModel()
                     setCityId = cityVM::setCity
                 )
 
-                BarPage(navController, barVM,cityVM.city)
+                BarPage(
+                    navController = navController,
+                    barVM = barVM,
+                    city = cityVM.city
+                )
             }
-
         }
 
 
@@ -308,7 +311,12 @@ val barVM : BarViewModel =viewModel()
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
 
-                FriendsPage(navController, login.loggedUser,chatListener.events,showDialog)
+                FriendsInit(
+                    navController = navController,
+                    userToken = login.loggedUser,
+                    flow = chatListener.events,
+                    showDialog = showDialog
+                )
 
 
 
@@ -330,7 +338,7 @@ val barVM : BarViewModel =viewModel()
         }
 
         composable(
-            BottomNavigationScreens.ProfileNav.route
+            BottomNavigationScreens.ProfileNav.route // Profile client user
         ) {
             ScreenScaffolded(
                 topBar = {
@@ -351,7 +359,7 @@ val barVM : BarViewModel =viewModel()
         }
 
         composable(
-            BottomNavigationScreens.ProfileNav.route + "/{userId}",
+            BottomNavigationScreens.ProfileNav.route + "/{userId}", // Profile other user
             arguments = listOf(navArgument("userId") { type = NavType.IntType })
         ) { backStackEntry ->
 
@@ -360,15 +368,16 @@ val barVM : BarViewModel =viewModel()
                 bottomBar = { BottomBarNavConstructor(navController, bottomNavigationItems) },
             ) {
                 ProfilePageView(
-                    navController,
-                    backStackEntry.arguments?.getInt("userId")?.toLong() ?: -1L, userVM
+                    navController = navController,
+                    userId = backStackEntry.arguments?.getInt("userId")?.toLong() ?: -1L,
+                    userVM = userVM
                 )
 
             }
         }
 
         composable(
-            NavigationScreens.ProfileEditor.route
+            NavigationScreens.ProfileEditor.route // Profile editor
         ) {
 
             ScreenScaffolded(
@@ -432,31 +441,3 @@ fun PreviewScreen() {
 
     }
 }
-
-
-//Weights
-/*
-Row() {
-    Box(
-        Modifier.weight(1f),
-        backgroundColor = Color.Blue) {
-        Text(text = "Weight = 1", color = Color.White)
-    }
-    Box(
-        Modifier.weight(2f),
-        backgroundColor = Color.Yellow
-    ) {
-        Text(text = "Weight = 2")
-    }
-}
-*/
-
-/*
-Concepto principal: cuando agregues un estado interno a un elemento que admite composición,
-evalúa si debe conservarse luego de los cambios de configuración o las interrupciones como las llamadas telefónicas.
-
-De ser así, usa savedInstanceState para almacenar el estado.
-
-var expanded by savedInstanceState { false }
-
- */

@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.network.network_DTOs
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageAsset
 
 
@@ -26,12 +27,13 @@ data class MessageView(
     }
 }
 
+@Immutable
 data class ChatFullView(
     val friendshipId: Long,
     val userId: Long,
     val userNickname: String,
     val hasImage: Boolean,
-    var messages: List<MessageView>,
-    var unreadMessages: Boolean,
+    val messages: List<MessageView>,
+    val unreadMessages: Boolean,
     var img: ImageAsset?
 )

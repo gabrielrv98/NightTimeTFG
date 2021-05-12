@@ -32,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
@@ -44,14 +46,53 @@ import com.esei.grvidal.nighttime.network.network_DTOs.UserFriendView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.SharedFlow
 import kotlin.coroutines.EmptyCoroutineContext
 
 
 private const val TAG = "FriendsPage"
+
+@Composable
+fun FriendsInit(navController: NavHostController,
+                userToken: UserToken,
+                flow: SharedFlow<MessageListened>,
+                showDialog: MutableState<Boolean>,
+){
+    val friendsVM : FriendsViewModel = viewModel("friendsVM", factory = object : ViewModelProvider.Factory {
+
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+
+            if (modelClass.isAssignableFrom(FriendsViewModel::class.java)) {
+
+                @Suppress("UNCHECKED_CAST")
+                return FriendsViewModel(userToken) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+
+    })
+
+    onCommit(friendsVM.getId()) {
+        val coroutineScope =  CoroutineScope(context = EmptyCoroutineContext)
+
+        Log.d(TAG, "FriendsPage: onCommit")
+        friendsVM.getChats()
+        friendsVM.getRequestingFriendships()
+        friendsVM.setFlow(coroutineScope, flow)
+
+        onDispose {
+            coroutineScope.cancel()
+
+        }
+    }
+
+    FriendsPage(
+        navController = navController,
+        showDialog = showDialog,
+        friendsVM = friendsVM
+    )
+}
 
 /**
  * Composable that manages the View of the list of chats
@@ -63,25 +104,9 @@ private const val TAG = "FriendsPage"
 @Composable
 fun FriendsPage(
     navController: NavHostController,
-    userToken: UserToken,
-    flow: SharedFlow<MessageListened>,
     showDialog: MutableState<Boolean>,
-    friendsVM: FriendsViewModel = viewModel(),
+    friendsVM: FriendsViewModel,
 ) {
-
-    onCommit(friendsVM.getId()) {
-        val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
-        friendsVM.setUserToken(userToken)
-
-        Log.d(TAG, "FriendsPage: onCommit")
-        friendsVM.getChats()
-        friendsVM.getRequestingFriendships()
-        friendsVM.setFlow(coroutineScope, flow)
-
-        onDispose {
-            coroutineScope.cancel()
-        }
-    }
 
     var requestFriendshipDialog by remember { mutableStateOf(false) }
 
@@ -116,7 +141,6 @@ fun FriendsPage(
             closeRequestFriendshipDialog = { requestFriendshipDialog = false }
         )
     }
-
 
     FriendsScreen(
         chatList = friendsVM.chatList.collectAsState().value,
@@ -246,9 +270,7 @@ fun FriendsScreen(
                         if (numberRequestFriendship > 0)
                             Surface(
                                 modifier = Modifier
-                                    //.wrapContentHeight()
                                     .padding(bottom = 23.dp, start = 26.dp)
-                                    //.align(Alignment.TopEnd)
                                     .clip(shape = CircleShape),
                                 color = Color.Red,
                                 shape = CircleShape
@@ -276,7 +298,9 @@ fun FriendsScreen(
                     lastMessage = chatData.messages[0].text,
                     unreadMessages = chatData.unreadMessages,
                     img = chatData.img,
-                    onEntryClick = { onChatClick(chatData.friendshipId) }
+                    onEntryClick = {
+                        Log.d(TAG, "FriendsScreen: chatSend - clicking on ${chatData.friendshipId}")
+                        onChatClick(chatData.friendshipId) }
                 )
             }
 

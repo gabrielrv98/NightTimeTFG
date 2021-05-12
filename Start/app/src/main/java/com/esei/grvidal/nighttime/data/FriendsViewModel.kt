@@ -35,32 +35,28 @@ fun ChatView.toFullView(
 
 private const val TAG = "FriendsViewModel"
 
-class FriendsViewModel : ViewModel() {
-
+class FriendsViewModel(
     // User token to call api
-    private var userToken = UserToken(-1, "")
+    private val userToken: UserToken
+) : ViewModel() {
 
-    fun setUserToken(loggedUser: UserToken) {
-        userToken = loggedUser
-    }
 
     fun getId(): Long {
         return userToken.id
     }
 
-    /**
-     * List of open chats the user has got
-     */
-    var chatListHolder= listOf<ChatFullView>()
-        private set
 
+    //List of open chats the user has got
+    private var chatListHolder = mutableListOf<ChatFullView>()
+
+    // Backing property to avoid state updates from other classes
     private val _chatList = MutableStateFlow(listOf<ChatFullView>())
+    // The UI collects from this StateFlow to get its state updates
     val chatList: StateFlow<List<ChatFullView>> = _chatList
 
-    /**
-     * List of friendships to start a new chat
-     */
-    var friendshipIdList by mutableStateOf(setOf<UserSnapImage>())
+
+    // List of friendships to start a new chat
+    var friendshipIdList by mutableStateOf(setOf<UserSnapImage>()) // TODO: 12/05/2021 fix this by adding idFriendship variable in the DTO and sending it by API
 
     private var friendListPage = 0
     var totalFriends = -1
@@ -77,7 +73,7 @@ class FriendsViewModel : ViewModel() {
      * [totalPeopleSearch] Number of max users with [searchString]
      */
     private lateinit var searchString: String
-    var searchPage = 0
+    private var searchPage = 0
     private var totalPeopleSearch = 0
 
 
@@ -105,7 +101,6 @@ class FriendsViewModel : ViewModel() {
     fun getChats() = viewModelScope.launch {
 
         try {
-            Log.d(TAG, "getChats: Ready to call retrofit")
             val webResponse =
                 retrofitService.getChatsWithMessages(auth = userToken.token, id = userToken.id)
 
@@ -114,52 +109,37 @@ class FriendsViewModel : ViewModel() {
                 webResponse.body()?.let { fetchedList ->
                     Log.d(TAG, "getChats: fetched data, number of chats = ${fetchedList.size}")
                     chatListHolder = fetchedList.map {
-                       it.toFullView()
-                     }
+                        it.toFullView()
+                    }.toMutableList()
 
-                    Log.d(TAG, "fetchPhotosChat starting to fetch photos")
 
-                    for (chat in chatListHolder) {
-                        if (chat.hasImage) {
-                            loadUserImage(
-                                picasso = Picasso.get(),
-                                userId = chat.userId,
-                                action = { img ->
-                                    chatListHolder.find { chaFilter ->
-                                        chaFilter.userId == chat.userId
+                    val usersToFetchPhoto = chatListHolder.filter { it.hasImage }
 
-                                    }?.let { chatSelected ->
+                    for (user in usersToFetchPhoto) {
+                        Log.d(TAG, "getChats: ${user.userId} has image ${user.hasImage}")
 
-                                        // Recomposition is made when the setter of the list is called,
-                                        // so we need to delete, edit (adding the picture) and re-add the element
-                                        chatListHolder = chatListHolder.toMutableList().also {
-                                            it.remove(chatSelected)
-                                            chatSelected.img = img.asImageAsset()
+                        loadUserImage(
+                            picasso = Picasso.get(),
+                            userId = user.userId,
+                            action = { img ->
 
-                                        } + listOf(chatSelected)
+                                chatListHolder.find { userFiltered ->
+                                    userFiltered.userId == user.userId
+                                }?.let {
+                                    chatListHolder.remove(it)
+                                    chatListHolder.add(it.copy(img = img.asImageAsset()))
+                                    Log.d(TAG, "getChats: Updating img of user ${it.userId}")
 
-                                        viewModelScope.launch {
-                                            _chatList.emit(
-                                                chatListHolder
-                                                .sortedByDescending { list -> list.messages[0].time }
-                                                .sortedByDescending { list -> list.messages[0].date }
-                                            )
-                                        }
+                                    updateFlow()
 
-                                        Log.d(
-                                            TAG,
-                                            "onBitmapLoaded: getting Image user ${chatSelected.userId} size ${img.byteCount} height ${img.height}, width ${img.width}"
-                                        )
-                                    }
                                 }
-                            )
-                        }
+
+                            }
+                        )
+
                     }
-                    _chatList.emit(
-                        chatListHolder
-                            .sortedByDescending { list -> list.messages[0].time }
-                            .sortedByDescending { list -> list.messages[0].date }
-                    )
+                    updateFlow()
+
 
                 }
 
@@ -172,6 +152,13 @@ class FriendsViewModel : ViewModel() {
 
             Log.d(TAG, "getChats: network exception ${e.message}  --//-- $e")
         }
+    }
+
+    private fun updateFlow() {
+        _chatList.value = chatListHolder
+            .sortedByDescending { list -> list.messages[0].time }
+            .sortedByDescending { list -> list.messages[0].date }
+        Log.d(TAG, "updateFlow: Flow has been updated")
     }
 
     fun getFriendshipsIds() = viewModelScope.launch {
@@ -294,7 +281,7 @@ class FriendsViewModel : ViewModel() {
 
                                                     Log.d(
                                                         TAG,
-                                                        "onBitmapLoaded: getting Image user $user.userId size ${img.byteCount} height ${img.height}, width ${img.width}"
+                                                        "onBitmapLoaded: getting Image user ${user.userId} size ${img.byteCount} height ${img.height}, width ${img.width}"
                                                     )
                                                 }
                                         }
@@ -493,7 +480,7 @@ class FriendsViewModel : ViewModel() {
 
                 Log.d(TAG, "setFlow: message arrived ${msg.messageView.text}")
 
-                val selectedChat = chatListHolder.find { it.friendshipId == msg.channel }
+                val selectedChat = _chatList.value.find { it.friendshipId == msg.channel }
 
                 // If the chat is found on the existing list the notification pops the chat up
                 selectedChat?.let { chat ->
@@ -522,7 +509,7 @@ class FriendsViewModel : ViewModel() {
             if (webResponse.isSuccessful) {
                 webResponse.body()?.let {
 
-                    chatListHolder = listOf(
+                    chatListHolder.add(
                         ChatFullView(
                             msg.channel,
                             msg.messageView.user,
@@ -532,9 +519,9 @@ class FriendsViewModel : ViewModel() {
                             unreadMessages = true,
                             img = null
                         )
-                    ) + chatListHolder
+                    )
 
-                    _chatList.emit(chatListHolder)
+                    updateFlow()
                 }
             }
 
@@ -552,16 +539,12 @@ class FriendsViewModel : ViewModel() {
         msg: MessageListened
     ) = viewModelScope.launch {
 
-        val index = chatListHolder.indexOf(chat)
-        chat.messages = listOf(msg.messageView)
-        chat.unreadMessages = true
+        chatListHolder.remove(chat)
+        chatListHolder.add(chat.copy(messages = listOf(msg.messageView), unreadMessages = true))
+        // Flow will update if .equals returns false,
+        // for some reason if [chat] is not .copy it will return false
 
-        // Chat is removed from the list so it can be edited, and after it is re-added in the first position
-        chatListHolder = listOf(chat) + chatListHolder.toMutableList().also {
-            it.removeAt(index)
-        }
-
-        _chatList.emit(chatListHolder)
+        updateFlow()
 
         for ((i, chatsAux) in chatListHolder.withIndex())
             Log.d(
