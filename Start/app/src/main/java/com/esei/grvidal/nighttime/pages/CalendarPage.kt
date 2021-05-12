@@ -31,16 +31,13 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
-import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.UsersSnapListDialog
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.EventData
-import com.esei.grvidal.nighttime.network.network_DTOs.EventData
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
-import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import java.time.LocalDate
 import java.util.*
 
@@ -59,8 +56,6 @@ fun CalendarPage(calendarVM: CalendarViewModel = viewModel(), userToken: UserTok
         calendarVM.setUserToken(userToken)
         calendarVM.cityId = cityId
     }
-    // TODO: 11/05/2021 check if it changes properly
-    //calendarVM.setCityId(cityId)
 
     //Remembered state of a boolean that express if the dialog with the friendly users must be shown
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
@@ -781,123 +776,3 @@ private fun InfoChip(
     }
 }
 
-@Preview("CalendarWindow")
-@Composable
-fun CalendarWindowPreview() {
-
-    val date = MyDate(20, 11, 2020)
-    val colorBackground = MaterialTheme.colors.background //.copy(alpha = 0.2f) not working,
-    CalendarPageView(
-        calendar = {
-            CalendarWindow(
-                //Name of the month shown on the top
-                monthName = monthName(date.month),
-                colorBackground = colorBackground,
-                previousMonthClick = { },
-                nextMonthClick = { }
-            ) {
-                for (week in ChipDayFactory.datesCreator()) {
-                    //Week Row
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        for (days in week) {
-
-                            //Each day in the week
-                            Box(
-                                modifier = Modifier.weight(1f),
-                                alignment = Alignment.Center
-                            ) {
-
-                                DayChip(
-                                    isNextUserDate = MyDate(24, 11, 2020) == days,
-                                    date = date,
-                                    setDate = {},
-                                    chipDate = days,
-                                    colorBackground = colorBackground
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        bottomInfo = {
-
-            DayInformation(
-                formattedDay = StringBuilder(8)
-                    .append(date.day)
-                    .append("/")
-                    .append(date.month)
-                    .append("/")
-                    .append(date.year)
-                    .toString(),
-                totalPeople = "150",
-                friends = "20",
-                showFriends = { },
-                OnChooseDateClick = { },
-                buttonText = stringResource(id = R.string.elegirDia),
-                events = {
-
-                    Event("bar1", "description 1")
-                    Event("bar2", "description 2")
-                    Event("bar3", "description 3")
-                    Event("bar4", "description 4")
-
-                },
-                selectDateEnable = true,
-            )
-        }
-    )
-}
-
-@Preview("Page")
-@Composable
-fun CalendarPreview() {
-    NightTimeTheme {
-
-        //CalendarPageView(City(0,"Ourense"))
-    }
-}
-
-
-@Preview("Dialog")
-@Composable
-fun DialogPreview() {
-    val userList =
-        listOf(
-            UserSnapImage(1, "Nuria", "pinknut", false, null),
-            UserSnapImage(1, "Miguel", "emikepick", false, null),
-            UserSnapImage(1, "Maria", "dulceFlor", false, null),
-            UserSnapImage(1, "Marcos", "Tigre", false, null),
-            UserSnapImage(1, "Laura", "laux21", false, null),
-            UserSnapImage(1, "Sara", "saraaldo", false, null),
-            UserSnapImage(1, "Julio", "itsme", false, null),
-            UserSnapImage(1, "Juan", "john32", false, null),
-            UserSnapImage(1, "Pedro", "pcsantiago", false, null),
-            UserSnapImage(1, "Salva", "Salvador", false, null),
-            UserSnapImage(1, "Gabriel", "grvidal", false, null),
-            UserSnapImage(1, "Jose", "JS", false, null),
-            UserSnapImage(1, "Emma", "EmmaSant", false, null),
-            UserSnapImage(1, "Santi", "santii810", false, null),
-            UserSnapImage(1, "Filo", "erfilo", false, null),
-            UserSnapImage(1, "Nuria", "pinknut", false, null),
-            UserSnapImage(1, "Miguel", "emikepick", false, null),
-            UserSnapImage(1, "Maria", "dulceFlor", false, null),
-            UserSnapImage(1, "Marcos", "Tigre", false, null),
-            UserSnapImage(1, "Laura", "laux21", false, null),
-            UserSnapImage(1, "Sara", "saraaldo", false, null),
-            UserSnapImage(1, "Julio", "itsme", false, null),
-            UserSnapImage(1, "Juan", "john32", false, null),
-            UserSnapImage(1, "Pedro", "pcsantiago", false, null),
-            UserSnapImage(1, "Salva", "Salvador", false, null),
-            UserSnapImage(1, "Gabriel", "grvidal", false, null),
-        )
-    NightTimeTheme {
-
-        CustomDialog(onClose = {}) {
-            UsersSnapListDialog(userList = userList, modifier = Modifier)
-        }
-    }
-}

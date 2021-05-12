@@ -30,7 +30,6 @@ import androidx.navigation.compose.rememberNavController
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.LoginViewModel
 import com.esei.grvidal.nighttime.data.UserViewModel
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import com.esei.grvidal.nighttime.scaffold.*
 
 
@@ -43,7 +42,7 @@ fun LoginArchitecture(
     userVM: UserViewModel,
     messageError: String = "",
     searchImage: () -> Unit
-){
+) {
     val navController = rememberNavController()
 
     NavHost(navController, startDestination = NavigationScreens.LoginPage.route) {
@@ -86,11 +85,7 @@ fun LoginPage(
         },
         register = {
             navController.navigate(NavigationScreens.RegisterPage.route)
-        },
-        jumpHack = {
-            loginVM.jumpHack()
-            Log.d(TAG, "LoginPage: jump-hack called")
-        } //todo Limpiar
+        }
     )
 }
 
@@ -102,8 +97,7 @@ fun LoginScreen(
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit,
     doLogin: () -> Unit,
-    register: () -> Unit,
-    jumpHack: () -> Unit
+    register: () -> Unit
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 24.dp),
@@ -128,11 +122,10 @@ fun LoginScreen(
             }
         )
 
-        Footer( 
+        Footer(
             text = stringResource(id = R.string.registerAdd),
             modifier = Modifier.weight(1f),
-            register = register,
-            jumpHack = jumpHack
+            register = register
         )
 
     }
@@ -199,8 +192,7 @@ fun Header(modifier: Modifier = Modifier, title: String) {
 fun Footer(
     text: String,
     modifier: Modifier = Modifier,
-    register: () -> Unit,
-    jumpHack: () -> Unit
+    register: () -> Unit
 ) {
 
     Box(
@@ -220,18 +212,10 @@ fun Footer(
                 asset = Icons.Rounded.PersonAdd,
                 modifier = Modifier
                     .padding(start = 12.dp)
-                .clickable(
-                    onClick = { register() }
-                )
+                    .clickable(
+                        onClick = { register() }
+                    )
             )
-
-            Button(
-                modifier = Modifier
-                    .padding(start = 12.dp),
-                onClick = { jumpHack() }
-            ) {
-                Text("Developer Skip")
-            }
         }
 
     }

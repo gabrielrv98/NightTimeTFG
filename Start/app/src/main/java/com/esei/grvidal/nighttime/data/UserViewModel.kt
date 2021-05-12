@@ -403,7 +403,7 @@ class UserViewModel : ViewModel() {
             Log.d(TAG, "requestFriendship: code Respond ${webResponse.code()}")
 
             if (!webResponse.isSuccessful)
-                Log.d(TAG, "requestFriendship: ${webResponse.headers()[ERROR_HEADER_TAG]}") // TODO: 21/04/2021 add this to every api call
+                Log.d(TAG, "requestFriendship: ${webResponse.headers()[ERROR_HEADER_TAG]}")
 
         } catch (e: IOException) {
             Log.e(TAG, "requestFriendship: network exception (no network)   --//-- $e")

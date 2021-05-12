@@ -55,8 +55,7 @@ import com.esei.grvidal.nighttime.ui.compositedOnSurface
 
 enum class InputSelector {
     NONE,
-    EMOJI//,
-    //PICTURE TODO maybe in a future
+    EMOJI
 }
 
 @Preview

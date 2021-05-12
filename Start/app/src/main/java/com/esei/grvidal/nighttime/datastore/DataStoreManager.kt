@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-/* https://developer.android.com/codelabs/android-preferences-datastore#2 */
 
 private const val APP_PREFERENCES_NAME = "night_time_data_store"
 private const val TAG = "DataStoreManager"
@@ -78,20 +77,6 @@ class DataStoreManager private constructor(context: Context) {
             login?.let { preferences[PreferencesKeys.LOGIN_CREDENTIALS] = it }
             password?.let { preferences[PreferencesKeys.PASSWORD_CREDENTIALS] = it }
             isChecked?.let { preferences[PreferencesKeys.CONFIRMATION_CREDENTIALS] = it }
-        }
-    }
-
-    /**
-     * Async updates credentials in the DataStore, every time data is changed,
-     * [PreferencesKeys.CONFIRMATION_CREDENTIALS] is set to false to avoid false logins
-     */
-    suspend fun updateLoginPassword(password: String, isChecked: Boolean) {
-
-        Log.d(TAG, "updateLoginPassword: new password \"$password\" is cheked $isChecked")
-
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.PASSWORD_CREDENTIALS] = password
-            preferences[PreferencesKeys.CONFIRMATION_CREDENTIALS] = false
         }
     }
 
