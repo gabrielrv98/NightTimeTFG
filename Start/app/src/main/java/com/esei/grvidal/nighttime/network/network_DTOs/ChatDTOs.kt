@@ -28,6 +28,6 @@ data class ChatFullView(
     val userNickname: String,
     val hasImage: Boolean,
     val messages: List<MessageView>,
-    val unreadMessages: Boolean,
+    val unreadMessages: Int,
     var img: ImageAsset?
 )

@@ -27,7 +27,7 @@ fun ChatView.toFullView(
         userNickname,
         hasImage,
         messages,
-        unreadMessages > 0,
+        unreadMessages,
         img
     )
 }
@@ -56,7 +56,7 @@ class FriendsViewModel(
 
 
     // List of friendships to start a new chat
-    var friendshipIdList by mutableStateOf(setOf<FriendshipSnapImage>()) // TODO: 12/05/2021 fix this by adding idFriendship variable in the DTO and sending it by API
+    var friendshipIdList by mutableStateOf(setOf<FriendshipSnapImage>())
 
     private var friendListPage = 0
     var totalFriends = -1
@@ -543,7 +543,7 @@ class FriendsViewModel(
                             it.nickname,
                             it.picture != null,
                             listOf(msg.messageView),
-                            unreadMessages = true,
+                            unreadMessages = 1,
                             img = null
                         )
                     )
@@ -567,7 +567,7 @@ class FriendsViewModel(
     ) = viewModelScope.launch {
 
         chatListHolder.remove(chat)
-        chatListHolder.add(chat.copy(messages = listOf(msg.messageView), unreadMessages = true))
+        chatListHolder.add(chat.copy(messages = listOf(msg.messageView), unreadMessages = chat.unreadMessages+1))
         // Flow will update if .equals returns false,
         // for some reason if [chat] is not .copy it will return false
 

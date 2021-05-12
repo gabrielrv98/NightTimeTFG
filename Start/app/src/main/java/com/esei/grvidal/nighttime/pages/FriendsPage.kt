@@ -43,6 +43,7 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.MessageListened
 import com.esei.grvidal.nighttime.network.network_DTOs.*
+import com.esei.grvidal.nighttime.pages.profile_pages.TextChanger
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.SharedFlow
@@ -333,7 +334,7 @@ fun FriendsScreen(
 fun ChatEntry(
     userName: String,
     lastMessage: String,
-    unreadMessages: Boolean,
+    unreadMessages: Int,
     img: ImageAsset? = null,
     onEntryClick: () -> Unit = {}
 ) {
@@ -348,8 +349,10 @@ fun ChatEntry(
                 .padding(vertical = 6.dp)
         ) {
             Surface(
+                modifier = Modifier
+                    .preferredSize(45.dp)
+                    .align(Alignment.CenterVertically) ,
                 shape = RoundedCornerShape(50),
-                modifier = Modifier.preferredSize(45.dp).align(Alignment.CenterVertically),
                 color = Color.Gray
             ) {
                 Log.d(
@@ -362,21 +365,27 @@ fun ChatEntry(
                         asset = it,
                         contentScale = ContentScale.Crop
                     )
-                } ?: Icon(asset = Icons.Default.Person)
+                } ?: Icon(
+                    asset = Icons.Default.Person)
             }
 
             Column(
-                modifier = Modifier.padding(start = 6.dp)
+                modifier = Modifier
+                    .padding(start = 6.dp)
             ) {
                 Text(
                     text = userName,
                     style = MaterialTheme.typography.body1,
                     fontWeight = FontWeight.Bold
                 )
-                Text(text = lastMessage, style = MaterialTheme.typography.body2, maxLines = 1)
+                Text(
+                    text =  makeLongShort(lastMessage,30),
+                    style = MaterialTheme.typography.body2,
+                    maxLines = 1
+                )
             }
 
-            if (unreadMessages)
+            if (unreadMessages > 0)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -386,16 +395,16 @@ fun ChatEntry(
                     Surface(
                         modifier = Modifier
                             .padding(bottom = 23.dp, start = 26.dp)
-                            .clip(shape = MaterialTheme.shapes.medium)
+                            .clip(shape = CircleShape)
                             .align(Alignment.End),
                         color = Color.Red,
-                        shape = MaterialTheme.shapes.medium
+                        shape = CircleShape
                     ) {
                         Text(
                             modifier = Modifier
                                 .padding(horizontal = 5.dp)
-                                .clip(MaterialTheme.shapes.medium),
-                            text = stringResource(R.string.new_messages),
+                                .clip(CircleShape),
+                            text = unreadMessages.toString(),
                             color = Color.White
                         )
                     }
