@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.UsersSnapListDialog
@@ -44,18 +46,41 @@ import java.util.*
 
 private const val TAG = "CalendarPage"
 
+
+@Composable
+fun CalendarInit(userToken: UserToken, cityId: Long){
+    val calendarVM : CalendarViewModel = viewModel("calendar", factory = object : ViewModelProvider.Factory {
+
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+
+            if (modelClass.isAssignableFrom(CalendarViewModel::class.java)) {
+
+                @Suppress("UNCHECKED_CAST")
+                return CalendarViewModel(userToken,cityId) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+
+    })
+    calendarVM.setCityId(cityId)
+
+    CalendarPage(calendarVM)
+}
+
+
 /**
  * Show the Calendar page. A calendar with selectable dates, information of the selected date
  * and the list of the dates selected by the user
  *
  */
 @Composable
-fun CalendarPage(calendarVM: CalendarViewModel = viewModel(), userToken: UserToken, cityId: Long) {
+fun CalendarPage(calendarVM: CalendarViewModel) {
 
-    onCommit(cityId) {
-        calendarVM.setUserToken(userToken)
-        calendarVM.cityId = cityId
-    }
+
+//    onCommit(calendarVM.) {
+//        //calendarVM.setUserToken(userToken)
+//        calendarVM.cityId = cityId
+//    }
 
     //Remembered state of a boolean that express if the dialog with the friendly users must be shown
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }

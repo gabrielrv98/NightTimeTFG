@@ -26,29 +26,29 @@ import java.time.LocalDate
 private const val TAG = "CalendarViewModel"
 
 
-class CalendarViewModel : ViewModel() {
-
-    private var userToken = UserToken(-1, "")
-
+class CalendarViewModel(
+    val userToken: UserToken,
+    var cityId: Long
+) : ViewModel() {
 
     fun setUserToken(loggedUser: UserToken) {
 
         Log.d(TAG, "setUserToken: old token = $userToken, new $loggedUser")
-        userToken = loggedUser
+        //userToken = loggedUser
     }
 
-    var cityId: Long = -1
-        set(value) {
-            Log.d(TAG, "setCityId: old id = $cityId, new $value")
+    @JvmName("setCityId1")
+    fun setCityId(id: Long) {
+        Log.d(TAG, "setCityId: old id = $cityId, new $id")
 
-            if (cityId != value) { // If the city has been updated, value is set and data is fetched
-                field = value
+        if (cityId != id) { // If the city has been updated, value is set and data is fetched
+            cityId = id
 
-                Log.d(TAG, "setCityId: fetching data")
-                loadSelectedDate()//Loading the actual day
-                getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
-            }
+            Log.d(TAG, "setCityId: fetching data")
+            loadSelectedDate()//Loading the actual day
+            getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
         }
+    }
 
     // Strong reference point to avoid loosing them
     private var targetList = mutableListOf<Target>()
@@ -78,6 +78,11 @@ class CalendarViewModel : ViewModel() {
         private set
 
     private var pageUserFriends by mutableStateOf(0)
+
+    init{
+        loadSelectedDate()//Loading the actual day
+        getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+    }
 
     private fun loadSelectedDate() = viewModelScope.launch {
         //call api
@@ -205,7 +210,6 @@ class CalendarViewModel : ViewModel() {
     fun getFriendsOnSelectedDate() = viewModelScope.launch {
 
 
-
         Log.d(TAG, "getFriendsOnSelectedDate: $selectedDate userToken $userToken")
 
         try {
@@ -224,7 +228,10 @@ class CalendarViewModel : ViewModel() {
                 TAG,
                 "getFriendsOnSelectedDate: call to retrofit done"
             )
-            Log.d(TAG, "getFriendsOnSelectedDate: userList size before page $pageUserFriends-> ${userFriends.size}")
+            Log.d(
+                TAG,
+                "getFriendsOnSelectedDate: userList size before page $pageUserFriends-> ${userFriends.size}"
+            )
             pageUserFriends += 1
 
             if (webResponse.isSuccessful) {
@@ -252,7 +259,10 @@ class CalendarViewModel : ViewModel() {
             }
 
         } catch (e: IOException) {
-            Log.e(TAG, "getFriendsOnSelectedDate: network exception (no network) ${e.message}  --//-- $e")
+            Log.e(
+                TAG,
+                "getFriendsOnSelectedDate: network exception (no network) ${e.message}  --//-- $e"
+            )
 
         } catch (e: Exception) {
             Log.e(TAG, "getFriendsOnSelectedDate: general exception ${e.message}  --//-- $e")
