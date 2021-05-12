@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.network
+package com.esei.grvidal.nighttime.network.network_DTOs
 
 
 data class MessageForm(

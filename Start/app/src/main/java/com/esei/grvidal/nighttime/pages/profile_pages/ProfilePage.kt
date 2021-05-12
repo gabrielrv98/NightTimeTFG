@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.DensityAmbient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import androidx.ui.tooling.preview.Preview
@@ -31,9 +30,8 @@ import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.animations.AnimatingFabContent
 import com.esei.grvidal.nighttime.data.*
-import com.esei.grvidal.nighttime.network.AnswerOptions
-import com.esei.grvidal.nighttime.network.network_DTOs.NextDate
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import com.esei.grvidal.nighttime.network.network_DTOs.AnswerOptions
+import com.esei.grvidal.nighttime.network.network_DTOs.NextDateDTO
 
 
 private const val TAG = "ProfilePage"
@@ -180,7 +178,7 @@ fun ProfilePage(
     name: String,
     nickname: String,
     state: String?,
-    nextDate: NextDate?,
+    nextDate: NextDateDTO?,
     img: ImageAsset?,
     photoState: PhotoState,
     isMe: Boolean,
@@ -229,7 +227,7 @@ private fun UserInfoFields(
     name: String,
     nickname: String,
     state: String?,
-    nextDate: NextDate?,
+    nextDate: NextDateDTO?,
     containerHeight: Dp
 ) {
     Column {
