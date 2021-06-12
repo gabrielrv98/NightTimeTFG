@@ -231,7 +231,7 @@ private fun Localization(
 
     //Localization of the bar
     DetailView(title = stringResource(R.string.localizacion),
-        icon = Icons.Outlined.Place,//todo improve aesthetic
+        icon = Icons.Outlined.Place,
         titleToRight = {
             //Button that triggers Google Maps
             Button(

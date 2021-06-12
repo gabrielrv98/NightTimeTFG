@@ -90,7 +90,6 @@ class CityViewModel(
 
         } catch (e: IOException) {
             Log.e(TAG, "getCitiesFromApi: network exception (no network) ${e.message}  --//-- $e")
-            allCities = CitiesNoInternet.cities
         } catch (e: Exception) {
             Log.e(TAG, "getCitiesFromApi: general exception ${e.message}  --//-- $e")
 
@@ -99,17 +98,6 @@ class CityViewModel(
     }
 }
 
-object CitiesNoInternet {
-    val cities = listOf(
-        City(1, "Ourense"),
-        City(2, "Vigo"),
-        City(3, "Pontevedra"),
-        City(4, "Coruña"),
-        City(5, "Allariz"),
-        City(6, "Lugo"),
-        City(7, "Rivadavia"),
-    )
-}
 
 
 class CityViewModelFactory(

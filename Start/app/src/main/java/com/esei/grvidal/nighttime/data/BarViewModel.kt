@@ -90,9 +90,7 @@ class BarViewModel : ViewModel() {
      */
     fun loadBarsOnCity() {
 
-        if (city.id == -1L) {
-            barList = BarOfflineList.bars
-        } else {
+        if (city.id != -1L) {
             viewModelScope.launch {
                 fetchBars(page++)
             }
@@ -125,7 +123,6 @@ class BarViewModel : ViewModel() {
 
         } catch (e: IOException) {
             Log.e(TAG, "fetchBars: network exception ${e.message}  --//-- $e")
-            barList = BarOfflineList.bars
 
         } catch (e: Exception) {
             Log.e(TAG, "fetchBars: general exception ${e.message}  --//-- $e")
@@ -279,81 +276,3 @@ class BarViewModel : ViewModel() {
 
 }
 
-object BarOfflineList {
-
-    val bars = listOf(
-
-        BarDTO(
-            id = 0,
-            name = "Luxus",
-            owner = "Nuria Sotelo",
-            address = "Rua Concordia",
-            description = "Un lugar libre para gente libre",
-
-            mondaySchedule = "12:00-22:00",
-            tuesdaySchedule = null,
-            wednesdaySchedule = "11:00-20:30",
-            thursdaySchedule = "14:40-21:20",
-            fridaySchedule = "11:00-20:30",
-            saturdaySchedule = null,
-            sundaySchedule = "09:30-21:30"
-        ),
-        BarDTO(
-            id = 1,
-            name = "Patio andaluz",
-            owner = "Aida Miguez",
-            address = "Calle turbia",
-            description = "Un buen lugar para charlar, conocer gente y disfrutar de la vida reunido de buenas compañias",
-            mondaySchedule = "12:00-20:30",
-            tuesdaySchedule = "12:00-20:30",
-            wednesdaySchedule = null,
-            thursdaySchedule = "17:00-22:00",
-            fridaySchedule = null,
-            saturdaySchedule = "14:40-21:20",
-            sundaySchedule = "09:30-21:30"
-        ),
-        BarDTO(
-            id = 2,
-            name = "Faro de Vigo",
-            owner = "Juan Miranda",
-            address = "Calle Principe",
-            description = "Somos el mejor lugar para verlo todo",
-            mondaySchedule = "11:00-20:30",
-            tuesdaySchedule = null,
-            wednesdaySchedule = "12:00-22:00",
-            thursdaySchedule = "12:00-22:00",
-            fridaySchedule = null,
-            saturdaySchedule = "14:40-21:20",
-            sundaySchedule = "09:30-21:30"
-        ),
-        BarDTO(
-            id = 3,
-            name = "Night",
-            owner = "NightOwner",
-            address = "Rua cabeza de manzaneda",
-            description = "Ven y pasatelo como si volvieses a tener 15",
-            mondaySchedule = null,
-            tuesdaySchedule = "11:00-20:30",
-            wednesdaySchedule = "12:00-22:00",
-            thursdaySchedule = null,
-            fridaySchedule = "11:00-20:30",
-            saturdaySchedule = "14:40-21:20",
-            sundaySchedule = "09:30-21:30"
-        ),
-
-        BarDTO(
-            id = 4,
-            name = "Studio 34",
-            owner = "Studio Owner Santiago",
-            address = "Rua Concordia",
-            description = "Un lugar libre para gente libre",
-            mondaySchedule = "12:00-22:00",
-            tuesdaySchedule = "11:00-20:30",
-            wednesdaySchedule = null,
-            thursdaySchedule = "14:40-21:20",
-            fridaySchedule = "11:00-20:30",
-            saturdaySchedule = null,
-            sundaySchedule = "09:30-21:30"
-        )
-    )
-}

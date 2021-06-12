@@ -86,10 +86,6 @@ dependencies {
     // DataStore
     implementation "androidx.datastore:datastore-preferences:$version_datastore"
 
-
-    // DataStore, new version of SharedPreferences
-    implementation "androidx.datastore:datastore-preferences:$version_datastore"
-
     // Retrofit
     implementation "com.squareup.retrofit2:converter-moshi:$version_retrofit"
 
