@@ -49,12 +49,12 @@ class BarViewModel : ViewModel() {
 
     // Total of photos of the bar
     //var totalNPhotos by mutableStateOf(0)
-    var totalNPhotos = 0
+    var totalNPhotos by mutableStateOf(0)
         private set
 
     // Number of downloaded photos
     //var nPhotos by mutableStateOf(0)
-    var nPhotos = 0
+    var nPhotos by mutableStateOf(0)
         private set
 
     // Strong reference point to avoid loosing them
