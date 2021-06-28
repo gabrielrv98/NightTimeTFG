@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.createDataStore
-import com.esei.grvidal.nighttime.data.City
+import com.esei.grvidal.nighttime.viewmodels.City
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map

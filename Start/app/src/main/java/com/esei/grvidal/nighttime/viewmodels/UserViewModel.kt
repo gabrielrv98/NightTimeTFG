@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.data
+package com.esei.grvidal.nighttime.viewmodels
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable

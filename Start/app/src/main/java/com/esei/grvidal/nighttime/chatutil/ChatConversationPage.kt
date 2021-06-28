@@ -32,7 +32,7 @@ import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.ui.tooling.preview.Preview
-import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.network.MessageListened
 import com.esei.grvidal.nighttime.network.NightTimeService
 import com.esei.grvidal.nighttime.network.network_DTOs.ChatView

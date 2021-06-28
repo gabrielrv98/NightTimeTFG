@@ -28,8 +28,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigate
 import androidx.navigation.compose.rememberNavController
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.LoginViewModel
-import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.viewmodels.LoginViewModel
+import com.esei.grvidal.nighttime.viewmodels.UserViewModel
 import com.esei.grvidal.nighttime.scaffold.*
 
 

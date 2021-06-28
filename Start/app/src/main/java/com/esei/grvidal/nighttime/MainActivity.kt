@@ -24,7 +24,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.chatutil.ChatConversationInit
-import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.network.ChatListener
 import com.esei.grvidal.nighttime.pages.*

@@ -42,8 +42,8 @@ import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.PhotoState
-import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.viewmodels.PhotoState
+import com.esei.grvidal.nighttime.viewmodels.UserViewModel
 import com.esei.grvidal.nighttime.pages.login_pages.TextWithInput
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.squareup.picasso.Picasso

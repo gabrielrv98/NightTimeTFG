@@ -1,6 +1,6 @@
 package com.esei.grvidal.nighttime.network
 
-import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.squareup.moshi.JsonClass
 import retrofit2.Retrofit

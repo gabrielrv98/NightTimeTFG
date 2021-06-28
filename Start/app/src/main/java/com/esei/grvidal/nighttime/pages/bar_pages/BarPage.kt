@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import com.esei.grvidal.nighttime.navigateWithId
 import com.esei.grvidal.nighttime.network.BarDTO

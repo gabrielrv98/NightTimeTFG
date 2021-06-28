@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.esei.grvidal.nighttime.CustomDialog
-import com.esei.grvidal.nighttime.data.City
+import com.esei.grvidal.nighttime.viewmodels.City
 
 /**
  * Screen with the Scaffolded format, with the topBar with the button to change the city

@@ -40,7 +40,7 @@ import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.*
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.*
+import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.network.MessageListened
 import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.esei.grvidal.nighttime.pages.bar_pages.Header

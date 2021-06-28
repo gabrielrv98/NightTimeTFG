@@ -35,10 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.ErrorHolder
-import com.esei.grvidal.nighttime.data.LoginViewModel
-import com.esei.grvidal.nighttime.data.PhotoState
-import com.esei.grvidal.nighttime.data.UserViewModel
+import com.esei.grvidal.nighttime.viewmodels.ErrorHolder
+import com.esei.grvidal.nighttime.viewmodels.LoginViewModel
+import com.esei.grvidal.nighttime.viewmodels.PhotoState
+import com.esei.grvidal.nighttime.viewmodels.UserViewModel
 import com.esei.grvidal.nighttime.pages.profile_pages.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target

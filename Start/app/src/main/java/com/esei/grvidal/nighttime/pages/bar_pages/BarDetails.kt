@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.data.BarViewModel
+import com.esei.grvidal.nighttime.viewmodels.BarViewModel
 import com.esei.grvidal.nighttime.network.EventFromBar
 import com.esei.grvidal.nighttime.pages.Event
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
