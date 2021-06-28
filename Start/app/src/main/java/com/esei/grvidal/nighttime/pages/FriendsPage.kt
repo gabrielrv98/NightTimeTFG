@@ -43,6 +43,8 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.MessageListened
 import com.esei.grvidal.nighttime.network.network_DTOs.*
+import com.esei.grvidal.nighttime.pages.bar_pages.Header
+import com.esei.grvidal.nighttime.pages.bar_pages.makeLongShort
 import com.esei.grvidal.nighttime.pages.profile_pages.TextChanger
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import kotlinx.coroutines.*

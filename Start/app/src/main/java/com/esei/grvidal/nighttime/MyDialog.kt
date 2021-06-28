@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.esei.grvidal.nighttime.network.network_DTOs.UserFriendView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
-import com.esei.grvidal.nighttime.pages.makeLongShort
+import com.esei.grvidal.nighttime.pages.bar_pages.makeLongShort
 
 /**
  * Custom dialog with the formatted shape

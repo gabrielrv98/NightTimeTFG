@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.pages
+package com.esei.grvidal.nighttime.pages.bar_pages
 
 import android.util.Log
 import androidx.compose.foundation.*

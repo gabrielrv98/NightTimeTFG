@@ -38,7 +38,7 @@ import com.esei.grvidal.nighttime.network.NightTimeService
 import com.esei.grvidal.nighttime.network.network_DTOs.ChatView
 import com.esei.grvidal.nighttime.network.network_DTOs.MessageView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
-import com.esei.grvidal.nighttime.pages.ErrorComposable
+import com.esei.grvidal.nighttime.pages.bar_pages.ErrorComposable
 import com.esei.grvidal.nighttime.repository.repository_implementation.RepositoryChat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi

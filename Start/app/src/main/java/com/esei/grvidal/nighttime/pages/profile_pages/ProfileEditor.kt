@@ -44,7 +44,7 @@ import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.PhotoState
 import com.esei.grvidal.nighttime.data.UserViewModel
-import com.esei.grvidal.nighttime.pages.TextWithInput
+import com.esei.grvidal.nighttime.pages.login_pages.TextWithInput
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target

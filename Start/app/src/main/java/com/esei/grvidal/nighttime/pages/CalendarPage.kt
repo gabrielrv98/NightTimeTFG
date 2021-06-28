@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.UsersSnapListDialog
+import com.esei.grvidal.nighttime.chipdayfactory.MyDate
 import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.network.EventData
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
@@ -76,12 +77,6 @@ fun CalendarInit(userToken: UserToken, cityId: Long) {
  */
 @Composable
 fun CalendarPage(calendarVM: CalendarViewModel) {
-
-
-//    onCommit(calendarVM.) {
-//        //calendarVM.setUserToken(userToken)
-//        calendarVM.cityId = cityId
-//    }
 
     //Remembered state of a boolean that express if the dialog with the friendly users must be shown
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
@@ -138,7 +133,6 @@ fun UserSnapList(
      */
     if (numberOfFriends > 0 &&
         userList.size < numberOfFriends &&
-        // total - cursor ( la posicion actual) >= 12  ->( los objetos restantes son 12 ( 9 mostrados en pantalla, 3 restantes por abajo ))
         (userList.size - state.firstVisibleItemIndex <= 12 || userList.isEmpty())
     ) {
 
@@ -260,7 +254,7 @@ fun MyDate.isBefore(): Boolean {
 }
 
 /**
- * Function that returns the name of the month throug a number that represents the month
+ * Function that returns the name of the month through a number that represents the month
  *
  * @param month number of the month
  */

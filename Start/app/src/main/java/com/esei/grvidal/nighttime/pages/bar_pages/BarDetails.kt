@@ -1,4 +1,4 @@
-package com.esei.grvidal.nighttime.pages
+package com.esei.grvidal.nighttime.pages.bar_pages
 
 import android.content.Intent
 import android.net.Uri
@@ -36,6 +36,7 @@ import androidx.navigation.compose.navigate
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.data.BarViewModel
 import com.esei.grvidal.nighttime.network.EventFromBar
+import com.esei.grvidal.nighttime.pages.Event
 import com.esei.grvidal.nighttime.scaffold.BottomNavigationScreens
 
 private const val TAG = "BarDetails"

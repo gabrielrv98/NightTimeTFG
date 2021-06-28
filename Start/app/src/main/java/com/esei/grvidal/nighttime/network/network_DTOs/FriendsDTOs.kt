@@ -30,20 +30,21 @@ data class FriendshipSnap(
     var username: String,
     val name: String,
     val image: Boolean
-) {
-    fun toFriendshipSnapImage(
-        image: ImageAsset? = null
-    ): FriendshipSnapImage {
-        return FriendshipSnapImage(
-            userId = this.userId,
-            friendshipId = this.friendshipId,
-            username = this.username,
-            name = this.name,
-            hasImage = this.image,
-            image = image
-        )
-    }
+)
+
+fun FriendshipSnap.toFriendshipSnapImage(
+    image: ImageAsset? = null
+): FriendshipSnapImage {
+    return FriendshipSnapImage(
+        userId = this.userId,
+        friendshipId = this.friendshipId,
+        username = this.username,
+        name = this.name,
+        hasImage = this.image,
+        image = image
+    )
 }
+
 
 data class FriendshipSnapImage(
     val userId: Long,

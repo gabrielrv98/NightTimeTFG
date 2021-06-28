@@ -13,15 +13,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.network.network_DTOs.AnswerOptions
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.ERROR_HEADER_TAG
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.esei.grvidal.nighttime.network.USER_URL
-import com.esei.grvidal.nighttime.network.network_DTOs.UserDTOEdit
-import com.esei.grvidal.nighttime.network.network_DTOs.UserDTOInsert
-import com.esei.grvidal.nighttime.network.network_DTOs.UserFull
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.delay

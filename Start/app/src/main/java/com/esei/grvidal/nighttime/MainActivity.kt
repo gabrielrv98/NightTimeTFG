@@ -28,6 +28,9 @@ import com.esei.grvidal.nighttime.data.*
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.network.ChatListener
 import com.esei.grvidal.nighttime.pages.*
+import com.esei.grvidal.nighttime.pages.bar_pages.BarDetails
+import com.esei.grvidal.nighttime.pages.bar_pages.BarPage
+import com.esei.grvidal.nighttime.pages.login_pages.LoginArchitecture
 import com.esei.grvidal.nighttime.pages.profile_pages.PERMISSION_CODE
 import com.esei.grvidal.nighttime.pages.profile_pages.ProfileEditorPage
 import com.esei.grvidal.nighttime.pages.profile_pages.ProfilePageView

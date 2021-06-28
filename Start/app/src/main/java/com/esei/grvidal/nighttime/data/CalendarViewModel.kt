@@ -9,6 +9,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.esei.grvidal.nighttime.chipdayfactory.ChipDayFactory
+import com.esei.grvidal.nighttime.chipdayfactory.MyDate
+import com.esei.grvidal.nighttime.chipdayfactory.toMyDate
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.DateCityDTO
 import com.esei.grvidal.nighttime.network.EventData
@@ -17,6 +20,7 @@ import com.esei.grvidal.nighttime.network.USER_URL
 import com.esei.grvidal.nighttime.network.network_DTOs.CalendarData
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import com.esei.grvidal.nighttime.network.network_DTOs.toUserSnapImage
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.launch

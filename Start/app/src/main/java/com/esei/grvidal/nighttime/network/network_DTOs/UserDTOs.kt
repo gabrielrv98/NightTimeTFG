@@ -31,19 +31,19 @@ data class UserDTO(
     var nextDate: NextDateDTO? = null,
     var picture: String? = null,
     var friendshipState: AnswerOptions
-) {
-    fun toUser(): UserFull {
-        return UserFull(
-            id = id,
-            nickname = nickname,
-            name = name,
-            password = "",
-            state = state,
-            email = "",
-            nextDate = nextDate,
-            picture = picture
-        )
-    }
+)
+
+fun UserDTO.toUser(): UserFull {
+    return UserFull(
+        id = id,
+        nickname = nickname,
+        name = name,
+        password = "",
+        state = state,
+        email = "",
+        nextDate = nextDate,
+        picture = picture
+    )
 }
 
 data class UserDTOInsert(
@@ -73,18 +73,18 @@ data class UserSnap(
     val username: String,
     val name: String,
     val image: Boolean
-) {
-    fun toUserSnapImage(
-        img: ImageAsset? = null
-    ): UserSnapImage {
-        return UserSnapImage(
-            this.userId,
-            this.username,
-            this.name,
-            this.image,
-            img
-        )
-    }
+)
+
+fun UserSnap.toUserSnapImage(
+    img: ImageAsset? = null
+): UserSnapImage {
+    return UserSnapImage(
+        this.userId,
+        this.username,
+        this.name,
+        this.image,
+        img
+    )
 }
 
 data class UserSnapImage(
