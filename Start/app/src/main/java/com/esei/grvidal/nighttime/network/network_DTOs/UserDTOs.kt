@@ -14,14 +14,6 @@ data class UserFull(
     var picture: String? = null
 )
 
-data class UserViewPrivate(
-    val id: Long,
-    val name: String,
-    val password: String,
-    val state: String? = null,
-    val email: String
-)
-
 
 data class UserDTO(
     var id: Long,//user ID
@@ -32,19 +24,6 @@ data class UserDTO(
     var picture: String? = null,
     var friendshipState: AnswerOptions
 )
-
-fun UserDTO.toUser(): UserFull {
-    return UserFull(
-        id = id,
-        nickname = nickname,
-        name = name,
-        password = "",
-        state = state,
-        email = "",
-        nextDate = nextDate,
-        picture = picture
-    )
-}
 
 data class UserDTOInsert(
     val name: String,

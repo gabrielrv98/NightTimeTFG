@@ -50,16 +50,13 @@ class MainActivity : AppCompatActivity() {
      * */
     private val userVM by viewModels<UserViewModel>()
 
-    /** This ViewModels need arguments in their constructors so we need to
-     * use a Fabric to return a lazy initialization of the ViewModel
-     */
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d(TAG, "{tags: AssistLogging} onCreate: userToken is going to be created")
-
         /**
+         * This ViewModels need arguments in their constructors so we need to
+         * use a Fabric to return a lazy initialization of the ViewModel
+         *
          * [LoginViewModel] and [CityViewModel] constructor requires a DataStoreManager instance, so we use [ViewModelProvider] with a
          * Factory [LoginViewModelFactory] and [CityViewModelFactory] respectively to return a ViewModel by lazy
          */
@@ -205,12 +202,6 @@ private fun NightTimeApp(
     cityVM: CityViewModel,
     searchImage: () -> Unit
 ) {
-/* Actual Navigation system
-        https://proandroiddev.com/implement-bottom-bar-navigation-in-jetpack-compose-b530b1cd9ee2
-
-Navigation with their own files ( no dependencies )
-    https://medium.com/google-developer-experts/how-to-handle-navigation-in-jetpack-compose-a9ac47f7f975
- */
 
     val chatListener = remember {
         ChatListener(

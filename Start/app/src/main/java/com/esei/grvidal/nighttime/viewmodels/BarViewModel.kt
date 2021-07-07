@@ -12,8 +12,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.network.BAR_URL
 import com.esei.grvidal.nighttime.network.BASE_URL
-import com.esei.grvidal.nighttime.network.BarDTO
-import com.esei.grvidal.nighttime.network.EventFromBar
+import com.esei.grvidal.nighttime.network.network_DTOs.BarDTO
+import com.esei.grvidal.nighttime.network.network_DTOs.EventFromBar
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -24,8 +24,11 @@ private const val TAG = "BarViewModel"
 
 class BarViewModel : ViewModel() {
 
-    object EmptyBar {
-        val bar = BarDTO(
+    // List with all the loaded bars
+    var barList by mutableStateOf(listOf<BarDTO>())
+
+    var selectedBar by mutableStateOf(
+        BarDTO(
             -1,
             "ERROR",
             "error",
@@ -39,12 +42,7 @@ class BarViewModel : ViewModel() {
             "",
             ""
         )
-    }
-
-    // List with all the loaded bars
-    var barList by mutableStateOf(listOf<BarDTO>())
-
-    var selectedBar by mutableStateOf(EmptyBar.bar)
+    )
         private set
 
     // Total of photos of the bar
@@ -201,7 +199,20 @@ class BarViewModel : ViewModel() {
         targetList = mutableListOf()
         totalNPhotos = 0
         nPhotos = 0
-        selectedBar = EmptyBar.bar
+        selectedBar = BarDTO(
+            -1,
+            "ERROR",
+            "error",
+            ".",
+            "description",
+            "",
+            ",",
+            ",",
+            "",
+            "",
+            "",
+            ""
+        )
     }
 
     fun fetchPhotos() {
@@ -272,7 +283,4 @@ class BarViewModel : ViewModel() {
 
 
     }
-
-
 }
-

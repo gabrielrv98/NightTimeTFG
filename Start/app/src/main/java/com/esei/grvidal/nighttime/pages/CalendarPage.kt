@@ -38,7 +38,7 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.UsersSnapListDialog
 import com.esei.grvidal.nighttime.chipdayfactory.MyDate
 import com.esei.grvidal.nighttime.viewmodels.*
-import com.esei.grvidal.nighttime.network.EventData
+import com.esei.grvidal.nighttime.network.network_DTOs.EventData
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import java.time.LocalDate

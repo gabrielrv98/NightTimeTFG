@@ -29,7 +29,7 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.ui.NightTimeTheme
 import com.esei.grvidal.nighttime.navigateWithId
-import com.esei.grvidal.nighttime.network.BarDTO
+import com.esei.grvidal.nighttime.network.network_DTOs.BarDTO
 import com.esei.grvidal.nighttime.scaffold.*
 
 private const val TAG = "BarPage"

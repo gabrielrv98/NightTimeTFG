@@ -14,7 +14,7 @@ import com.esei.grvidal.nighttime.chipdayfactory.MyDate
 import com.esei.grvidal.nighttime.chipdayfactory.toMyDate
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.DateCityDTO
-import com.esei.grvidal.nighttime.network.EventData
+import com.esei.grvidal.nighttime.network.network_DTOs.EventData
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
 import com.esei.grvidal.nighttime.network.USER_URL
 import com.esei.grvidal.nighttime.network.network_DTOs.CalendarData

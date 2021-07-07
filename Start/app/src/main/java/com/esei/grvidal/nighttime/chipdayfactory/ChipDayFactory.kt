@@ -146,11 +146,7 @@ class ChipDayFactory {
 
 
             return monthArray.chunked(7)
-            //return  selectedDate.get(Calendar.DAY_OF_WEEK).toString() + "  -> " +  selectedDate.toString()
         }
 
     }
 }
-
-
-

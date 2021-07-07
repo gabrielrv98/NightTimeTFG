@@ -126,7 +126,7 @@ interface NightTimeService {
     suspend fun getUserPrivate(
         @Header("auth") auth: String,
         @Path("idUser") id: Long
-    ): Response<UserViewPrivate?>
+    ): Response<UserDTOEdit?>
 
     @PATCH("$USER_URL{idUser}")
     suspend fun updateUser(
