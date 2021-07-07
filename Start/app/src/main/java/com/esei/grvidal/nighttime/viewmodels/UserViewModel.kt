@@ -65,7 +65,18 @@ class UserViewModel : ViewModel() {
     var photoState by mutableStateOf(PhotoState.DONE)
 
     // User data
-    var user by mutableStateOf(UserEmpty.getEmptyUser())
+    var user by mutableStateOf(
+        UserFull(
+            id = -1,
+            name = "",
+            nickname = "",
+            state = "",
+            nextDate = null,
+            picture = null,
+            password = "",
+            email = ""
+        )
+    )
         private set
 
     var friendshipState by mutableStateOf(AnswerOptions.NO)
@@ -129,7 +140,16 @@ class UserViewModel : ViewModel() {
             if (webResponse.isSuccessful) {
 
                 webResponse.body()?.let { userDTO ->
-                    user = userDTO.toUser()
+                    user = UserFull(
+                        id = userDTO.id,
+                        nickname = userDTO.nickname,
+                        name = userDTO.name,
+                        password = "",
+                        state = userDTO.state,
+                        email = "",
+                        nextDate = userDTO.nextDate,
+                        picture = userDTO.picture
+                    )
                     friendshipState = userDTO.friendshipState
                 }
 
@@ -213,9 +233,9 @@ class UserViewModel : ViewModel() {
 
                     webResponse.body()?.let { userViewPrivate ->
 
-                        name = TextFieldValue(userViewPrivate.name)
-                        email = TextFieldValue(userViewPrivate.email)
-                        password = TextFieldValue(userViewPrivate.password)
+                        name = TextFieldValue(userViewPrivate.name ?: "")
+                        email = TextFieldValue(userViewPrivate.email?: "")
+                        password = TextFieldValue(userViewPrivate.password?: "")
                         state = TextFieldValue(userViewPrivate.state ?: "")
 
                         Log.d(TAG, "fetchEditData: user retrieved successfully $userViewPrivate")
@@ -432,23 +452,3 @@ class UserViewModel : ViewModel() {
 
 
 }
-
-object UserEmpty {
-    fun getEmptyUser(): UserFull {
-        return UserFull(
-            id = -1,
-            name = "",
-            nickname = "",
-            state = "",
-            nextDate = null,
-            picture = null,
-            password = "",
-            email = ""
-        )
-    }
-}
-
-
-
-
-
