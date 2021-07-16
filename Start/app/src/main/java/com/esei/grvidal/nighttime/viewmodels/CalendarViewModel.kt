@@ -366,7 +366,7 @@ class CalendarViewModel(
         loadSelectedDate()
     }
 
-    // event: addItem
+
     fun addDateToUserList(date: MyDate) {
 
         userDays = userDays + listOf(date)
@@ -418,7 +418,7 @@ class CalendarViewModel(
 
     }
 
-    // event: removeItem
+
     fun removeDateFromUserList(date: MyDate) {
         removeDate(date)
 
