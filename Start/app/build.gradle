@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    //id 'org.jetbrains.kotlin.android' version '1.4.32'
+    //id 'kotlin-android-extensions'
 }
 
 android {
@@ -8,12 +10,17 @@ android {
 
     defaultConfig {
         applicationId "com.esei.grvidal.nighttime"
-        minSdkVersion 29
+        minSdkVersion 26//changed from minSdkVersion 29
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding true
+        compose true
     }
 
     buildTypes {
@@ -34,35 +41,10 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
-        kotlinCompilerVersion '1.4.10'
+        kotlinCompilerVersion version_kotlin_compiler
+        kotlinCompilerExtensionVersion version_compose
     }
 }
-
-dependencies {
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    implementation "androidx.fragment:fragment-ktx:1.2.5"
-
-    implementation "androidx.compose.animation:animation:$compose_version"
-    implementation "androidx.compose.foundation:foundation:$compose_version"
-    implementation "androidx.compose.foundation:foundation-layout:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.material:material-icons-extended:$compose_version"
-    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
-    implementation "androidx.compose.runtime:runtime:$compose_version"
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.ui:ui-tooling:$compose_version"
-
-    implementation 'androidx.compose:compose-runtime:0.1.0-dev14'
-    testImplementation 'junit:junit:4.+'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-}
-
 
 // Compiler flag to use experimental Compose APIs
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
@@ -73,3 +55,75 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
         ]
     }
 }
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+        freeCompilerArgs += ["-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check"]
+    }
+}
+
+dependencies {
+
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_lifecycle"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$version_reflect"
+
+    // Activity
+    implementation "androidx.activity:activity-ktx:$version_activity"
+    implementation 'androidx.fragment:fragment-ktx:1.3.3'
+
+    // Core with Ktx
+    implementation "androidx.core:core-ktx:$version_core"
+
+    // Navigation
+    implementation "androidx.navigation:navigation-compose:$version_nav_compose"
+
+    // DataStore
+    implementation "androidx.datastore:datastore-preferences:$version_datastore"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:converter-moshi:$version_retrofit"
+
+    // Moshi
+    implementation "com.squareup.moshi:moshi-kotlin:$version_moshi"
+
+    // Material Design
+    implementation "androidx.appcompat:appcompat:$version_app_compat"
+    implementation "com.google.android.material:material:$version_material"
+
+    // Picasso
+    implementation "com.squareup.picasso:picasso:$version_picasso"
+
+    // Pusher (chat)
+    implementation "com.pusher:pusher-java-client:$version_pusher"
+
+
+    // Compose https://developer.android.com/jetpack/androidx/releases/compose
+        // Animation
+    implementation "androidx.compose.animation:animation:$version_animation"
+        // Compiler
+    implementation "androidx.compose.compiler:compiler:$version_compiler"
+        // Foundation
+    implementation "androidx.compose.foundation:foundation:$version_foundation"
+    implementation "androidx.compose.foundation:foundation-layout:$version_foundation"
+        // Material
+    implementation "androidx.compose.material:material:$version_compose_material"
+    implementation "androidx.compose.material:material-icons-extended:$version_compose_material"
+        // Runtime
+    implementation "androidx.compose.runtime:runtime-livedata:$version_compose_runtime"
+    implementation "androidx.compose.runtime:runtime:$version_compose_runtime"
+    implementation "androidx.compose.runtime:runtime-rxjava2:$version_compose_runtime"
+        // IU
+    implementation "androidx.compose.ui:ui:$version_iu"
+
+    // Preview
+    implementation "androidx.ui:ui-tooling:$version_ui_tooling"
+
+
+}
+
