@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
 import com.esei.grvidal.nighttime.datastore.LoginData
+import com.esei.grvidal.nighttime.fakeData.grvidal
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
 import kotlinx.coroutines.flow.first
@@ -136,7 +137,7 @@ class LoginViewModel(
         )
 
 
-        val id = 0L
+        val id = grvidal.id
         val token = ""
         viewModelScope.launch {
             dataStoreManager.credentialsChecked()
