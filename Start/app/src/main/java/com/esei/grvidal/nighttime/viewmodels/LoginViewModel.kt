@@ -12,6 +12,7 @@ import com.esei.grvidal.nighttime.datastore.LoginData
 import com.esei.grvidal.nighttime.fakeData.grvidal
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -144,7 +145,11 @@ class LoginViewModel(
         }
         credentialsChecked = true
         loggedUser = UserToken(id, token)
-        loggingState = LoginState.ACCEPTED
+        viewModelScope.launch {
+            delay(2500)
+            loggingState = LoginState.ACCEPTED
+
+        }
 
         Log.d(
             TAG,
