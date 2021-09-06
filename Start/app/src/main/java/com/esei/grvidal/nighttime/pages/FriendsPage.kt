@@ -118,7 +118,9 @@ fun FriendsPage(
             onClose = { showDialog.value = false }
         ) {
             FriendsSearch(
-                onSearch = friendsVM::searchUsers,
+                // TODO: 06/09/2021 FAKE DATA fakes search user
+                //onSearch = friendsVM::searchUsers,
+                onSearch = friendsVM::fakeSearchUsers,
                 onClick = { userId ->
 
                     friendsVM.clearSearchedList()

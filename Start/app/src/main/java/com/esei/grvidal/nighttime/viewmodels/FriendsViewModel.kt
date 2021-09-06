@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.*
+import com.esei.grvidal.nighttime.fakeData.allUsersList
 import com.esei.grvidal.nighttime.network.*
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
 import com.esei.grvidal.nighttime.network.network_DTOs.*
@@ -237,6 +238,24 @@ class FriendsViewModel(
         searchedUserList = listOf()
     }
 
+    fun fakeSearchUsers(username: String){
+        if (username.isBlank()) {
+            searchString = ""
+            searchedUserList = listOf()
+        } else {
+            searchedUserList = allUsersList
+                .filter { it.nickname.contains(username) || it.name.contains(username) }
+                .map{ user ->
+                    UserSnapImage(
+                        user.id,
+                        user.nickname,
+                        user.name,
+                        user.picture != null,
+                        null
+                    )
+                }
+        }
+    }
     /**
      * Calls to api to request a new page (starting in 0) of searched users
      * and uses Picasso to get their picture if they have one
