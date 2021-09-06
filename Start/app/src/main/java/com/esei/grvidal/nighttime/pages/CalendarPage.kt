@@ -1,6 +1,5 @@
 package com.esei.grvidal.nighttime.pages
 
-import android.os.Build
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
@@ -94,10 +93,27 @@ fun CalendarPage(calendarVM: CalendarViewModel) {
             closeDialog = { setShowDialog(false) }
         )
 
-    val santi = friendList.keys.filter { it.nickname == "santii810" }[0]
-    val text= ""
-        santi.nextDates.onEach {   text.plus( it.nextDate.toString() ).plus( " | ") }
-    Text(text= text)
+// TODO: 06/09/2021 Faked Info profile editor
+    val (showError, setShowError) = remember { mutableStateOf(false) }
+
+    if (showError) {
+        CustomDialog(
+            onClose = { setShowError(false) }
+        ) {
+            Text(
+                text = stringResource(id = R.string.errorConnectionTitle),
+                style = MaterialTheme.typography.h6,
+                color = Color.Red
+            )
+            Spacer(modifier = Modifier.height(25.dp))
+            Text(
+                text = stringResource(id = R.string.errorConnectionDescription),
+                style = MaterialTheme.typography.body1
+            )
+
+        }
+
+    }
 
     CalendarScreen(
         total = calendarVM.dateInformation.total,
@@ -107,8 +123,11 @@ fun CalendarPage(calendarVM: CalendarViewModel) {
         setDate = calendarVM::setDate,
         calendar = calendarVM.calendar,
         userSelectedDates = calendarVM.userDays,
-        addUserSelectedDate = calendarVM::addDateToUserList,
-        removeUserSelectedDate = calendarVM::removeDateFromUserList,
+        // TODO: 06/09/2021 FAKE DATA avoid adding or removing dates
+        //addUserSelectedDate = calendarVM::addDateToUserList,
+        //removeUserSelectedDate = calendarVM::removeDateFromUserList,
+        addUserSelectedDate = {setShowDialog(true)},
+        removeUserSelectedDate = {setShowDialog(true)},
         userFriendListButton = { setShowDialog(true) }
     )
 
