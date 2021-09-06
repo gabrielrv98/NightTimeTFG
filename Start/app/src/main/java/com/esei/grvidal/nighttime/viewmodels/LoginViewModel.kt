@@ -57,6 +57,12 @@ class LoginViewModel(
         }
     }
 
+    // TODO: 06/09/2021 Faked Info login
+    fun doFakeLoginRefreshed(username: String, password: String) {
+        fakeLogin()
+
+    }
+
     fun setPassword(password: String) {
         viewModelScope.launch {
             dataStoreManager.updateLoginCredentials(password = password)
@@ -72,12 +78,14 @@ class LoginViewModel(
 
     }
 
+    // In test branch user can only log in as grvidal
     private fun doLogin() {
         viewModelScope.launch {
-            val loginData = fetchLoginData()
-
+            //val loginData = fetchLoginData()
             if (loggingState == LoginState.LOADING) {
-                login(loginData)
+                // TODO: 06/09/2021 Faked Info login
+                //login(loginData)
+                fakeLogin()
             }
         }
     }
@@ -117,6 +125,31 @@ class LoginViewModel(
         }
 
         return loginData
+    }
+
+    // TODO: 06/09/2021 Faked Info login
+    private fun fakeLogin() {
+
+        Log.d(
+            TAG,
+            "{tags: FakeAssistLogging} call to retrofit done"
+        )
+
+
+        val id = 0L
+        val token = ""
+        viewModelScope.launch {
+            dataStoreManager.credentialsChecked()
+        }
+        credentialsChecked = true
+        loggedUser = UserToken(id, token)
+        loggingState = LoginState.ACCEPTED
+
+        Log.d(
+            TAG,
+            "{tags: AssistLogging} login: login successfully id-> $id  token -> $token"
+        )
+
     }
 
     private suspend fun login(loginData: LoginData) {

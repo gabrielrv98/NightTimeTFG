@@ -27,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigate
 import androidx.navigation.compose.rememberNavController
+import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.viewmodels.LoginViewModel
 import com.esei.grvidal.nighttime.viewmodels.UserViewModel
@@ -74,6 +75,27 @@ fun LoginPage(
     val (username, setUsername) = remember { mutableStateOf(TextFieldValue()) }
     val (password, setPassword) = remember { mutableStateOf(TextFieldValue()) }
 
+    val (showError, setShowError) = remember { mutableStateOf(false) }
+
+    if (showError) {
+        CustomDialog(
+            onClose = { setShowError(false) }
+        ) {
+            Text(
+                text = stringResource(id = R.string.errorConnectionTitle),
+                style = MaterialTheme.typography.h6,
+                color = Color.Red
+            )
+            Spacer(modifier = Modifier.height(25.dp))
+            Text(
+                text = stringResource(id = R.string.errorConnectionDescription),
+                style = MaterialTheme.typography.body1
+            )
+
+        }
+
+    }
+
     LoginScreen(
         showMessageError = messageError,
         username = username,
@@ -81,7 +103,13 @@ fun LoginPage(
         password = password,
         setPassword = setPassword,
         doLogin = {
-            loginVM.doLoginRefreshed(username.text, password.text)
+            // TODO: 06/09/2021 Faked Info register
+            //loginVM.doLoginRefreshed(username.text, password.text)
+            if (username.text == "grvidal" && password.text == "1234")
+                loginVM.doFakeLoginRefreshed(username.text, password.text)
+            else
+                setShowError(true)
+
         },
         register = {
             navController.navigate(NavigationScreens.RegisterPage.route)
@@ -115,11 +143,8 @@ fun LoginScreen(
             password = password,
             setPassword = setPassword,
             showMessageError = showMessageError,
-            onClick = {
-                if (username.text.isNotEmpty() &&
-                    password.text.isNotEmpty()
-                ) doLogin()
-            }
+            onClick = doLogin
+
         )
 
         Footer(
@@ -162,7 +187,9 @@ private fun LoggingForm(
             Spacer(modifier = Modifier.size(15.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onClick
+                onClick = onClick,
+                enabled = !(username.text.isEmpty() ||
+                        password.text.isEmpty())
             ) {
                 Text(
                     text = stringResource(id = R.string.log_in),

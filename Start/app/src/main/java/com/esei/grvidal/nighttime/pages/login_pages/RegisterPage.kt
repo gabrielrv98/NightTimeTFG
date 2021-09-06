@@ -5,11 +5,8 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.util.Log
-import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -18,6 +15,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.onCommit
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -34,6 +32,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
+import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.viewmodels.ErrorHolder
 import com.esei.grvidal.nighttime.viewmodels.LoginViewModel
@@ -97,7 +96,27 @@ fun RegisterPage(
                 })
         }
     }
+// TODO: 06/09/2021 Faked Info register
+    val (showError, setShowError) = remember { mutableStateOf(false) }
 
+    if (showError) {
+        CustomDialog(
+            onClose = { setShowError(false) }
+        ) {
+            Text(
+                text = stringResource(id = R.string.errorConnectionTitle),
+                style = MaterialTheme.typography.h6,
+                color = Color.Red
+            )
+            Spacer(modifier = Modifier.height(25.dp))
+            Text(
+                text = stringResource(id = R.string.errorConnectionDescription),
+                style = MaterialTheme.typography.body1
+            )
+
+        }
+
+    }
 
     val context = ContextAmbient.current
 
@@ -136,17 +155,22 @@ fun RegisterPage(
                 //permission already granted
                 pickImageFromGallery(searchImageButton)
             }
+        },
+        register = {
+            // TODO: 06/09/2021 Faked Info register
+            /*
+            // Adding user to server
+            userVM.newUser(
+                userVM.uriPhotoPicasso?.let {
+                    getPathFromURI(context, it)
+                },
+                 loginVM::doLoginRefreshed
+            )
+            */
+            setShowError(true)
         }
-    ) {
-        // Adding user to server
-        userVM.newUser(
-            userVM.uriPhotoPicasso?.let {
-                getPathFromURI(context, it)
-            },
-            loginVM::doLoginRefreshed
-        )
 
-    }
+    )
 
 }
 
