@@ -10,6 +10,9 @@ import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.esei.grvidal.nighttime.fakeData.Bar
+import com.esei.grvidal.nighttime.fakeData.barListFakeData
+import com.esei.grvidal.nighttime.fakeData.cityOu
 import com.esei.grvidal.nighttime.network.BAR_URL
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.network_DTOs.BarDTO
@@ -79,9 +82,69 @@ class BarViewModel : ViewModel() {
                 page = 0
 
                 Log.d(TAG, "setCityId: removing old data and fetching new data")
-                loadBarsOnCity()//Loading the first page
+                // TODO: 06/09/2021 FAKE DATA bar list
+                //loadBarsOnCity()//Loading the first page
+                fakeLoadBarsOnCity()
             }
         }
+
+
+    fun fakeLoadBarsOnCity() {
+        if (city == cityOu)
+            barList = barListFakeData.map {
+                BarDTO(
+                    it.id,
+                    it.name,
+                    it.owner,
+                    it.address,
+                    it.description ?: "",
+                    it.mondaySchedule,
+                    it.tuesdaySchedule,
+                    it.wednesdaySchedule,
+                    it.thursdaySchedule,
+                    it.fridaySchedule,
+                    it.saturdaySchedule,
+                    it.sundaySchedule
+                )
+            }
+    }
+
+    fun fakeGetBarDetails(id: Long) {
+        val bar = barListFakeData.find { it.id == id } ?: Bar(
+            "ERROR",
+            "ERROR",
+            "error",
+            ".",
+            "description",
+            "",
+            ",",
+            ",",
+            "",
+            "",
+            "",
+            cityOu
+        )
+
+        selectedBar = BarDTO(
+            bar.id,
+            bar.name,
+            bar.owner,
+            bar.address,
+            bar.description ?: "",
+            bar.mondaySchedule,
+            bar.tuesdaySchedule,
+            bar.wednesdaySchedule,
+            bar.thursdaySchedule,
+            bar.fridaySchedule,
+            bar.saturdaySchedule,
+            bar.sundaySchedule
+        )
+        nPhotos = bar.photos.size
+        barSelectedEvents = bar.events.map{
+            EventFromBar(it.id,it.description,it.date)
+        }
+
+    }
 
     /**
      * Starts a new coroutine to fetch data from internet and add 1 to the index page

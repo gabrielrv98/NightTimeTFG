@@ -56,6 +56,8 @@ fun BarPage(
 
         val state = rememberLazyListState()
 
+        // TODO: 06/09/2021 FAKE DATA bar list
+        /*
         Log.d(TAG, "BarPage: size: ${barVM.barList.size}  state : ${state.firstVisibleItemIndex} ")
         /**
          * [LazyListState.firstVisibleItemIndex] points at the number of items already scrolled
@@ -69,6 +71,7 @@ fun BarPage(
             barVM.loadBarsOnCity()
         }
 
+         */
         BarList(
             barVM.barList,
             state = state
