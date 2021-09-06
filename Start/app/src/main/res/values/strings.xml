@@ -108,4 +108,8 @@
     <string name="already_used_name">Nombre de usuario en uso</string>
     <string name="previousMonth">Mes anterior</string>
     <string name="nextMonth">Mes siguiente</string>
+
+
+    <string name="errorConnectionTitle">Error de conexión</string>
+    <string name="errorConnectionDescription">No se ha podido obtener respuesta del servidor, intentelo en otro momento</string>
 </resources>
