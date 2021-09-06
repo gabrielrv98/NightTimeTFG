@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.datastore.DataStoreManager
+import com.esei.grvidal.nighttime.fakeData.*
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -42,7 +43,9 @@ class CityViewModel(
     init {
         Log.d(TAG, "init: starting City")
         getCityFromPreferences()
-        getCitiesRepository() // Only get all the cities once per application start
+        // TODO: 06/09/2021 Fake data Cities
+        //getCitiesRepository() // Only get all the cities once per application start
+        allCities = listOf(cityOu,cityVigo,cityPontevedra,cityAllariz,cityLugo,cityCorunha  ,cityRivadavia  )
     }
 
     private fun getCityFromPreferences() {
