@@ -20,9 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.esei.grvidal.nighttime.fakeData.allUsersList
 import com.esei.grvidal.nighttime.network.network_DTOs.UserFriendView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.pages.bar_pages.makeLongShort
@@ -128,9 +130,18 @@ fun UsersSnapListDialog(
                 shape = CircleShape,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
             ) {
+
+                // TODO: 06/09/2021 FAKE Data image
+                /*
                 user.img?.let {
                     Image(asset = it)
                 } ?: Icon(asset = Icons.Default.Person)
+                */
+                allUsersList.find { it.nickname == user.username }?.let { user ->
+                    user.picture?.let {
+                        Image(asset = imageResource(id = it))
+                    } ?: Icon(asset = Icons.Default.Person)
+                }
 
             }
 

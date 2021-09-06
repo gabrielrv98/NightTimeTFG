@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.pages
 
+import android.os.Build
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
@@ -37,6 +38,7 @@ import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.UsersSnapListDialog
 import com.esei.grvidal.nighttime.chipdayfactory.MyDate
+import com.esei.grvidal.nighttime.fakeData.friendList
 import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.network.network_DTOs.EventData
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
@@ -52,7 +54,6 @@ private const val TAG = "CalendarPage"
 fun CalendarInit(userToken: UserToken, cityId: Long) {
     val calendarVM: CalendarViewModel =
         viewModel("calendar", factory = object : ViewModelProvider.Factory {
-
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
                 if (modelClass.isAssignableFrom(CalendarViewModel::class.java)) {
@@ -86,11 +87,17 @@ fun CalendarPage(calendarVM: CalendarViewModel) {
         UserSnapList(
             userList = calendarVM.userFriends,
             numberOfFriends = calendarVM.dateInformation.friends,
-            loadMoreFriends = calendarVM::getFriendsOnSelectedDate,
+            loadMoreFriends = calendarVM::fakeGetFriendsOnSelectedDate
+            // TODO: 06/09/2021 Fake data on getFriendsOnSelectedDate
+            //calendarVM::getFriendsOnSelectedDate
+            ,
             closeDialog = { setShowDialog(false) }
         )
 
-
+    val santi = friendList.keys.filter { it.nickname == "santii810" }[0]
+    val text= ""
+        santi.nextDates.onEach {   text.plus( it.nextDate.toString() ).plus( " | ") }
+    Text(text= text)
 
     CalendarScreen(
         total = calendarVM.dateInformation.total,

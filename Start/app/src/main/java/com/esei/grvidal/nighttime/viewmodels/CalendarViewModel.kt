@@ -2,16 +2,19 @@ package com.esei.grvidal.nighttime.viewmodels
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.chipdayfactory.ChipDayFactory
 import com.esei.grvidal.nighttime.chipdayfactory.MyDate
 import com.esei.grvidal.nighttime.chipdayfactory.toMyDate
+import com.esei.grvidal.nighttime.fakeData.*
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.DateCityDTO
 import com.esei.grvidal.nighttime.network.network_DTOs.EventData
@@ -25,7 +28,10 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.time.DayOfWeek
 import java.time.LocalDate
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 private const val TAG = "CalendarViewModel"
 
@@ -43,8 +49,11 @@ class CalendarViewModel(
             cityId = id
 
             Log.d(TAG, "setCityId: fetching data")
-            loadSelectedDate()//Loading the actual day
-            getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+            // TODO: 06/09/2021 fake data setCity
+            //loadSelectedDate()//Loading the actual day
+            //getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+            fakeLoadSelectedDate()
+            fakeUserDateList()
         }
     }
 
@@ -78,8 +87,60 @@ class CalendarViewModel(
     private var pageUserFriends by mutableStateOf(0)
 
     init {
-        loadSelectedDate()//Loading the actual day
-        getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+        // TODO: 06/09/2021 fake data init
+        //loadSelectedDate()//Loading the actual day
+        //getUserDateList() // Fetch from api the list of dates in the selected city selected by the user
+        fakeLoadSelectedDate()
+        fakeUserDateList()
+    }
+
+
+    private fun fakeLoadSelectedDate() {
+        //call api
+        Log.d(TAG, "load: $selectedDate userToken $userToken")
+
+        val eventList = eventDataList.filter { it.date == selectedDate.toLocalDate().toString() }
+
+
+        val total = if (selectedDate.toLocalDate().dayOfWeek == DayOfWeek.FRIDAY ||
+            selectedDate.toLocalDate().dayOfWeek == DayOfWeek.SATURDAY ||
+            selectedDate.toLocalDate().dayOfWeek == DayOfWeek.SUNDAY
+        ) Random.nextInt(150..300)
+        else Random.nextInt(20..90)
+
+        var friends = 0
+
+        friendList.filter { it.value }// Filter all friends with true
+            .keys.onEach { user ->                       // Checks all dates looking for the selected one
+                user.nextDates
+                    .forEach { dateCity ->
+                        if (dateCity.nextDate == selectedDate.toLocalDate())
+                            friends++
+                    }
+
+            }
+
+        dateInformation = CalendarData(total, friends, eventList)
+        fakeGetFriendsOnSelectedDate()
+        Log.d(
+            TAG,
+            "data fetched $dateInformation"
+        )
+
+
+    }
+
+    private fun fakeUserDateList() {
+        userDays = if (cityId == cityOu.id)
+            grvidal.nextDates.map { dateCity ->
+                MyDate(
+                    dateCity.nextDate.dayOfMonth,
+                    dateCity.nextDate.monthValue,
+                    dateCity.nextDate.year
+                )
+            }
+        else
+            listOf()
     }
 
     private fun loadSelectedDate() = viewModelScope.launch {
@@ -139,6 +200,29 @@ class CalendarViewModel(
 
     }
 
+    fun fakeGetFriendsOnSelectedDate() {
+        val finalList = mutableSetOf<User>()
+        friendList
+            .filter { it.value } // filter only friends
+            .keys // get users
+            .toList()
+            .onEach { user ->
+                user.nextDates.onEach { dateCity -> // check their selected dates
+                    if (dateCity.nextDate == selectedDate.toLocalDate())// if there is a match, add it to the list
+                        finalList.add(user)
+                }
+            }
+
+        userFriends = finalList.map {
+            UserSnapImage(
+                it.id,
+                it.nickname,
+                it.name,
+                it.picture != null,
+                null
+            )
+        }.toList()
+    }
 
     private fun getUserDateList() {
 
@@ -363,7 +447,9 @@ class CalendarViewModel(
         userFriends = listOf()
         pageUserFriends = 0
 
-        loadSelectedDate()
+        // TODO: 06/09/2021 Fake data loadSelectedDate
+        //loadSelectedDate()
+        fakeLoadSelectedDate()
     }
 
 
