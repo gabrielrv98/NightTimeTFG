@@ -54,7 +54,6 @@ val barNight = Bar(
         add(R.drawable.bar8_1)
         add(R.drawable.bar8_3)
         add(R.drawable.bar8_4)
-        add(R.drawable.bar8_5)
         add(R.drawable.bar8_6)
         add(R.drawable.bar8_7)
     }
@@ -119,7 +118,6 @@ val barStudio = Bar(
         add(R.drawable.bar22_3)
         add(R.drawable.bar22_4)
         add(R.drawable.bar22_5)
-        add(R.drawable.bar)
     }
 }
 
@@ -163,11 +161,13 @@ fun generateBars(): List<Bar> {
                 fridaySchedule = "11:00-20:30",
                 saturdaySchedule = null,
                 sundaySchedule = "09:30-21:30"
-            )
+            ).apply {
+                id = i + 4L
+            }
         )
     }
     return list.toList()
 }
 
 
-val barListFakeData = listOf<Bar>(barNight, barLokal, barRequiem, barStudio) + barExtras
+val barListFakeData = listOf(barNight, barLokal, barRequiem, barStudio) + barExtras

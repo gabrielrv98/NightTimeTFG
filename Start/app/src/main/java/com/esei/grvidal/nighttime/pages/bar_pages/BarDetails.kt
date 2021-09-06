@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,8 +60,9 @@ fun BarDetails(
     } else {
 
         onCommit(barId) {
-
-            barVM.getSelectedBarDetails(barId)
+            // TODO: 06/09/2021 FAKE DATA BAR DETAILS
+            //barVM.getSelectedBarDetails(barId)
+            barVM.fakeGetBarDetails(barId)
             // Release space from memory when composable is being detached from composition
             onDispose {
                 barVM.eraseSelectedBar()
@@ -75,8 +77,10 @@ fun BarDetails(
             schedule = barVM.selectedBar.schedule,
             totalImages = barVM.totalNPhotos,
             nImages = barVM.nPhotos,
-            images = barVM.barSelectedPhotos,
-            fetchImages = barVM::fetchPhotos,
+            // TODO: 06/09/2021 FAKE DATA, no more fetching photos
+            images = barVM.barSelectedResources,
+            //barVM.barSelectedPhotos,
+            fetchImages = {},//barVM::fetchPhotos,
             events = barVM.barSelectedEvents,
             onBackPressed = {
                 navController.popBackStack(navController.graph.startDestination, false)
@@ -129,7 +133,8 @@ fun ShowDetails(
     schedule: List<String>,
     totalImages: Int,
     nImages: Int,
-    images: List<ImageAsset>,
+    //images: List<ImageAsset>,//todo FAKE INFO
+    images: List<Int>,
     fetchImages: () -> Unit,
     events: List<EventFromBar>,
     onBackPressed: () -> Unit = {}
@@ -325,7 +330,8 @@ private fun BarSchedule(schedule: List<String>) {
 @Composable
 fun MultimediaView(
     nImages: Int,
-    images: List<ImageAsset>,
+    //images: List<ImageAsset>,// FAKE INFO
+    images: List<Int>,
     modifier: Modifier,
     fetchImages: () -> Unit
 ) {
@@ -375,15 +381,17 @@ fun MultimediaView(
             state = scrollState,
             modifier = modifier.fillMaxWidth()
         ) { img ->
+            val imgFake = imageResource(id = img)
 
             Image(
-                asset = img,
+                //asset = img,//FAKE INFO
+                asset = imgFake,
                 modifier = Modifier
                     .padding(2.dp)
                     .preferredSize(120.dp)
                     .background(Color.Gray)
                     .clickable(onClick = {
-                        setSelectedImage(img)
+                        setSelectedImage(imgFake)
                         setShowAlert(true)
                     })
             )

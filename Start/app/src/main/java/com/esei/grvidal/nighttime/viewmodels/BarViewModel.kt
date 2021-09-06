@@ -1,5 +1,6 @@
 package com.esei.grvidal.nighttime.viewmodels
 
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -8,6 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
+import androidx.compose.ui.graphics.imageFromResource
+import androidx.compose.ui.platform.ContextAmbient
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.fakeData.Bar
@@ -63,6 +66,10 @@ class BarViewModel : ViewModel() {
 
     // Photos from the selected bar
     var barSelectedPhotos by mutableStateOf(listOf<ImageAsset>())
+
+    // TODO fake info photos
+    var barSelectedResources by mutableStateOf(listOf<Int>())
+
 
     // Events from the selected bar
     var barSelectedEvents by mutableStateOf(listOf<EventFromBar>())
@@ -139,10 +146,14 @@ class BarViewModel : ViewModel() {
             bar.saturdaySchedule,
             bar.sundaySchedule
         )
+        totalNPhotos= bar.photos.size
         nPhotos = bar.photos.size
         barSelectedEvents = bar.events.map{
             EventFromBar(it.id,it.description,it.date)
         }
+
+        barSelectedResources = bar.photos
+
 
     }
 

@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 val eventDataList = listOf(
     EventData(0, date = LocalDate.now().toString(), "Oferta 2 x 1", "Night"),
-    EventData(1, date = LocalDate.now().plusDays(1).toString(), "Oferta 2 x 1", "Night"),
+    EventData(1, date = LocalDate.now().plusDays(1).toString(), "Oferta invita a dos amigos y te regalamos una copa", "Night"),
     EventData(2, date = LocalDate.now().plusDays(1).toString(), "Oferta 2 x 1", "Lokal"),
     EventData(
         3,
