@@ -152,3 +152,5 @@ val juan = User(
     picture = R.drawable.someone_else
     id = 5
 }
+
+val allUsersList = listOf(grvidal, santi, maria, nuria, joseN, juan)
