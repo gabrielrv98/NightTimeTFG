@@ -126,8 +126,8 @@ fun CalendarPage(calendarVM: CalendarViewModel) {
         // TODO: 06/09/2021 FAKE DATA avoid adding or removing dates
         //addUserSelectedDate = calendarVM::addDateToUserList,
         //removeUserSelectedDate = calendarVM::removeDateFromUserList,
-        addUserSelectedDate = {setShowDialog(true)},
-        removeUserSelectedDate = {setShowDialog(true)},
+        addUserSelectedDate = {setShowError(true)},
+        removeUserSelectedDate = {setShowError(true)},
         userFriendListButton = { setShowDialog(true) }
     )
 
