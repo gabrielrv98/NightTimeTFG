@@ -27,11 +27,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.DensityAmbient
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -41,7 +43,9 @@ import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
+import com.esei.grvidal.nighttime.CustomDialog
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.fakeData.allUsersList
 import com.esei.grvidal.nighttime.viewmodels.PhotoState
 import com.esei.grvidal.nighttime.viewmodels.UserViewModel
 import com.esei.grvidal.nighttime.pages.login_pages.TextWithInput
@@ -66,7 +70,9 @@ fun ProfileEditorPage(
     Log.d(TAG, "ProfileEditorPage: starting userPic ${user.userPicture.toString()}")
 
     onCommit(user.user.id) {
-        user.fetchEditData()
+        // TODO: 06/09/2021 FAKE DATA fetch user
+        //user.fetchEditData()
+        user.fakeFetchEditData()
     }
 
 
@@ -119,6 +125,28 @@ fun ProfileEditorPage(
         }
     }
 
+    // TODO: 06/09/2021 Faked Info profile editor
+    val (showError, setShowError) = remember { mutableStateOf(false) }
+
+    if (showError) {
+        CustomDialog(
+            onClose = { setShowError(false) }
+        ) {
+            Text(
+                text = stringResource(id = R.string.errorConnectionTitle),
+                style = MaterialTheme.typography.h6,
+                color = Color.Red
+            )
+            Spacer(modifier = Modifier.height(25.dp))
+            Text(
+                text = stringResource(id = R.string.errorConnectionDescription),
+                style = MaterialTheme.typography.body1
+            )
+
+        }
+
+    }
+
     val context = ContextAmbient.current
 
     ProfileEditorScreen(
@@ -133,10 +161,13 @@ fun ProfileEditorPage(
         img = user.userPicture,
         photoState = user.photoState,
         saveData = {
-            user.saveData(
+            // TODO: 06/09/2021 Faked Info profile editor
+           /* user.saveData(
                 setLoginCredentials,
                 user.uriPhotoPicasso?.let { getPathFromURI(context, it) }
             )
+           */
+                   setShowError(true)
         },
         searchImageButton = {
 
@@ -193,10 +224,15 @@ fun ProfileEditorScreen(
         modifier = Modifier.fillMaxSize(),
         scrollState = scrollState
     ) {
-
+        var image : ImageAsset? = null
+        // TODO: 06/09/2021 FAKE DATA IMAGE
+        allUsersList.find { it.name == name.text }?.picture?.let{
+            image = imageResource(id = it)
+        }
         ProfileHeader(
             scrollState = scrollState,
-            asset = img,
+            //asset = img, //TODO: 06/09/2021 FAKE DATA IMAGE
+            asset = image,
             photoState = photoState,
         ) { modifier ->
 
@@ -267,7 +303,8 @@ fun ProfileEditorScreen(
             accept = {
                 // save password in storage
                 saveData()
-                goBack()
+                // TODO: 06/09/2021 FAKE DATA avoids call back when error ( add this)
+                //goBack()
             },
             decline = { goBack() }
         )

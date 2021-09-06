@@ -13,6 +13,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.fakeData.allUsersList
+import com.esei.grvidal.nighttime.fakeData.friendList
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.ERROR_HEADER_TAG
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
@@ -113,13 +115,46 @@ class UserViewModel : ViewModel() {
         eraseData()
 
 
-        fetchUser(userId) // Get data from new user
+        // TODO: 06/09/2021 FAKE DATA invalidate picasso
+        //fetchUser(userId) // Get data from new user
+        fakeFetchUser(userId)
 
         if (!user.picture.isNullOrEmpty()) {
-            fetchPhoto(userId)
+            // TODO: 06/09/2021 FAKE DATA invalidate picasso
+            //fetchPhoto(userId)
         }
         delay(500)
-        fetchUser(userId) // Get data again from the user in case the edit delayed a bit
+        // TODO: 06/09/2021 FAKE DATA invalidate picasso
+        //fetchUser(userId) // Get data again from the user in case the edit delayed a bit
+        fakeFetchUser(userId)
+    }
+
+    private fun fakeFetchUser(userId: Long) {
+        allUsersList.find { search -> userId == search.id }?.let { user1 ->
+            user = UserFull(
+                user1.id,
+                user1.nickname,
+                user1.name,
+                user1.password,
+                user1.state ?: "",
+                user1.email,
+                user1.nextDates.firstOrNull()?.let { dateCity ->
+                    NextDateDTO(
+                        dateCity.id,
+                        dateCity.nextDate.toString(),
+                        CityDTO(dateCity.nextCity.id, dateCity.nextCity.name, "España")
+                    )
+                },
+                user1.picture.toString(),
+            )
+
+            friendshipState = if(friendList.keys.contains(user1)) {
+                if (friendList[user1] == true){
+                    AnswerOptions.YES
+                } else AnswerOptions.NOT_ANSWERED
+            }else AnswerOptions.NO
+
+        }
     }
 
     private suspend fun fetchUser(userId: Long) {
@@ -222,6 +257,19 @@ class UserViewModel : ViewModel() {
 
     }
 
+    fun fakeFetchEditData() {
+
+        val user = allUsersList.find { userToken.id == it.id }
+
+        if (user != null) {
+            name = TextFieldValue(user.name)
+            email = TextFieldValue(user.email)
+            password = TextFieldValue(user.password)
+            state = TextFieldValue(user.state ?: "")
+        }
+
+    }
+
     fun fetchEditData() {
         viewModelScope.launch {
             try {
@@ -234,8 +282,8 @@ class UserViewModel : ViewModel() {
                     webResponse.body()?.let { userViewPrivate ->
 
                         name = TextFieldValue(userViewPrivate.name ?: "")
-                        email = TextFieldValue(userViewPrivate.email?: "")
-                        password = TextFieldValue(userViewPrivate.password?: "")
+                        email = TextFieldValue(userViewPrivate.email ?: "")
+                        password = TextFieldValue(userViewPrivate.password ?: "")
                         state = TextFieldValue(userViewPrivate.state ?: "")
 
                         Log.d(TAG, "fetchEditData: user retrieved successfully $userViewPrivate")
@@ -409,6 +457,14 @@ class UserViewModel : ViewModel() {
         return MultipartBody.Part.createFormData("img", file.name, requestFile)
     }
 
+    fun fakeRequestFriendship(idFriend: Long){
+        allUsersList.find { it.id == idFriend }?.let{ userFriend ->
+            if (!friendList.keys.contains(userFriend))
+                friendList[userFriend] = false
+        }
+
+    }
+
     fun requestFriendship(idFriend: Long) = viewModelScope.launch {
         try {
 
@@ -429,6 +485,13 @@ class UserViewModel : ViewModel() {
         } catch (e: Exception) {
             Log.e(TAG, "requestFriendship: general exception  --//-- $e")
         }
+    }
+
+
+    fun fakeRemoveFriendship(userId: Long){
+        friendList.remove(
+            friendList.keys.find { it.id ==userId }
+        )
     }
 
     fun removeFriendShip(userId: Long) = viewModelScope.launch {

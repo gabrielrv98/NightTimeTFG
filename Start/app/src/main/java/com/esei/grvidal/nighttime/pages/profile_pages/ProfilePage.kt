@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.DensityAmbient
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.scaffold.NavigationScreens
 import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.animations.AnimatingFabContent
+import com.esei.grvidal.nighttime.fakeData.allUsersList
 import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.network.network_DTOs.AnswerOptions
 import com.esei.grvidal.nighttime.network.network_DTOs.NextDateDTO
@@ -73,7 +75,9 @@ fun ProfilePageView(
                 userName = userVM.user.name,
                 context = context,
                 deleteFriendship = {
-                    userVM.removeFriendShip(userId)
+                    // TODO: 06/09/2021 FAKE DATA REMOVE FRIENDSHIP
+                    //userVM.removeFriendShip(userId)
+                    userVM.fakeRemoveFriendship(userId)
                     userVM.friendshipState = AnswerOptions.NO
                 }
             )
@@ -125,7 +129,9 @@ fun ProfilePageView(
                         {
 
                             userVM.friendshipState = AnswerOptions.NOT_ANSWERED
-                            userVM.requestFriendship(userVM.user.id)
+                            // TODO: 06/09/2021 FAKE DATA TO REQUEST FRIENDSHIP
+                            //userVM.requestFriendship(userVM.user.id)
+                            userVM.fakeRequestFriendship(userVM.user.id)
 
                         }
                     }
@@ -212,9 +218,15 @@ fun ProfilePage(
                         modifier = Modifier.fillMaxSize(),
                         scrollState = scrollState
                     ) {
+                        var image : ImageAsset? = null
+                        // TODO: 06/09/2021 FAKE DATA IMAGE
+                        allUsersList.find { it.nickname == nickname }?.picture?.let{
+                            image = imageResource(id = it)
+                        }
                         ProfileHeader(
                             scrollState = scrollState,
-                            asset = img,
+                            //asset = img, //TODO: 06/09/2021 FAKE DATA IMAGE
+                            asset = image,
                             photoState = photoState
                         )
                         UserInfoFields(
