@@ -9,7 +9,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.*
+import com.esei.grvidal.nighttime.fakeData.ReadState
 import com.esei.grvidal.nighttime.fakeData.allUsersList
+import com.esei.grvidal.nighttime.fakeData.friendList
 import com.esei.grvidal.nighttime.network.*
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
 import com.esei.grvidal.nighttime.network.network_DTOs.*
@@ -96,6 +98,34 @@ class FriendsViewModel(
      */
     private var targetList = mutableListOf<Target>()
 
+
+    fun fakeGetChats() {
+        chatListHolder = friendList.filter { it.answer == AnswerOptions.YES && it.messages != null }
+            .map { friendship ->
+                Log.d(TAG, "fakeGetChats: user Friend ${friendship.userAsk.nickname}")
+                ChatFullView(
+                    friendship.id,
+                    friendship.userAsk.id,
+                    friendship.userAsk.nickname,
+                    friendship.userAsk.picture != null,
+                    friendship.messages?.let { messageSet ->
+                        messageSet.map {
+                            MessageView(
+                                -1,
+                                it.text,
+                                it.date.toString(),
+                                it.hour.toString(),
+                                it.user.id
+                            )
+                        }
+                    } ?: listOf(),
+                    friendship.messages?.filter { it.readState == ReadState.NOT_READ }?.size ?: 0,
+                    null
+                )
+            }.toMutableList()
+        updateFlow()
+        Log.d(TAG, "fakeGetChats: fetched data, number of chats = ${chatListHolder.size}")
+    }
 
     /**
      * Fetches from the API all friendships with at least one message
@@ -238,14 +268,14 @@ class FriendsViewModel(
         searchedUserList = listOf()
     }
 
-    fun fakeSearchUsers(username: String){
+    fun fakeSearchUsers(username: String) {
         if (username.isBlank()) {
             searchString = ""
             searchedUserList = listOf()
         } else {
             searchedUserList = allUsersList
                 .filter { it.nickname.contains(username) || it.name.contains(username) }
-                .map{ user ->
+                .map { user ->
                     UserSnapImage(
                         user.id,
                         user.nickname,
@@ -256,6 +286,7 @@ class FriendsViewModel(
                 }
         }
     }
+
     /**
      * Calls to api to request a new page (starting in 0) of searched users
      * and uses Picasso to get their picture if they have one
@@ -349,6 +380,22 @@ class FriendsViewModel(
             }
         }
 
+    }
+
+    fun fakeGetRequestingFriendships() {
+        requestingFriendshipUserList = friendList
+            .filter { it.answer == AnswerOptions.NOT_ANSWERED }
+            .map {
+
+                UserFriendView(
+                    it.id,
+                    it.userAsk.id,
+                    it.userAsk.nickname,
+                    it.userAsk.state ?: "",
+                    it.userAsk.picture != null
+                )
+            }
+        totalRequestingFriendship = requestingFriendshipUserList.size
     }
 
     fun getRequestingFriendships() = viewModelScope.launch {
@@ -469,6 +516,36 @@ class FriendsViewModel(
             .centerCrop()
             .into(target)
 
+    }
+
+    fun fakeAnswerFriendshipRequest(idFriendship: Long, isAccepted: Boolean) {
+        requestingFriendshipUserList.findLast { friend -> friend.friendshipId == idFriendship }
+            ?.let { userAnswered ->
+                Log.d(
+                    TAG,
+                    "answerFriendshipRequest: deleting from requestingFriendshipUserList user ${userAnswered.userId} - ${userAnswered.userNickname}"
+                )
+                requestingFriendshipUserList =
+                    requestingFriendshipUserList.toMutableList()
+                        .also { mutableList ->
+                            mutableList.remove(userAnswered)
+                            totalRequestingFriendship--
+
+                        }
+
+
+                val friendShip = friendList.find { it.id == idFriendship }?.let {
+                    it.apply {
+                        if (isAccepted) {
+
+                            it.answer = AnswerOptions.YES
+                        }
+                    }
+
+                }
+                if (!isAccepted && friendShip != null)
+                    friendList.remove(friendShip)
+            }
     }
 
     fun answerFriendshipRequest(idFriendship: Long, isAccepted: Boolean) = viewModelScope.launch {

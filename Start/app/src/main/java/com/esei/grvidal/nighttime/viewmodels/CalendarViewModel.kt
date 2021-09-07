@@ -2,12 +2,10 @@ package com.esei.grvidal.nighttime.viewmodels
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,21 +15,14 @@ import com.esei.grvidal.nighttime.chipdayfactory.toMyDate
 import com.esei.grvidal.nighttime.fakeData.*
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.DateCityDTO
-import com.esei.grvidal.nighttime.network.network_DTOs.EventData
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi.retrofitService
 import com.esei.grvidal.nighttime.network.USER_URL
-import com.esei.grvidal.nighttime.network.network_DTOs.CalendarData
-import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
-import com.esei.grvidal.nighttime.network.network_DTOs.UserToken
-import com.esei.grvidal.nighttime.network.network_DTOs.toUserSnapImage
+import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.time.DayOfWeek
 import java.time.LocalDate
-import kotlin.random.Random
-import kotlin.random.nextInt
 
 private const val TAG = "CalendarViewModel"
 
@@ -122,9 +113,9 @@ class CalendarViewModel(
             }
         }
         var friends = 0
-        friendList.filter { it.value }// Filter all friends with true
-            .keys.onEach { user ->                       // Checks all dates looking for the selected one
-                user.nextDates
+        friendList.filter { it.answer == AnswerOptions.YES }// Filter all friends with true
+            .onEach { friendship ->                       // Checks all dates looking for the selected one
+                friendship.userAsk.nextDates
                     .forEach { dateCity ->
                         if (dateCity.nextDate == selectedDate.toLocalDate()) {
                             friends++
@@ -216,13 +207,12 @@ class CalendarViewModel(
     fun fakeGetFriendsOnSelectedDate() {
         val finalList = mutableSetOf<User>()
         friendList
-            .filter { it.value } // filter only friends
-            .keys // get users
+            .filter { it.answer == AnswerOptions.YES } // filter only friends
             .toList()
-            .onEach { user ->
-                user.nextDates.onEach { dateCity -> // check their selected dates
+            .onEach { friendship ->
+                friendship.userAsk.nextDates.onEach { dateCity -> // check their selected dates
                     if (dateCity.nextDate == selectedDate.toLocalDate())// if there is a match, add it to the list
-                        finalList.add(user)
+                        finalList.add(friendship.userAsk)
                 }
             }
 

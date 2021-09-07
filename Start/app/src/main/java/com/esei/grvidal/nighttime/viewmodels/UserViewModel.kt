@@ -13,8 +13,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esei.grvidal.nighttime.R
-import com.esei.grvidal.nighttime.fakeData.allUsersList
-import com.esei.grvidal.nighttime.fakeData.friendList
+import com.esei.grvidal.nighttime.fakeData.*
 import com.esei.grvidal.nighttime.network.BASE_URL
 import com.esei.grvidal.nighttime.network.ERROR_HEADER_TAG
 import com.esei.grvidal.nighttime.network.NightTimeService.NightTimeApi
@@ -148,11 +147,20 @@ class UserViewModel : ViewModel() {
                 user1.picture.toString(),
             )
 
-            friendshipState = if(friendList.keys.contains(user1)) {
-                if (friendList[user1] == true){
-                    AnswerOptions.YES
-                } else AnswerOptions.NOT_ANSWERED
-            }else AnswerOptions.NO
+            val iterator = friendList.iterator()
+            var isFound = false
+            while (iterator.hasNext() && !isFound) {
+                val actual = iterator.next()
+                if (actual.userAsk == user1) {
+                    isFound = true
+                    friendshipState = actual.answer
+                }
+            }
+
+            if (!isFound) {
+                friendshipState = AnswerOptions.NO
+            }
+
 
         }
     }
@@ -457,12 +465,14 @@ class UserViewModel : ViewModel() {
         return MultipartBody.Part.createFormData("img", file.name, requestFile)
     }
 
-    fun fakeRequestFriendship(idFriend: Long){
-        allUsersList.find { it.id == idFriend }?.let{ userFriend ->
-            if (!friendList.keys.contains(userFriend))
-                friendList[userFriend] = false
-        }
+    fun fakeRequestFriendship(idFriend: Long) {
+        allUsersList.find { it.id == idFriend }?.let { userFriend ->
 
+            if (findUser(userFriend.id) == null) {
+                friendList.add(Friendship(userFriend))
+            }
+
+        }
     }
 
     fun requestFriendship(idFriend: Long) = viewModelScope.launch {
@@ -488,9 +498,9 @@ class UserViewModel : ViewModel() {
     }
 
 
-    fun fakeRemoveFriendship(userId: Long){
+    fun fakeRemoveFriendship(friendshipId: Long) {
         friendList.remove(
-            friendList.keys.find { it.id ==userId }
+            friendList.find { it.id == friendshipId }
         )
     }
 
