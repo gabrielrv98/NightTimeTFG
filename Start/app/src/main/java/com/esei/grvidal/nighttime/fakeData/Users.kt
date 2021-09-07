@@ -4,6 +4,7 @@ import com.esei.grvidal.nighttime.R
 import com.esei.grvidal.nighttime.viewmodels.City
 import java.time.LocalDate
 import kotlin.collections.HashMap
+import kotlin.random.Random
 
 
 data class User(
@@ -41,8 +42,7 @@ data class User(
     var nextDates: List<DateCity> = listOf()
 
     var picture: Int? = null
-    var id: Long = 0
-
+    var id: Long = -1
 
 }
 
@@ -50,7 +50,7 @@ class DateCity(
     var nextDate: LocalDate,
     var nextCity: City
 ) {
-    var id: Long = 0
+    var id: Long = 0L
 }
 
 
@@ -153,4 +153,40 @@ val juan = User(
     id = 5
 }
 
-val allUsersList = listOf(grvidal, santi, maria, nuria, joseN, juan)
+
+val allUsersList: List<User> = listOf(grvidal, santi, maria, nuria, joseN, juan) + generateUsers(0)
+
+fun generateUsers(max: Int): List<User> {
+    val list = mutableListOf<User>()
+
+    var idIndex = 6L
+    nicknameList.subList(0, if(max== 0) nicknameList.size else max).forEach {
+        val name =
+            namesList[Random.nextInt(0, namesList.size - 1)] +
+                    " " + surnameList[Random.nextInt(0, surnameList.size - 1)]
+        list.add(
+
+            User(
+                name = name,
+                nickname = it.trim(),
+                password = it.trim() + "12345",
+                state = stateList[Random.nextInt(0, stateList.size - 1)],
+                email = "$name@gmail.com",
+                daysInFuture = hashMapOf<Long, City>().apply {
+                    for (i in 0..7) {
+                        this[Random.nextLong(0, 30)] = cityOu
+                    }
+                    for (i in 0..3) {
+                        this[Random.nextLong(30, 60)] = cityOu
+                    }
+                }
+
+            ).apply {
+                id = idIndex
+                idIndex++
+            }
+        )
+
+    }
+    return list
+}
