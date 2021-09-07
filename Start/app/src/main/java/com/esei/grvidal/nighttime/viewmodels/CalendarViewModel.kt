@@ -101,21 +101,23 @@ class CalendarViewModel(
 
         val eventList = eventDataList.filter { it.date == selectedDate.toLocalDate().toString() }
 
+        var total = 0
+        allUsersList.forEach { userChecking ->
+            userChecking.nextDates.forEach { dc ->
+                if (dc.nextDate.toMyDate() == selectedDate) {
+                    total++
 
-        val total = if (selectedDate.toLocalDate().dayOfWeek == DayOfWeek.FRIDAY ||
-            selectedDate.toLocalDate().dayOfWeek == DayOfWeek.SATURDAY ||
-            selectedDate.toLocalDate().dayOfWeek == DayOfWeek.SUNDAY
-        ) Random.nextInt(150..300)
-        else Random.nextInt(20..90)
-
+                }
+            }
+        }
         var friends = 0
-
         friendList.filter { it.value }// Filter all friends with true
             .keys.onEach { user ->                       // Checks all dates looking for the selected one
                 user.nextDates
                     .forEach { dateCity ->
-                        if (dateCity.nextDate == selectedDate.toLocalDate())
+                        if (dateCity.nextDate == selectedDate.toLocalDate()) {
                             friends++
+                        }
                     }
 
             }
