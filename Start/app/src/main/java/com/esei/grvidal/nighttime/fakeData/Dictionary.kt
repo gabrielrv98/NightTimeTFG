@@ -295,7 +295,7 @@ val stateList = listOf(
 )
 
 val offersList = listOf(
-    "2 x 1 en bebidas no-alcoholcas",
+    "2 x 1 en bebidas no-alcoholicas",
     "Fiesta especial esta noche",
     "Cervezas a mitad de precio",
     "Hoy se puede fumar dentro",
