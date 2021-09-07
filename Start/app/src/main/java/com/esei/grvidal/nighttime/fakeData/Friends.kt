@@ -153,33 +153,33 @@ val friendList = mutableListOf(
                 ).apply { readState = ReadState.READ },
                 Message(
                     "Claro, estare donde siempre, fijo que nos vemos", LocalDate.now().minusDays(1),
-                    LocalTime.now().minusMinutes(8),
+                    LocalTime.now().minusMinutes(9),
                     this,
                     grvidal
                 ).apply { readState = ReadState.READ },
                 Message(
                     "Me puedes dar esa copa que me debias si quires",
                     LocalDate.now().minusDays(1),
-                    LocalTime.now().minusMinutes(7),
+                    LocalTime.now().minusMinutes(8),
                     this,
                     this.userAsk
                 ).apply { readState = ReadState.READ },
                 Message(
                     "Nunca perdonas una eh, el primero en ser encontrado invita a un chupito",
                     LocalDate.now().minusDays(1),
-                    LocalTime.now().minusMinutes(6),
+                    LocalTime.now().minusMinutes(7),
                     this,
                     grvidal
                 ).apply { readState = ReadState.READ },
                 Message(
                     "Mira que eres rata!!!", LocalDate.now().minusDays(1),
-                    LocalTime.now().minusMinutes(5),
+                    LocalTime.now().minusMinutes(6),
                     this,
                     this.userAsk
                 ).apply { readState = ReadState.READ },
                 Message(
                     "Buena suerte XD", LocalDate.now().minusDays(1),
-                    LocalTime.now().minusMinutes(1),
+                    LocalTime.now().minusMinutes(5),
                     this,
                     grvidal
                 ).apply { readState = ReadState.READ }
