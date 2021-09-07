@@ -99,8 +99,19 @@ class CalendarViewModel(
         //call api
         Log.d(TAG, "load: $selectedDate userToken $userToken")
 
-        val eventList = eventDataList.filter { it.date == selectedDate.toLocalDate().toString() }
+        var eventList = listOf<EventData>()
 
+        barListFakeData.forEach { bar ->
+            eventList = eventList.toMutableList()
+                .apply {
+
+                    bar.events
+                        .filter { it.date == selectedDate.toLocalDate().toString() }
+                        .forEach { event ->
+                            add(event)
+                        }
+                }
+        }
         var total = 0
         allUsersList.forEach { userChecking ->
             userChecking.nextDates.forEach { dc ->
