@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.esei.grvidal.nighttime.fakeData.allUsersList
+import com.esei.grvidal.nighttime.fakeData.getImageResource
 import com.esei.grvidal.nighttime.network.network_DTOs.UserFriendView
 import com.esei.grvidal.nighttime.network.network_DTOs.UserSnapImage
 import com.esei.grvidal.nighttime.pages.bar_pages.makeLongShort
@@ -205,8 +206,9 @@ fun FriendshipRequestListDialog(
                     shape = CircleShape,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
                 ) {
-                    friendship.image?.let {
-                        Image(asset = it)
+                        // TODO: 07/09/2021 FAKE DATA IMAGE REQUEST FRIENDSHIP
+                    getImageResource(friendship.userId)?.let {
+                        Image(asset = imageResource(id = it))
                     } ?: Icon(asset = Icons.Default.Person)
 
                 }
