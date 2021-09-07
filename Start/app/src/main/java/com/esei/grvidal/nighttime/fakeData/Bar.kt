@@ -3,6 +3,8 @@ package com.esei.grvidal.nighttime.fakeData
 import com.esei.grvidal.nighttime.network.network_DTOs.EventData
 import com.esei.grvidal.nighttime.viewmodels.City
 import com.esei.grvidal.nighttime.R
+import java.time.LocalDate
+import kotlin.random.Random
 
 class Bar(
     var name: String,
@@ -140,10 +142,6 @@ val barRequiem = Bar(
 
 }
 
-val barExtras: List<Bar>
-    get() = generateBars()
-
-
 fun generateBars(): List<Bar> {
     val list = mutableListOf<Bar>()
     for (i in 0..15) {
@@ -163,11 +161,58 @@ fun generateBars(): List<Bar> {
                 sundaySchedule = "09:30-21:30"
             ).apply {
                 id = i + 4L
+                events = generateEvents(5, "Bar$i")
             }
         )
     }
     return list.toList()
 }
 
+fun generateEvents(max: Int, name: String): List<EventData> {
 
-val barListFakeData = listOf(barNight, barLokal, barRequiem, barStudio) + barExtras
+    val list = mutableMapOf<LocalDate, EventData>()
+    var id = 0L
+    for (i in 0..max / 3 * 2) {
+        var date: LocalDate
+
+        do {
+            date = LocalDate.now().plusDays(Random.nextLong(0, 30))
+        } while (list.keys.contains(date))
+
+
+        list[date] = EventData(
+            id,
+            date.toString(),
+            offersList[Random.nextInt(
+                0,
+                offersList.size
+            )],
+            name
+        )
+        id++
+    }
+
+    for (i in 0..max / 3) {
+        var date: LocalDate
+
+        do {
+            date = LocalDate.now().plusDays(Random.nextLong(30, 60))
+        } while (list.keys.contains(date))
+
+        list[date] = EventData(
+            id,
+            date.toString(),
+            offersList[Random.nextInt(
+                0,
+                offersList.size
+            )],
+            name
+        )
+        id++
+    }
+
+    return list.toSortedMap().values.toList()
+}
+
+
+val barListFakeData = listOf(barNight, barLokal, barRequiem, barStudio) + generateBars()
