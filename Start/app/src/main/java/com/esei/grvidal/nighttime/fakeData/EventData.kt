@@ -10,7 +10,7 @@ val eventDataList = listOf(
     EventData(2, date = LocalDate.now().plusDays(1).toString(), "Oferta 2 x 1", "Lokal"),
     EventData(
         3,
-        date = LocalDate.now().plusDays(2).toString(),
+        date = LocalDate.now().toString(),
         "Fiesta de la espuma.",
         "Lokal"
     ),
@@ -20,7 +20,7 @@ val eventDataList = listOf(
         "Hoy cerrado por fiesta privada.",
         "Lokal"
     ),
-    EventData(5, date = LocalDate.now().plusDays(1).toString(), "Musica en vivo", "Studio 34"),
+    EventData(5, date = LocalDate.now().toString(), "Musica en vivo", "Studio 34"),
     EventData(
         6,
         date = LocalDate.now().plusDays(3).toString(),
