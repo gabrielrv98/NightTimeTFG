@@ -190,3 +190,7 @@ fun generateUsers(max: Int): List<User> {
     }
     return list
 }
+
+fun getImageResource(userId: Long): Int?{
+    return allUsersList.find { it.id == userId }?.picture
+}
