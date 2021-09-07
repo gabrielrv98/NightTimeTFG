@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -40,6 +41,7 @@ import androidx.navigation.NavHostController
 import androidx.ui.tooling.preview.Preview
 import com.esei.grvidal.nighttime.*
 import com.esei.grvidal.nighttime.R
+import com.esei.grvidal.nighttime.fakeData.findUser
 import com.esei.grvidal.nighttime.viewmodels.*
 import com.esei.grvidal.nighttime.network.MessageListened
 import com.esei.grvidal.nighttime.network.network_DTOs.*
@@ -80,9 +82,13 @@ fun FriendsInit(
         val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
 
         Log.d(TAG, "FriendsPage: onCommit")
-        friendsVM.getChats()
-        friendsVM.getRequestingFriendships()
+        // TODO: 07/09/2021 FAKE DATA chats
+        //friendsVM.getChats()
+        //friendsVM.getRequestingFriendships()
         friendsVM.setFlow(coroutineScope, flow)
+
+        friendsVM.fakeGetChats()
+        friendsVM.fakeGetRequestingFriendships()
 
         onDispose {
             coroutineScope.cancel()
@@ -142,7 +148,9 @@ fun FriendsPage(
         FriendshipRequestDialog(
             navController = navController,
             requestList = friendsVM.requestingFriendshipUserList,
-            answerFriendship = friendsVM::answerFriendshipRequest,
+            // TODO: 07/09/2021 FAKE data answer friendship
+            answerFriendship = friendsVM::fakeAnswerFriendshipRequest,
+            //answerFriendship = friendsVM::answerFriendshipRequest,
             closeRequestFriendshipDialog = { requestFriendshipDialog = false }
         )
     }
@@ -158,7 +166,9 @@ fun FriendsPage(
         },
         numberRequestFriendship = friendsVM.totalRequestingFriendship,
         showDialog = { requestFriendshipDialog = true },
-        fetchFriendList = friendsVM::getFriendshipsIds,
+        // TODO: 07/09/2021 FAKE DATA get Friendships id
+        //        fetchFriendList = friendsVM::getFriendshipsIds,
+        fetchFriendList = friendsVM::fakeGetFriendshipIds,
         friendsList = friendsVM.friendshipIdList.toList(),
         numberOfFriends = friendsVM.totalFriends
     )
@@ -297,12 +307,16 @@ fun FriendsScreen(
 
             LazyColumnFor(items = chatList) { chatData ->
                 Log.d(TAG, "FriendsScreen: setFlow Recomposing ${chatData.userNickname}")
-
+                var img: ImageAsset? = null
+                findUser(chatData.userId)?.picture?.let {
+                        img = imageResource(id = it)
+                }
                 ChatEntry(
                     userName = chatData.userNickname,
-                    lastMessage = chatData.messages[0].text,
+                    lastMessage = chatData.messages[chatData.messages.size-1].text,
                     unreadMessages = chatData.unreadMessages,
-                    img = chatData.img,
+                    // TODO: 07/09/2021 FAKE DATA image chat
+                    img = img,
                     onEntryClick = {
                         Log.d(TAG, "FriendsScreen: chatSend - clicking on ${chatData.friendshipId}")
                         onChatClick(chatData.friendshipId)
@@ -310,23 +324,23 @@ fun FriendsScreen(
                 )
             }
 
-        }
-
-        FloatingActionButton(
-            onClick = {
-                setNewConversationShowDialog(true)
-                if (friendsList.isEmpty())
-                    fetchFriendList()
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .preferredHeight(48.dp)
-                .widthIn(min = 48.dp),
-        ) {
-            Icon(asset = Icons.Default.Add)
-        }
     }
+
+    FloatingActionButton(
+        onClick = {
+            setNewConversationShowDialog(true)
+            if (friendsList.isEmpty())
+                fetchFriendList()
+        },
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(16.dp)
+            .preferredHeight(48.dp)
+            .widthIn(min = 48.dp),
+    ) {
+        Icon(asset = Icons.Default.Add)
+    }
+}
 }
 
 
@@ -545,7 +559,11 @@ fun FriendSnapListDialog(
                 shape = CircleShape,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
             ) {
-                user.image?.let {
+                var img : ImageAsset? = null
+                findUser(user.userId)?.picture?.let{
+                    img = imageResource(id = it)
+                }
+                img?.let {
                     Image(asset = it)
                 } ?: Icon(asset = Icons.Default.Person)
 

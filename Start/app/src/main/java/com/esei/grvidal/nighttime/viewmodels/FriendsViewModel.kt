@@ -193,6 +193,13 @@ class FriendsViewModel(
         Log.d(TAG, "updateFlow: Flow has been updated")
     }
 
+    fun fakeGetFriendshipIds(){
+        friendshipIdList = friendList.filter { it.answer == AnswerOptions.YES }
+            .map{
+                FriendshipSnapImage(it.userAsk.id,it.id,it.userAsk.nickname,it.userAsk.name,it.userAsk.picture != null, null)
+            }.toSet()
+        totalFriends = friendshipIdList.size
+    }
     fun getFriendshipsIds() = viewModelScope.launch {
         if (totalFriends == -1 || totalFriends > friendshipIdList.size)
             try {
