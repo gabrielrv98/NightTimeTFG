@@ -506,7 +506,7 @@ fun FriendSnapList(
 
         loadMoreFriends()
     }
-
+    loadMoreFriends()
 
 
     CustomDialog(onClose = closeDialog) {

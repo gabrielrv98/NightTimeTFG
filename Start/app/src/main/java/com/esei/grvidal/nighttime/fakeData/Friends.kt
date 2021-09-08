@@ -77,7 +77,7 @@ val friendList = mutableListOf(
                     grvidal
                 ).apply { readState = ReadState.READ },
                 Message(
-                    "Te veo a las 12, no llegues tarde!", LocalDate.now().minusDays(1),
+                    "Te veo a las 12, no llegues tarde!", LocalDate.now(),
                     LocalTime.now().minusMinutes(1),
                     this,
                     nuria
@@ -131,7 +131,7 @@ val friendList = mutableListOf(
                     this.userAsk
                 ),
                 Message(
-                    "A las 16*", LocalDate.now().minusDays(1),
+                    "A las 16*", LocalDate.now(),
                     LocalTime.now().minusMinutes(1),
                     this,
                     this.userAsk
@@ -178,7 +178,7 @@ val friendList = mutableListOf(
                     this.userAsk
                 ).apply { readState = ReadState.READ },
                 Message(
-                    "Buena suerte XD", LocalDate.now().minusDays(1),
+                    "Buena suerte XD", LocalDate.now(),
                     LocalTime.now().minusMinutes(5),
                     this,
                     grvidal

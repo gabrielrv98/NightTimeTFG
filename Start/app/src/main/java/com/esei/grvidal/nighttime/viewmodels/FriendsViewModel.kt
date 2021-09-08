@@ -20,6 +20,7 @@ import com.squareup.picasso.Target
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
+import java.util.*
 
 fun ChatView.toFullView(
     img: ImageAsset? = null
@@ -280,8 +281,10 @@ class FriendsViewModel(
             searchString = ""
             searchedUserList = listOf()
         } else {
+            val usernameLowered = username.toLowerCase(Locale.ROOT)
             searchedUserList = allUsersList
-                .filter { it.nickname.contains(username) || it.name.contains(username) }
+                .filter { it.nickname.toLowerCase(Locale.ROOT).contains(usernameLowered) ||
+                        it.name.toLowerCase(Locale.ROOT).contains(usernameLowered) }
                 .map { user ->
                     UserSnapImage(
                         user.id,
