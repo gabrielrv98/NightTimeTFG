@@ -61,7 +61,11 @@ class LoginViewModel(
 
     // TODO: 06/09/2021 Faked Info login
     fun doFakeLoginRefreshed(username: String, password: String) {
-        fakeLogin()
+        viewModelScope.launch {
+            dataStoreManager.credentialsChecked()
+            credentialsChecked = true
+            fakeLogin()
+        }
 
     }
 
@@ -130,30 +134,54 @@ class LoginViewModel(
     }
 
     // TODO: 06/09/2021 Faked Info login
-    private fun fakeLogin() {
+    private suspend fun fakeLogin() {
 
         Log.d(
             TAG,
             "{tags: FakeAssistLogging} call to retrofit done"
         )
 
+        var loginData = LoginData("", "", false)
 
-        val id = grvidal.id
-        val token = ""
-        viewModelScope.launch {
-            dataStoreManager.credentialsChecked()
-        }
-        credentialsChecked = true
-        loggedUser = UserToken(id, token)
-        viewModelScope.launch {
-            delay(2500)
-            loggingState = LoginState.ACCEPTED
+        try {
+            loginData = dataStoreManager.userPreferences.first()
+            credentialsChecked = loginData.accepted
+
+
+            if (loginData.accepted) {
+                val id = grvidal.id
+                val token = ""
+                credentialsChecked = true
+                loggedUser = UserToken(id, token)
+                loggingState = LoginState.LOADING
+                viewModelScope.launch {
+                    delay(2500)
+                    loggingState = LoginState.ACCEPTED
+
+                }
+            }else{
+                loggingState = LoginState.REFUSED
+            }
+
+            Log.e(
+                TAG,
+                "{tags: AssistLogging} login: getting LoginData = ${loginData.username} : ${loginData.password} [ ${loginData.accepted} ] loggingState : ${loggingState.name}"
+            )
+
+
+
+        } catch (e: NoSuchElementException) {
+            loggingState = LoginState.NO_DATA_STORED
 
         }
+
+
+
+
 
         Log.d(
             TAG,
-            "{tags: AssistLogging} login: login successfully id-> $id  token -> $token"
+            "{tags: AssistLogging} login: login successfully id-> ${loggedUser.id}  token -> ${loggedUser.token}"
         )
 
     }

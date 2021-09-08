@@ -153,6 +153,17 @@ fun LoginScreen(
             register = register
         )
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                modifier = Modifier,
+                text = "Accede con grvidal:1234",
+                style = MaterialTheme.typography.body1
+            )
+        }
+
     }
 
 }
