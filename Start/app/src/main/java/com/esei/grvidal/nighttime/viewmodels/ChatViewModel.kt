@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.asImageAsset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.esei.grvidal.nighttime.fakeData.ReadState
+import com.esei.grvidal.nighttime.fakeData.friendList
 import com.esei.grvidal.nighttime.network.*
 import com.esei.grvidal.nighttime.network.network_DTOs.*
 import com.esei.grvidal.nighttime.repository.interface_repository.IRepositoryChat
@@ -35,6 +37,9 @@ class ChatViewModel(
 
 ) : ViewModel() {
 
+    fun fakeGetId(): Long{
+        return chatRepository.getId()
+    }
     fun getId(): Long {
         return chatRepository.getId()
     }
@@ -54,6 +59,38 @@ class ChatViewModel(
     // The UI collects from this StateFlow to get its state updates
     val actualChat: StateFlow<ChatView> = _actualChat
     var image by mutableStateOf<ImageAsset?>(null)
+    var imgId by mutableStateOf<Int?>(null)
+
+    fun fakeGetSelectedChat() {
+
+        friendList.find { it.id == friendshipId }?.let { friendship ->
+            _actualChat.value = ChatView(
+                friendshipId = friendshipId,
+                userId = friendship.userAsk.id,
+                userNickname = friendship.userAsk.nickname,
+                hasImage = friendship.userAsk.picture != null,
+                messages = friendship.messages?.map { msg ->
+                    MessageView(
+                        msg.id,
+                        msg.text,
+                        msg.date.toString(),
+                        msg.hour.toString(),
+                        msg.user.id
+                    )
+                } ?: listOf(),
+                unreadMessages = friendship.messages?.filter { it.readState == ReadState.NOT_READ }?.size
+                    ?: 0
+            )
+            friendship.messages?.
+            filter { it.readState == ReadState.NOT_READ }?.
+            forEach {
+                it.readState = ReadState.READ
+            }
+            imgId = friendship.userAsk.picture
+        }
+
+
+    }
 
     fun getSelectedChat() = viewModelScope.launch {
 

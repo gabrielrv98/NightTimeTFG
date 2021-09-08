@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.DensityAmbient
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.ViewModel
@@ -86,8 +88,11 @@ fun ChatConversationInit(
     onCommit(friendshipId) {
         val coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
 
-        chatVM.getSelectedChat()
+        // TODO: 07/09/2021 FAKE DATA chats
+        //chatVM.getSelectedChat()
         chatVM.setFlow(coroutineScope, flow)
+
+        chatVM.fakeGetSelectedChat()
 
         onDispose {
             coroutineScope.cancel()
@@ -95,11 +100,14 @@ fun ChatConversationInit(
         }
     }
 
+    // TODO: 07/09/2021 Fixed image
+        val img = chatVM.imgId?.let { imageResource(id = it) }
+
     ChatConversationPage(
         navController = navController,
         userId = chatVM.getId(),
         addMessage = chatVM::addMessage,
-        userImage = chatVM.image,
+        userImage = img,
         chatData = chatVM.actualChat.collectAsState().value
     )
 
