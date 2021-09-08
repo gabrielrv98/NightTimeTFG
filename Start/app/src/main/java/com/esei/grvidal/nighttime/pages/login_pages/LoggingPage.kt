@@ -153,16 +153,21 @@ fun LoginScreen(
             register = register
         )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                modifier = Modifier,
-                text = "Accede con grvidal:1234",
-                style = MaterialTheme.typography.body1
-            )
+        Box(
+            modifier = Modifier,//.weight(1f),
+            alignment = Alignment.TopStart
+        ){
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier,
+                    text = "Accede con grvidal:1234",
+                    style = MaterialTheme.typography.subtitle1
+                )
+            }
         }
+
 
     }
 
@@ -197,7 +202,8 @@ private fun LoggingForm(
 
             Spacer(modifier = Modifier.size(15.dp))
             Button(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 10.dp),
                 onClick = onClick,
                 enabled = !(username.text.isEmpty() ||
                         password.text.isEmpty())
