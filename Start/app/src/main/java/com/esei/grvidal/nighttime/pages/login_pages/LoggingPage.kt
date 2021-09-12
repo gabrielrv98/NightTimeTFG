@@ -75,6 +75,9 @@ fun LoginPage(
     val (username, setUsername) = remember { mutableStateOf(TextFieldValue()) }
     val (password, setPassword) = remember { mutableStateOf(TextFieldValue()) }
 
+
+    val (wasError, setWasError) = remember { mutableStateOf(false) }
+
     val (showError, setShowError) = remember { mutableStateOf(false) }
 
     if (showError) {
@@ -105,15 +108,20 @@ fun LoginPage(
         doLogin = {
             // TODO: 06/09/2021 Faked Info register
             //loginVM.doLoginRefreshed(username.text, password.text)
-            if (username.text == "grvidal" && password.text == "1234")
+            if (username.text == "grvidal" && password.text == "1234") {
+                setWasError(false)
                 loginVM.doFakeLoginRefreshed(username.text, password.text)
-            else
+
+            }else {
                 setShowError(true)
+                setWasError(true)
+            }
 
         },
         register = {
             navController.navigate(NavigationScreens.RegisterPage.route)
-        }
+        },
+        wasError
     )
 }
 
@@ -125,7 +133,8 @@ fun LoginScreen(
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit,
     doLogin: () -> Unit,
-    register: () -> Unit
+    register: () -> Unit,
+    wasError: Boolean
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 24.dp),
@@ -143,6 +152,7 @@ fun LoginScreen(
             password = password,
             setPassword = setPassword,
             showMessageError = showMessageError,
+            wasError = wasError,
             onClick = doLogin
 
         )
@@ -181,6 +191,7 @@ private fun LoggingForm(
     password: TextFieldValue,
     setPassword: (TextFieldValue) -> Unit,
     showMessageError: String,
+    wasError: Boolean,
     onClick: () -> Unit
 ) {
     Box(modifier = modifier) {
@@ -192,7 +203,7 @@ private fun LoggingForm(
                 setPassword = setPassword
             )
 
-            if (showMessageError.isNotEmpty()) {
+            if (wasError) {
                 Text(
                     text = showMessageError,
                     style = MaterialTheme.typography.body2,
